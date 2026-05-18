@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
@@ -10,941 +11,966 @@
 <title>Aviões · Brooksfield</title>
 <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
 <style>
 /* ══════════════════════════════════════
-   RESET & VARIABLES
+RESET & VARIABLES
 ══════════════════════════════════════ */
 :root {
-  --bg:       #070d08;
-  --s1:       #0c1610;
-  --s2:       #111e14;
-  --s3:       #162a1a;
-  --border:   rgba(90,171,104,0.14);
-  --accent:   #5aab68;
-  --accent2:  #7dcf8a;
-  --accent3:  #3d7a48;
-  --text:     #cce8cc;
-  --text2:    #5d8f65;
-  --text3:    #2e4d33;
-  --gold:     #f5c842;
-  --red:      #ff5f5f;
-  --blue:     #4f8ef7;
-  --safe-top: env(safe-area-inset-top, 0px);
-  --safe-bot: env(safe-area-inset-bottom, 0px);
+--bg: #070d08;
+--s1: #0c1610;
+--s2: #111e14;
+--s3: #162a1a;
+--border: rgba(90,171,104,0.14);
+--accent: #5aab68;
+--accent2: #7dcf8a;
+--accent3: #3d7a48;
+--text: #cce8cc;
+--text2: #5d8f65;
+--text3: #2e4d33;
+--gold: #f5c842;
+--red: #ff5f5f;
+--blue: #4f8ef7;
+--safe-top: env(safe-area-inset-top, 0px);
+--safe-bot: env(safe-area-inset-bottom, 0px);
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;overflow:hidden;background:var(--bg)}
 body{font-family:'DM Sans',sans-serif;color:var(--text);display:flex;flex-direction:column}
 
 /* ══════════════════════════════════════
-   SCREENS
+SCREENS
 ══════════════════════════════════════ */
 .screen{
-  position:absolute;inset:0;
-  display:flex;flex-direction:column;
-  background:var(--bg);
-  transition:transform 0.35s cubic-bezier(0.4,0,0.2,1),opacity 0.35s;
-  overflow:hidden;
+position:absolute;inset:0;
+display:flex;flex-direction:column;
+background:var(–bg);
+transition:transform 0.35s cubic-bezier(0.4,0,0.2,1),opacity 0.35s;
+overflow:hidden;
 }
 .screen.hidden{transform:translateX(100%);opacity:0;pointer-events:none}
 .screen.slide-left{transform:translateX(-40%);opacity:0;pointer-events:none}
 
 /* ══════════════════════════════════════
-   SCROLLABLE CONTENT AREA
+SCROLLABLE CONTENT AREA
 ══════════════════════════════════════ */
 .scroll-area{
-  flex:1;overflow-y:auto;overflow-x:hidden;
-  -webkit-overflow-scrolling:touch;
-  padding-bottom:calc(72px + var(--safe-bot));
+flex:1;overflow-y:auto;overflow-x:hidden;
+-webkit-overflow-scrolling:touch;
+padding-bottom:calc(72px + var(–safe-bot));
 }
 .scroll-area::-webkit-scrollbar{display:none}
 
 /* ══════════════════════════════════════
-   TOP BAR
+TOP BAR
 ══════════════════════════════════════ */
 .topbar{
-  padding:calc(var(--safe-top) + 10px) 16px 10px;
-  background:rgba(7,13,8,0.92);
-  backdrop-filter:blur(20px);
-  border-bottom:1px solid var(--border);
-  display:flex;align-items:center;justify-content:space-between;
-  flex-shrink:0;
-  z-index:10;
+padding:calc(var(–safe-top) + 10px) 16px 10px;
+background:rgba(7,13,8,0.92);
+backdrop-filter:blur(20px);
+border-bottom:1px solid var(–border);
+display:flex;align-items:center;justify-content:space-between;
+flex-shrink:0;
+z-index:10;
 }
 .topbar-brand{display:flex;align-items:center;gap:10px}
 .topbar-title{
-  font-family:'Black Han Sans',sans-serif;
-  font-size:18px;letter-spacing:2px;
-  background:linear-gradient(135deg,var(--accent),var(--accent2));
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+font-family:‘Black Han Sans’,sans-serif;
+font-size:18px;letter-spacing:2px;
+background:linear-gradient(135deg,var(–accent),var(–accent2));
+-webkit-background-clip:text;-webkit-text-fill-color:transparent;
 }
 .topbar-sub{
-  font-family:'JetBrains Mono',monospace;
-  font-size:9px;letter-spacing:3px;color:var(--text2);margin-top:1px;
+font-family:‘JetBrains Mono’,monospace;
+font-size:9px;letter-spacing:3px;color:var(–text2);margin-top:1px;
 }
 .plane-anim{
-  font-size:28px;
-  animation:plane-bob 3s ease-in-out infinite;
-  filter:drop-shadow(0 0 6px rgba(90,171,104,0.5));
+font-size:28px;
+animation:plane-bob 3s ease-in-out infinite;
+filter:drop-shadow(0 0 6px rgba(90,171,104,0.5));
 }
 @keyframes plane-bob{
-  0%,100%{transform:translateY(0) rotate(-3deg)}
-  50%{transform:translateY(-3px) rotate(3deg)}
+0%,100%{transform:translateY(0) rotate(-3deg)}
+50%{transform:translateY(-3px) rotate(3deg)}
 }
 
 /* ══════════════════════════════════════
-   BOTTOM NAV
+BOTTOM NAV
 ══════════════════════════════════════ */
 .bottom-nav{
-  position:fixed;bottom:0;left:0;right:0;
-  height:calc(60px + var(--safe-bot));
-  background:rgba(7,13,8,0.96);
-  backdrop-filter:blur(24px);
-  border-top:1px solid var(--border);
-  display:flex;align-items:flex-start;justify-content:space-around;
-  padding-top:6px;
-  z-index:100;
+position:fixed;bottom:0;left:0;right:0;
+height:calc(60px + var(–safe-bot));
+background:rgba(7,13,8,0.96);
+backdrop-filter:blur(24px);
+border-top:1px solid var(–border);
+display:flex;align-items:flex-start;justify-content:space-around;
+padding-top:6px;
+z-index:100;
 }
 .nav-item{
-  display:flex;flex-direction:column;align-items:center;gap:3px;
-  cursor:pointer;padding:4px 12px;border-radius:12px;
-  transition:all 0.2s;min-width:52px;
+display:flex;flex-direction:column;align-items:center;gap:3px;
+cursor:pointer;padding:4px 12px;border-radius:12px;
+transition:all 0.2s;min-width:52px;
 }
 .nav-item .nav-icon{font-size:20px;transition:transform 0.2s}
 .nav-item .nav-label{
-  font-size:9px;font-weight:600;letter-spacing:1px;
-  text-transform:uppercase;color:var(--text2);
-  font-family:'JetBrains Mono',monospace;
+font-size:9px;font-weight:600;letter-spacing:1px;
+text-transform:uppercase;color:var(–text2);
+font-family:‘JetBrains Mono’,monospace;
 }
-.nav-item.active .nav-label{color:var(--accent)}
+.nav-item.active .nav-label{color:var(–accent)}
 .nav-item.active .nav-icon{transform:scale(1.15)}
 .nav-item.active{background:rgba(90,171,104,0.08)}
 
 /* ══════════════════════════════════════
-   CARDS & COMMON
+CARDS & COMMON
 ══════════════════════════════════════ */
 .card{
-  background:var(--s1);
-  border:1px solid var(--border);
-  border-radius:14px;
-  padding:16px;
-  position:relative;overflow:hidden;
+background:var(–s1);
+border:1px solid var(–border);
+border-radius:14px;
+padding:16px;
+position:relative;overflow:hidden;
 }
 .card::before{
-  content:'';position:absolute;top:0;left:0;
-  width:3px;height:100%;
-  background:linear-gradient(180deg,var(--accent),transparent);
+content:’’;position:absolute;top:0;left:0;
+width:3px;height:100%;
+background:linear-gradient(180deg,var(–accent),transparent);
 }
 .card-title{
-  font-family:'JetBrains Mono',monospace;
-  font-size:10px;letter-spacing:2px;text-transform:uppercase;
-  color:var(--text2);margin-bottom:12px;
-  display:flex;align-items:center;gap:6px;
+font-family:‘JetBrains Mono’,monospace;
+font-size:10px;letter-spacing:2px;text-transform:uppercase;
+color:var(–text2);margin-bottom:12px;
+display:flex;align-items:center;gap:6px;
 }
 .section-pad{padding:16px;display:flex;flex-direction:column;gap:14px}
 
 .badge{
-  display:inline-flex;align-items:center;gap:4px;
-  padding:3px 10px;border-radius:20px;
-  font-size:11px;font-weight:600;
-  font-family:'JetBrains Mono',monospace;letter-spacing:1px;
+display:inline-flex;align-items:center;gap:4px;
+padding:3px 10px;border-radius:20px;
+font-size:11px;font-weight:600;
+font-family:‘JetBrains Mono’,monospace;letter-spacing:1px;
 }
-.badge-green{background:rgba(90,171,104,0.15);color:var(--accent);border:1px solid rgba(90,171,104,0.3)}
-.badge-gold{background:rgba(245,200,66,0.15);color:var(--gold);border:1px solid rgba(245,200,66,0.3)}
-.badge-red{background:rgba(255,95,95,0.15);color:var(--red);border:1px solid rgba(255,95,95,0.3)}
-.badge-blue{background:rgba(79,142,247,0.15);color:var(--blue);border:1px solid rgba(79,142,247,0.3)}
+.badge-green{background:rgba(90,171,104,0.15);color:var(–accent);border:1px solid rgba(90,171,104,0.3)}
+.badge-gold{background:rgba(245,200,66,0.15);color:var(–gold);border:1px solid rgba(245,200,66,0.3)}
+.badge-red{background:rgba(255,95,95,0.15);color:var(–red);border:1px solid rgba(255,95,95,0.3)}
+.badge-blue{background:rgba(79,142,247,0.15);color:var(–blue);border:1px solid rgba(79,142,247,0.3)}
 
 .btn{
-  display:inline-flex;align-items:center;justify-content:center;gap:8px;
-  padding:12px 20px;border-radius:12px;border:none;cursor:pointer;
-  font-family:'Black Han Sans',sans-serif;font-size:14px;letter-spacing:2px;
-  text-transform:uppercase;transition:all 0.2s;width:100%;
+display:inline-flex;align-items:center;justify-content:center;gap:8px;
+padding:12px 20px;border-radius:12px;border:none;cursor:pointer;
+font-family:‘Black Han Sans’,sans-serif;font-size:14px;letter-spacing:2px;
+text-transform:uppercase;transition:all 0.2s;width:100%;
 }
-.btn-primary{background:linear-gradient(135deg,var(--accent3),var(--accent));color:#fff}
+.btn-primary{background:linear-gradient(135deg,var(–accent3),var(–accent));color:#fff}
 .btn-primary:active{transform:scale(0.97)}
-.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--text2)}
-.btn-danger{background:transparent;border:1px solid var(--red);color:var(--red)}
+.btn-ghost{background:transparent;border:1px solid var(–border);color:var(–text2)}
+.btn-danger{background:transparent;border:1px solid var(–red);color:var(–red)}
 
 input,select{
-  width:100%;background:var(--s2);
-  border:1px solid var(--border);border-radius:10px;
-  padding:12px 14px;color:var(--text);
-  font-family:'DM Sans',sans-serif;font-size:15px;outline:none;
-  transition:border-color 0.2s;
+width:100%;background:var(–s2);
+border:1px solid var(–border);border-radius:10px;
+padding:12px 14px;color:var(–text);
+font-family:‘DM Sans’,sans-serif;font-size:15px;outline:none;
+transition:border-color 0.2s;
 }
-input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(90,171,104,0.12)}
-select option{background:var(--s2)}
+input:focus,select:focus{border-color:var(–accent);box-shadow:0 0 0 3px rgba(90,171,104,0.12)}
+select option{background:var(–s2)}
 label{
-  display:block;
-  font-family:'JetBrains Mono',monospace;
-  font-size:10px;letter-spacing:2px;text-transform:uppercase;
-  color:var(--text2);margin-bottom:6px;
+display:block;
+font-family:‘JetBrains Mono’,monospace;
+font-size:10px;letter-spacing:2px;text-transform:uppercase;
+color:var(–text2);margin-bottom:6px;
 }
 
 /* XP Bar */
 .xp-bar-wrap{background:rgba(255,255,255,0.06);border-radius:4px;height:6px;overflow:hidden}
-.xp-bar-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width 0.8s}
+.xp-bar-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(–accent),var(–accent2));transition:width 0.8s}
 
 /* ══════════════════════════════════════
-   SCREEN: LOGIN
+SCREEN: LOGIN
 ══════════════════════════════════════ */
 #screen-login{
-  justify-content:center;align-items:center;
-  background:radial-gradient(ellipse at 50% 30%,#0d2016 0%,var(--bg) 70%);
-  padding:32px 24px;gap:0;
+justify-content:center;align-items:center;
+background:radial-gradient(ellipse at 50% 30%,#0d2016 0%,var(–bg) 70%);
+padding:32px 24px;gap:0;
 }
 .login-hero{text-align:center;margin-bottom:36px}
 .login-plane{font-size:64px;animation:plane-bob 3s ease-in-out infinite;display:block;margin-bottom:12px;filter:drop-shadow(0 0 16px rgba(90,171,104,0.4))}
 .login-title{
-  font-family:'Black Han Sans',sans-serif;font-size:36px;letter-spacing:4px;
-  background:linear-gradient(135deg,var(--accent),var(--accent2),var(--gold));
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+font-family:‘Black Han Sans’,sans-serif;font-size:36px;letter-spacing:4px;
+background:linear-gradient(135deg,var(–accent),var(–accent2),var(–gold));
+-webkit-background-clip:text;-webkit-text-fill-color:transparent;
 }
-.login-sub{font-size:12px;color:var(--text2);letter-spacing:3px;margin-top:4px;font-family:'JetBrains Mono',monospace}
-.login-card{background:var(--s1);border:1px solid var(--border);border-radius:20px;padding:24px;width:100%;max-width:360px}
+.login-sub{font-size:12px;color:var(–text2);letter-spacing:3px;margin-top:4px;font-family:‘JetBrains Mono’,monospace}
+.login-card{background:var(–s1);border:1px solid var(–border);border-radius:20px;padding:24px;width:100%;max-width:360px}
 .login-form-group{margin-bottom:16px}
 .login-error{
-  background:rgba(255,95,95,0.1);border:1px solid rgba(255,95,95,0.3);
-  border-radius:8px;padding:10px 14px;font-size:13px;color:var(--red);
-  display:none;margin-bottom:12px;
+background:rgba(255,95,95,0.1);border:1px solid rgba(255,95,95,0.3);
+border-radius:8px;padding:10px 14px;font-size:13px;color:var(–red);
+display:none;margin-bottom:12px;
 }
 
 /* ══════════════════════════════════════
-   SCREEN: FEED
+SCREEN: FEED
 ══════════════════════════════════════ */
 .rank-strip{
-  display:flex;gap:10px;overflow-x:auto;padding:12px 16px;
-  scrollbar-width:none;flex-shrink:0;
+display:flex;gap:10px;overflow-x:auto;padding:12px 16px;
+scrollbar-width:none;flex-shrink:0;
 }
 .rank-strip::-webkit-scrollbar{display:none}
 .rank-chip{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer}
 .rank-ava-wrap{position:relative;width:50px;height:50px}
-.rank-ava-ring{position:absolute;inset:-2px;border-radius:50%;background:conic-gradient(var(--accent) var(--pct,0%),rgba(90,171,104,0.1) var(--pct,0%))}
-.rank-ava{position:absolute;inset:3px;border-radius:50%;background:var(--s2);display:flex;align-items:center;justify-content:center;font-size:18px;border:2px solid var(--bg)}
-.rank-name{font-size:10px;color:var(--text2);font-weight:500;max-width:50px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.rank-xp{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--accent);font-weight:700}
+.rank-ava-ring{position:absolute;inset:-2px;border-radius:50%;background:conic-gradient(var(–accent) var(–pct,0%),rgba(90,171,104,0.1) var(–pct,0%))}
+.rank-ava{position:absolute;inset:3px;border-radius:50%;background:var(–s2);display:flex;align-items:center;justify-content:center;font-size:18px;border:2px solid var(–bg)}
+.rank-name{font-size:10px;color:var(–text2);font-weight:500;max-width:50px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rank-xp{font-family:‘JetBrains Mono’,monospace;font-size:9px;color:var(–accent);font-weight:700}
 
-.post{background:var(--s1);border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin-bottom:2px;animation:post-in 0.4s ease both}
+.post{background:var(–s1);border-top:1px solid var(–border);border-bottom:1px solid var(–border);margin-bottom:2px;animation:post-in 0.4s ease both}
 @keyframes post-in{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 .post-header{padding:12px 16px;display:flex;align-items:center;gap:10px}
-.post-ava{width:38px;height:38px;border-radius:50%;background:var(--s2);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;border:2px solid var(--accent3)}
+.post-ava{width:38px;height:38px;border-radius:50%;background:var(–s2);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;border:2px solid var(–accent3)}
 .post-author{font-weight:600;font-size:14px;display:flex;align-items:center;gap:6px}
-.post-plane-badge{font-size:10px;background:rgba(90,171,104,0.12);color:var(--accent);border:1px solid rgba(90,171,104,0.25);border-radius:4px;padding:1px 6px;font-family:'JetBrains Mono',monospace}
-.post-time{font-size:11px;color:var(--text2);margin-top:1px}
+.post-plane-badge{font-size:10px;background:rgba(90,171,104,0.12);color:var(–accent);border:1px solid rgba(90,171,104,0.25);border-radius:4px;padding:1px 6px;font-family:‘JetBrains Mono’,monospace}
+.post-time{font-size:11px;color:var(–text2);margin-top:1px}
 .post-img-wrap{position:relative;background:#000;overflow:hidden}
-.post-img-placeholder{width:100%;aspect-ratio:1;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;font-size:52px;background:linear-gradient(135deg,var(--s2),#0a1a0d)}
-.post-img-placeholder span{font-size:12px;color:var(--text2)}
+.post-img-placeholder{width:100%;aspect-ratio:1;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;font-size:52px;background:linear-gradient(135deg,var(–s2),#0a1a0d)}
+.post-img-placeholder span{font-size:12px;color:var(–text2)}
 .score-overlay{position:absolute;top:12px;right:12px;display:flex;flex-direction:column;align-items:flex-end;gap:4px}
 .score-badge{display:flex;flex-direction:column;align-items:center;background:rgba(0,0,0,0.75);backdrop-filter:blur(12px);border-radius:12px;padding:8px 12px;border:1px solid rgba(255,255,255,0.08);min-width:76px}
-.score-label{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-bottom:2px}
-.score-number{font-family:'Black Han Sans',sans-serif;font-size:30px;line-height:1}
-.score-max{font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(255,255,255,0.3)}
+.score-label{font-family:‘JetBrains Mono’,monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-bottom:2px}
+.score-number{font-family:‘Black Han Sans’,sans-serif;font-size:30px;line-height:1}
+.score-max{font-family:‘JetBrains Mono’,monospace;font-size:9px;color:rgba(255,255,255,0.3)}
 .score-bar-wrap{width:100%;height:3px;background:rgba(255,255,255,0.1);border-radius:2px;margin-top:4px;overflow:hidden}
 .score-bar-fill{height:100%;border-radius:2px;transition:width 1.2s cubic-bezier(0.23,1,0.32,1)}
-.score-rank-tag{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;letter-spacing:1px}
-.xp-pill{position:absolute;bottom:12px;right:12px;background:rgba(0,0,0,0.75);backdrop-filter:blur(12px);border:1px solid rgba(90,171,104,0.3);border-radius:20px;padding:5px 12px;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;color:var(--accent)}
+.score-rank-tag{font-family:‘JetBrains Mono’,monospace;font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;letter-spacing:1px}
+.xp-pill{position:absolute;bottom:12px;right:12px;background:rgba(0,0,0,0.75);backdrop-filter:blur(12px);border:1px solid rgba(90,171,104,0.3);border-radius:20px;padding:5px 12px;font-family:‘JetBrains Mono’,monospace;font-size:12px;font-weight:700;color:var(–accent)}
 .rank-up-overlay{position:absolute;inset:0;background:linear-gradient(135deg,rgba(90,171,104,0.12),transparent);pointer-events:none;display:flex;align-items:flex-end;padding:12px}
-.rank-up-chip{background:linear-gradient(135deg,var(--accent3),var(--accent));color:#fff;border-radius:8px;padding:5px 12px;font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;letter-spacing:1px;animation:rank-pop 0.5s cubic-bezier(0.34,1.56,0.64,1) both}
+.rank-up-chip{background:linear-gradient(135deg,var(–accent3),var(–accent));color:#fff;border-radius:8px;padding:5px 12px;font-size:11px;font-weight:700;font-family:‘JetBrains Mono’,monospace;letter-spacing:1px;animation:rank-pop 0.5s cubic-bezier(0.34,1.56,0.64,1) both}
 @keyframes rank-pop{from{transform:scale(0.6) translateY(10px);opacity:0}to{transform:scale(1) translateY(0);opacity:1}}
 .post-actions{padding:10px 16px 6px;display:flex;align-items:center;gap:14px}
-.action-btn{background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:5px;color:var(--text2);font-size:13px;font-weight:500;font-family:'DM Sans',sans-serif;transition:all 0.15s;padding:4px 0}
+.action-btn{background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:5px;color:var(–text2);font-size:13px;font-weight:500;font-family:‘DM Sans’,sans-serif;transition:all 0.15s;padding:4px 0}
 .action-btn .icon{font-size:20px;transition:transform 0.2s cubic-bezier(0.34,1.56,0.64,1)}
-.action-btn.liked{color:var(--red)}
+.action-btn.liked{color:var(–red)}
 .action-btn.liked .icon{animation:heart-pop 0.3s cubic-bezier(0.34,1.56,0.64,1)}
 @keyframes heart-pop{0%{transform:scale(1)}50%{transform:scale(1.5)}100%{transform:scale(1)}}
 .reaction-row{margin-left:auto;display:flex;gap:4px;flex-wrap:wrap}
-.react-pill{background:var(--s2);border:1px solid var(--border);border-radius:20px;padding:3px 8px;font-size:13px;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;gap:3px;user-select:none}
+.react-pill{background:var(–s2);border:1px solid var(–border);border-radius:20px;padding:3px 8px;font-size:13px;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;gap:3px;user-select:none}
 .react-pill:active{transform:scale(1.1)}
 .react-pill.active{background:rgba(90,171,104,0.15);border-color:rgba(90,171,104,0.4)}
-.react-count{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text2)}
+.react-count{font-family:‘JetBrains Mono’,monospace;font-size:10px;color:var(–text2)}
 .emoji-picker{display:none;padding:8px 16px;gap:8px;flex-wrap:wrap}
 .emoji-picker.open{display:flex}
-.emoji-opt{width:40px;height:40px;border-radius:12px;background:var(--s2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer;transition:all 0.15s}
+.emoji-opt{width:40px;height:40px;border-radius:12px;background:var(–s2);border:1px solid var(–border);display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer;transition:all 0.15s}
 .emoji-opt:active{transform:scale(1.2)}
-.emoji-opt.selected{border-color:var(--accent);background:rgba(90,171,104,0.12)}
+.emoji-opt.selected{border-color:var(–accent);background:rgba(90,171,104,0.12)}
 .comments-section{padding:0 16px}
 .comment{display:flex;gap:8px;padding:7px 0;border-top:1px solid rgba(255,255,255,0.03);animation:comment-in 0.25s ease}
 @keyframes comment-in{from{opacity:0;transform:translateX(-6px)}to{opacity:1;transform:translateX(0)}}
-.comment-ava{width:26px;height:26px;border-radius:50%;background:var(--s2);display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;font-weight:700}
-.comment-author{font-size:12px;font-weight:600;color:var(--text)}
-.comment-text{font-size:13px;color:var(--text2);line-height:1.4;margin-top:1px}
-.comment-time{font-size:10px;color:var(--text3);margin-top:2px;font-family:'JetBrains Mono',monospace}
-.view-more-comments{font-size:12px;color:var(--text2);cursor:pointer;padding:4px 0 8px;font-weight:500;display:block;border-top:1px solid rgba(255,255,255,0.03)}
-.comment-input-row{display:flex;align-items:center;gap:8px;padding:8px 16px 14px;border-top:1px solid var(--border)}
-.comment-input{flex:1;background:var(--s2);border:1px solid var(--border);border-radius:20px;padding:8px 14px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);outline:none;transition:border-color 0.2s}
+.comment-ava{width:26px;height:26px;border-radius:50%;background:var(–s2);display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;font-weight:700}
+.comment-author{font-size:12px;font-weight:600;color:var(–text)}
+.comment-text{font-size:13px;color:var(–text2);line-height:1.4;margin-top:1px}
+.comment-time{font-size:10px;color:var(–text3);margin-top:2px;font-family:‘JetBrains Mono’,monospace}
+.view-more-comments{font-size:12px;color:var(–text2);cursor:pointer;padding:4px 0 8px;font-weight:500;display:block;border-top:1px solid rgba(255,255,255,0.03)}
+.comment-input-row{display:flex;align-items:center;gap:8px;padding:8px 16px 14px;border-top:1px solid var(–border)}
+.comment-input{flex:1;background:var(–s2);border:1px solid var(–border);border-radius:20px;padding:8px 14px;font-family:‘DM Sans’,sans-serif;font-size:13px;color:var(–text);outline:none;transition:border-color 0.2s}
 .comment-input:focus{border-color:rgba(90,171,104,0.4)}
-.comment-input::placeholder{color:var(--text3)}
-.comment-send{width:32px;height:32px;border-radius:50%;background:var(--accent);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
-.score-legendary{color:#ffd066}.score-epic{color:#a78bfa}.score-great{color:#3ddc84}.score-good{color:var(--blue)}.score-ok{color:var(--text2)}
-.bar-legendary{background:linear-gradient(90deg,#ff9f0a,#ffcc02)}.bar-epic{background:linear-gradient(90deg,#a78bfa,#c084fc)}.bar-great{background:linear-gradient(90deg,#3ddc84,#34d399)}.bar-good{background:linear-gradient(90deg,var(--blue),#818cf8)}.bar-ok{background:rgba(255,255,255,0.3)}
+.comment-input::placeholder{color:var(–text3)}
+.comment-send{width:32px;height:32px;border-radius:50%;background:var(–accent);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.score-legendary{color:#ffd066}.score-epic{color:#a78bfa}.score-great{color:#3ddc84}.score-good{color:var(–blue)}.score-ok{color:var(–text2)}
+.bar-legendary{background:linear-gradient(90deg,#ff9f0a,#ffcc02)}.bar-epic{background:linear-gradient(90deg,#a78bfa,#c084fc)}.bar-great{background:linear-gradient(90deg,#3ddc84,#34d399)}.bar-good{background:linear-gradient(90deg,var(–blue),#818cf8)}.bar-ok{background:rgba(255,255,255,0.3)}
 .tag-legendary{background:rgba(255,159,10,0.2);color:#ffd066;border:1px solid rgba(255,159,10,0.4)}
 .tag-epic{background:rgba(167,139,250,0.2);color:#a78bfa;border:1px solid rgba(167,139,250,0.4)}
 .tag-great{background:rgba(61,220,132,0.2);color:#3ddc84;border:1px solid rgba(61,220,132,0.4)}
-.tag-good{background:rgba(79,142,247,0.2);color:var(--blue);border:1px solid rgba(79,142,247,0.4)}
-.tag-ok{background:rgba(120,120,160,0.2);color:var(--text2);border:1px solid rgba(120,120,160,0.3)}
+.tag-good{background:rgba(79,142,247,0.2);color:var(–blue);border:1px solid rgba(79,142,247,0.4)}
+.tag-ok{background:rgba(120,120,160,0.2);color:var(–text2);border:1px solid rgba(120,120,160,0.3)}
 .reaction-burst{position:fixed;pointer-events:none;z-index:9998;font-size:28px;animation:burst-float 1.2s ease forwards}
 @keyframes burst-float{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-80px) scale(1.6)}}
 
 /* ══════════════════════════════════════
-   SCREEN: TAREFAS
+SCREEN: TAREFAS
 ══════════════════════════════════════ */
 .tarefa-card{
-  background:var(--s1);border:1px solid var(--border);border-radius:14px;
-  padding:16px;display:flex;align-items:center;gap:14px;
-  transition:all 0.2s;cursor:pointer;
+background:var(–s1);border:1px solid var(–border);border-radius:14px;
+padding:16px;display:flex;align-items:center;gap:14px;
+transition:all 0.2s;cursor:pointer;
 }
 .tarefa-card.done{opacity:0.6;border-color:rgba(90,171,104,0.3)}
-.tarefa-card.done .tarefa-check{background:var(--accent);border-color:var(--accent)}
+.tarefa-card.done .tarefa-check{background:var(–accent);border-color:var(–accent)}
 .tarefa-check{
-  width:26px;height:26px;border-radius:50%;border:2px solid var(--border);
-  display:flex;align-items:center;justify-content:center;flex-shrink:0;
-  font-size:13px;transition:all 0.2s;
+width:26px;height:26px;border-radius:50%;border:2px solid var(–border);
+display:flex;align-items:center;justify-content:center;flex-shrink:0;
+font-size:13px;transition:all 0.2s;
 }
 .tarefa-info{flex:1}
 .tarefa-nome{font-weight:600;font-size:15px;margin-bottom:3px}
-.tarefa-xp{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent)}
-.tarefa-desc{font-size:12px;color:var(--text2);margin-top:2px}
+.tarefa-xp{font-family:‘JetBrains Mono’,monospace;font-size:11px;color:var(–accent)}
+.tarefa-desc{font-size:12px;color:var(–text2);margin-top:2px}
 .streak-banner{
-  background:linear-gradient(135deg,rgba(245,200,66,0.12),rgba(90,171,104,0.08));
-  border:1px solid rgba(245,200,66,0.25);border-radius:14px;
-  padding:16px;display:flex;align-items:center;gap:12px;
+background:linear-gradient(135deg,rgba(245,200,66,0.12),rgba(90,171,104,0.08));
+border:1px solid rgba(245,200,66,0.25);border-radius:14px;
+padding:16px;display:flex;align-items:center;gap:12px;
 }
-.streak-num{font-family:'Black Han Sans',sans-serif;font-size:42px;color:var(--gold);line-height:1}
+.streak-num{font-family:‘Black Han Sans’,sans-serif;font-size:42px;color:var(–gold);line-height:1}
 .progress-circle-wrap{display:flex;align-items:center;justify-content:center}
 .progress-circle{position:relative;width:80px;height:80px}
 .progress-circle svg{transform:rotate(-90deg)}
 .progress-circle-num{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
-.progress-circle-num .big{font-family:'Black Han Sans',sans-serif;font-size:22px;color:var(--accent);line-height:1}
-.progress-circle-num .small{font-size:9px;color:var(--text2);font-family:'JetBrains Mono',monospace}
+.progress-circle-num .big{font-family:‘Black Han Sans’,sans-serif;font-size:22px;color:var(–accent);line-height:1}
+.progress-circle-num .small{font-size:9px;color:var(–text2);font-family:‘JetBrains Mono’,monospace}
 
 /* ══════════════════════════════════════
-   SCREEN: RANKING
+SCREEN: RANKING
 ══════════════════════════════════════ */
 .podium{display:flex;align-items:flex-end;justify-content:center;gap:8px;padding:20px 16px 0}
 .podium-item{display:flex;flex-direction:column;align-items:center;gap:6px;flex:1;max-width:110px}
 .podium-ava{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;border:3px solid transparent}
-.podium-item.p1 .podium-ava{border-color:var(--gold);box-shadow:0 0 16px rgba(245,200,66,0.3)}
+.podium-item.p1 .podium-ava{border-color:var(–gold);box-shadow:0 0 16px rgba(245,200,66,0.3)}
 .podium-item.p2 .podium-ava{border-color:#aaa;box-shadow:0 0 10px rgba(170,170,170,0.2)}
 .podium-item.p3 .podium-ava{border-color:#c87d2f;box-shadow:0 0 10px rgba(200,125,47,0.2)}
 .podium-name{font-size:12px;font-weight:600;text-align:center}
-.podium-xp{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent)}
+.podium-xp{font-family:‘JetBrains Mono’,monospace;font-size:11px;color:var(–accent)}
 .podium-block{border-radius:8px 8px 0 0;width:100%;display:flex;align-items:center;justify-content:center;padding:8px 0}
-.podium-item.p1 .podium-block{height:64px;background:linear-gradient(180deg,rgba(245,200,66,0.3),rgba(245,200,66,0.1));border-top:2px solid var(--gold)}
+.podium-item.p1 .podium-block{height:64px;background:linear-gradient(180deg,rgba(245,200,66,0.3),rgba(245,200,66,0.1));border-top:2px solid var(–gold)}
 .podium-item.p2 .podium-block{height:46px;background:rgba(170,170,170,0.1);border-top:2px solid #aaa}
 .podium-item.p3 .podium-block{height:34px;background:rgba(200,125,47,0.1);border-top:2px solid #c87d2f}
 .podium-medal{font-size:20px}
 .ranking-list-item{
-  display:flex;align-items:center;gap:12px;padding:12px 0;
-  border-bottom:1px solid rgba(255,255,255,0.04);
+display:flex;align-items:center;gap:12px;padding:12px 0;
+border-bottom:1px solid rgba(255,255,255,0.04);
 }
-.rl-pos{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:var(--text2);min-width:24px;text-align:center}
-.rl-ava{width:38px;height:38px;border-radius:50%;background:var(--s2);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.rl-pos{font-family:‘JetBrains Mono’,monospace;font-size:13px;font-weight:700;color:var(–text2);min-width:24px;text-align:center}
+.rl-ava{width:38px;height:38px;border-radius:50%;background:var(–s2);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
 .rl-info{flex:1}
 .rl-name{font-weight:600;font-size:14px}
-.rl-plane{font-size:11px;color:var(--text2);margin-top:1px}
-.rl-xp{font-family:'Black Han Sans',sans-serif;font-size:20px;color:var(--accent)}
-.rl-streak{font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--gold)}
-.tab-row{display:flex;background:var(--s2);border-radius:10px;padding:3px;margin:0 16px 16px;flex-shrink:0}
-.tab-btn{flex:1;padding:8px;text-align:center;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--text2);cursor:pointer;transition:all 0.2s}
-.tab-btn.active{background:var(--s3);color:var(--accent)}
+.rl-plane{font-size:11px;color:var(–text2);margin-top:1px}
+.rl-xp{font-family:‘Black Han Sans’,sans-serif;font-size:20px;color:var(–accent)}
+.rl-streak{font-size:12px;font-family:‘JetBrains Mono’,monospace;color:var(–gold)}
+.tab-row{display:flex;background:var(–s2);border-radius:10px;padding:3px;margin:0 16px 16px;flex-shrink:0}
+.tab-btn{flex:1;padding:8px;text-align:center;border-radius:8px;font-family:‘JetBrains Mono’,monospace;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(–text2);cursor:pointer;transition:all 0.2s}
+.tab-btn.active{background:var(–s3);color:var(–accent)}
 
 /* ══════════════════════════════════════
-   SCREEN: ANÁLISE
+SCREEN: ANÁLISE
 ══════════════════════════════════════ */
 .kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.kpi-val{font-family:'Black Han Sans',sans-serif;font-size:32px;color:var(--accent);line-height:1;margin-bottom:2px}
-.kpi-label{font-size:11px;color:var(--text2)}
-.kpi-delta{font-size:11px;font-family:'JetBrains Mono',monospace;margin-top:4px}
-.delta-up{color:#3ddc84}.delta-down{color:var(--red)}
+.kpi-val{font-family:‘Black Han Sans’,sans-serif;font-size:32px;color:var(–accent);line-height:1;margin-bottom:2px}
+.kpi-label{font-size:11px;color:var(–text2)}
+.kpi-delta{font-size:11px;font-family:‘JetBrains Mono’,monospace;margin-top:4px}
+.delta-up{color:#3ddc84}.delta-down{color:var(–red)}
 .chart-wrap{position:relative;height:180px}
 .adesao-item{margin-bottom:10px}
 .adesao-label{display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px}
-.adesao-pct{font-family:'JetBrains Mono',monospace;font-size:11px}
+.adesao-pct{font-family:‘JetBrains Mono’,monospace;font-size:11px}
 
 /* ══════════════════════════════════════
-   SCREEN: GESTOR
+SCREEN: GESTOR
 ══════════════════════════════════════ */
 .gestor-menu-item{
-  display:flex;align-items:center;gap:14px;
-  padding:16px;background:var(--s1);border:1px solid var(--border);
-  border-radius:14px;cursor:pointer;transition:all 0.2s;
+display:flex;align-items:center;gap:14px;
+padding:16px;background:var(–s1);border:1px solid var(–border);
+border-radius:14px;cursor:pointer;transition:all 0.2s;
 }
-.gestor-menu-item:active{background:var(--s2)}
+.gestor-menu-item:active{background:var(–s2)}
 .gestor-menu-icon{font-size:28px;flex-shrink:0}
 .gestor-menu-info{flex:1}
 .gestor-menu-title{font-weight:600;font-size:15px;margin-bottom:2px}
-.gestor-menu-desc{font-size:12px;color:var(--text2)}
-.gestor-menu-arrow{color:var(--text3);font-size:18px}
+.gestor-menu-desc{font-size:12px;color:var(–text2)}
+.gestor-menu-arrow{color:var(–text3);font-size:18px}
 
 /* sub-telas gestor */
 .gestor-sub{display:none;flex-direction:column;height:100%}
 .gestor-sub.active{display:flex}
-.gestor-back{display:flex;align-items:center;gap:8px;padding:12px 16px;cursor:pointer;color:var(--accent);font-weight:600;font-size:14px;flex-shrink:0;border-bottom:1px solid var(--border)}
+.gestor-back{display:flex;align-items:center;gap:8px;padding:12px 16px;cursor:pointer;color:var(–accent);font-weight:600;font-size:14px;flex-shrink:0;border-bottom:1px solid var(–border)}
 
 table{width:100%;border-collapse:collapse;font-size:13px}
-th{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--text2);padding:8px 10px;text-align:left;border-bottom:1px solid var(--border)}
+th{font-family:‘JetBrains Mono’,monospace;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(–text2);padding:8px 10px;text-align:left;border-bottom:1px solid var(–border)}
 td{padding:10px;border-bottom:1px solid rgba(255,255,255,0.04);vertical-align:middle}
 tr:active td{background:rgba(90,171,104,0.04)}
 
 .log-entry{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:12px}
-.log-time{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text2);min-width:80px;flex-shrink:0}
-.log-text{color:var(--text);line-height:1.4}
-.log-text strong{color:var(--accent)}
+.log-time{font-family:‘JetBrains Mono’,monospace;font-size:10px;color:var(–text2);min-width:80px;flex-shrink:0}
+.log-text{color:var(–text);line-height:1.4}
+.log-text strong{color:var(–accent)}
 .danger-zone{border:1px solid rgba(255,95,95,0.3);border-radius:12px;padding:16px;background:rgba(255,95,95,0.04)}
-.danger-title{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--red);margin-bottom:12px}
+.danger-title{font-family:‘JetBrains Mono’,monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(–red);margin-bottom:12px}
 
 /* ══════════════════════════════════════
-   MODAL
+MODAL
 ══════════════════════════════════════ */
 .modal-overlay{
-  display:none;position:fixed;inset:0;
-  background:rgba(0,0,0,0.75);backdrop-filter:blur(6px);
-  z-index:500;align-items:flex-end;justify-content:center;
+display:none;position:fixed;inset:0;
+background:rgba(0,0,0,0.75);backdrop-filter:blur(6px);
+z-index:500;align-items:flex-end;justify-content:center;
 }
 .modal-overlay.open{display:flex}
 .modal{
-  background:var(--s1);border:1px solid var(--border);
-  border-radius:20px 20px 0 0;padding:24px;width:100%;max-width:500px;
-  animation:modal-up 0.3s cubic-bezier(0.34,1.2,0.64,1);
-  padding-bottom:calc(24px + var(--safe-bot));
-  max-height:90vh;overflow-y:auto;
+background:var(–s1);border:1px solid var(–border);
+border-radius:20px 20px 0 0;padding:24px;width:100%;max-width:500px;
+animation:modal-up 0.3s cubic-bezier(0.34,1.2,0.64,1);
+padding-bottom:calc(24px + var(–safe-bot));
+max-height:90vh;overflow-y:auto;
 }
 @keyframes modal-up{from{transform:translateY(100%)}to{transform:translateY(0)}}
-.modal-title{font-family:'Black Han Sans',sans-serif;font-size:18px;letter-spacing:2px;color:var(--accent);margin-bottom:20px}
+.modal-title{font-family:‘Black Han Sans’,sans-serif;font-size:18px;letter-spacing:2px;color:var(–accent);margin-bottom:20px}
 .modal-form-group{margin-bottom:14px}
 .modal-actions{display:flex;gap:10px;margin-top:16px}
 .modal-actions .btn{flex:1}
 
 /* ══════════════════════════════════════
-   TOAST & CELEBRATION
+TOAST & CELEBRATION
 ══════════════════════════════════════ */
 #toast{
-  position:fixed;top:calc(var(--safe-top) + 64px);
-  left:50%;transform:translateX(-50%) translateY(-20px);
-  background:var(--s1);border:1px solid var(--border);border-radius:20px;
-  padding:10px 20px;font-size:13px;font-weight:600;color:var(--text);
-  box-shadow:0 8px 30px rgba(0,0,0,0.5);z-index:9000;
-  opacity:0;pointer-events:none;
-  transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1);
-  white-space:nowrap;
+position:fixed;top:calc(var(–safe-top) + 64px);
+left:50%;transform:translateX(-50%) translateY(-20px);
+background:var(–s1);border:1px solid var(–border);border-radius:20px;
+padding:10px 20px;font-size:13px;font-weight:600;color:var(–text);
+box-shadow:0 8px 30px rgba(0,0,0,0.5);z-index:9000;
+opacity:0;pointer-events:none;
+transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+white-space:nowrap;
 }
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
 /* XP Celebration */
 .xp-celebration{
-  position:fixed;inset:0;z-index:8000;pointer-events:none;
-  display:flex;align-items:center;justify-content:center;
-  opacity:0;transition:opacity 0.3s;
+position:fixed;inset:0;z-index:8000;pointer-events:none;
+display:flex;align-items:center;justify-content:center;
+opacity:0;transition:opacity 0.3s;
 }
 .xp-celebration.show{opacity:1}
 .xp-burst{
-  font-family:'Black Han Sans',sans-serif;font-size:60px;
-  color:var(--accent);text-shadow:0 0 30px rgba(90,171,104,0.8);
-  animation:xp-burst-anim 0.8s cubic-bezier(0.34,1.56,0.64,1) both;
+font-family:‘Black Han Sans’,sans-serif;font-size:60px;
+color:var(–accent);text-shadow:0 0 30px rgba(90,171,104,0.8);
+animation:xp-burst-anim 0.8s cubic-bezier(0.34,1.56,0.64,1) both;
 }
 @keyframes xp-burst-anim{
-  0%{transform:scale(0.3);opacity:0}
-  60%{transform:scale(1.1);opacity:1}
-  100%{transform:scale(1);opacity:0}
+0%{transform:scale(0.3);opacity:0}
+60%{transform:scale(1.1);opacity:1}
+100%{transform:scale(1);opacity:0}
 }
 
 /* ══════════════════════════════════════
-   USER PILL in topbar
+USER PILL in topbar
 ══════════════════════════════════════ */
 .user-pill{
-  display:flex;align-items:center;gap:7px;
-  background:var(--s2);border:1px solid var(--border);
-  border-radius:20px;padding:5px 12px 5px 5px;cursor:pointer;
+display:flex;align-items:center;gap:7px;
+background:var(–s2);border:1px solid var(–border);
+border-radius:20px;padding:5px 12px 5px 5px;cursor:pointer;
 }
 .user-pill .ava{
-  width:26px;height:26px;border-radius:50%;
-  background:linear-gradient(135deg,var(--accent3),var(--accent));
-  display:flex;align-items:center;justify-content:center;
-  font-size:11px;font-weight:700;color:#fff;flex-shrink:0;
+width:26px;height:26px;border-radius:50%;
+background:linear-gradient(135deg,var(–accent3),var(–accent));
+display:flex;align-items:center;justify-content:center;
+font-size:11px;font-weight:700;color:#fff;flex-shrink:0;
 }
 .user-pill-name{font-size:12px;font-weight:600}
-.user-pill-level{font-size:9px;color:var(--text2);font-family:'JetBrains Mono',monospace}
+.user-pill-level{font-size:9px;color:var(–text2);font-family:‘JetBrains Mono’,monospace}
 
 /* FAB */
 .fab{
-  position:fixed;bottom:calc(72px + var(--safe-bot) + 12px);right:20px;
-  width:52px;height:52px;border-radius:50%;
-  background:linear-gradient(135deg,var(--accent3),var(--accent));
-  border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;
-  font-size:22px;box-shadow:0 6px 20px rgba(90,171,104,0.4);
-  transition:all 0.2s;z-index:90;
+position:fixed;bottom:calc(72px + var(–safe-bot) + 12px);right:20px;
+width:52px;height:52px;border-radius:50%;
+background:linear-gradient(135deg,var(–accent3),var(–accent));
+border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;
+font-size:22px;box-shadow:0 6px 20px rgba(90,171,104,0.4);
+transition:all 0.2s;z-index:90;
 }
 .fab:active{transform:scale(0.93)}
 </style>
+
 </head>
 <body>
 
 <!-- ══════════════════════════════════════
-     SCREEN: LOGIN
+SCREEN: LOGIN
 ══════════════════════════════════════ -->
+
 <div class="screen" id="screen-login">
-  <div class="login-hero">
-    <span class="login-plane" id="login-plane-icon">✈️</span>
-    <div class="login-title">AVIÕES</div>
-    <div class="login-sub">Brooksfield · Brookfield</div>
-  </div>
-  <div class="login-card">
-    <div class="login-form-group">
-      <label>Quem é você?</label>
-      <select id="login-select">
-        <option value="">Selecione seu apelido...</option>
-      </select>
-    </div>
-    <div class="login-form-group">
-      <label>Senha</label>
-      <input type="password" id="login-senha" placeholder="Digite sua senha" autocomplete="current-password">
-    </div>
-    <div class="login-error" id="login-error">Senha incorreta. Tente novamente.</div>
-    <button class="btn btn-primary" onclick="tentarLogin()">✈️ DECOLAR</button>
-    <div style="text-align:center;margin-top:14px">
-      <span style="font-size:12px;color:var(--text2);cursor:pointer" onclick="openModal('modal-primeiro-acesso')">Primeiro acesso? Crie sua senha</span>
-    </div>
-    <div style="text-align:center;margin-top:8px">
-      <span style="font-size:11px;color:var(--text3);cursor:pointer;font-family:'JetBrains Mono',monospace;letter-spacing:1px" onclick="loginGestor()">ACESSO GESTOR</span>
-    </div>
-  </div>
+<div class="login-hero">
+<span class="login-plane" id="login-plane-icon">✈️</span>
+<div class="login-title">AVIÕES</div>
+<div class="login-sub">Brooksfield</div>
+</div>
+<div class="login-card">
+<div class="login-form-group">
+<label>Quem é você?</label>
+<select id="login-select">
+<option value="">Selecione seu apelido...</option>
+</select>
+</div>
+<div class="login-form-group">
+<label>Senha</label>
+<input type="password" id="login-senha" placeholder="Digite sua senha" autocomplete="current-password">
+</div>
+<div class="login-error" id="login-error">Senha incorreta. Tente novamente.</div>
+<button class="btn btn-primary" onclick="tentarLogin()">✈️ DECOLAR</button>
+<div style="text-align:center;margin-top:14px">
+<span style="font-size:12px;color:var(--text2);cursor:pointer" onclick="openModal('modal-primeiro-acesso')">Primeiro acesso? Crie sua senha</span>
+</div>
+<div style="text-align:center;margin-top:8px">
+<span style="font-size:11px;color:var(--text3);cursor:pointer;font-family:'JetBrains Mono',monospace;letter-spacing:1px" onclick="loginGestor()">ACESSO GESTOR</span>
+</div>
+</div>
 </div>
 
 <!-- ══════════════════════════════════════
-     APP SHELL (visível após login)
+APP SHELL (visível após login)
 ══════════════════════════════════════ -->
 
 <!-- TOPBAR -->
+
 <div class="topbar hidden" id="app-topbar">
-  <div class="topbar-brand">
-    <span class="plane-anim" id="topbar-plane">✈️</span>
-    <div>
-      <div class="topbar-title">AVIÕES</div>
-      <div class="topbar-sub">Brooksfield</div>
-    </div>
-  </div>
-  <div class="user-pill" onclick="showToast('⚙️ Perfil em breve!')">
-    <div class="ava" id="topbar-ava">MQ</div>
-    <div>
-      <div class="user-pill-name" id="topbar-name">—</div>
-      <div class="user-pill-level" id="topbar-level">—</div>
-    </div>
-  </div>
+<div class="topbar-brand">
+<span class="plane-anim" id="topbar-plane">✈️</span>
+<div>
+<div class="topbar-title">AVIÕES</div>
+<div class="topbar-sub">Brooksfield</div>
+</div>
+</div>
+<div class="user-pill" onclick="showToast('⚙️ Perfil em breve!')">
+<div class="ava" id="topbar-ava">—</div>
+<div>
+<div class="user-pill-name" id="topbar-name">—</div>
+<div class="user-pill-level" id="topbar-level">—</div>
+</div>
+</div>
 </div>
 
 <!-- SCREEN: FEED -->
+
 <div class="screen hidden" id="screen-feed">
-  <div class="scroll-area">
-    <div class="rank-strip" id="rank-strip"></div>
-    <div style="height:1px;background:var(--border);margin:0 16px"></div>
-    <div id="feed-container"></div>
-  </div>
-  <button class="fab" onclick="showToast('📸 Integrado com tela de missão!')">📸</button>
+<div class="scroll-area">
+<div class="rank-strip" id="rank-strip"></div>
+<div style="height:1px;background:var(--border);margin:0 16px"></div>
+<div id="feed-container"></div>
+</div>
+<button class="fab" onclick="showToast('📸 Integrado com tela de missão!')">📸</button>
 </div>
 
 <!-- SCREEN: TAREFAS -->
+
 <div class="screen hidden" id="screen-tarefas">
-  <div class="scroll-area">
-    <div class="section-pad">
-      <!-- Streak banner -->
-      <div class="streak-banner">
-        <div>
-          <div style="font-size:11px;color:var(--text2);font-family:'JetBrains Mono',monospace;letter-spacing:1px;margin-bottom:2px">SEQUÊNCIA</div>
-          <div class="streak-num" id="streak-num">0</div>
-          <div style="font-size:12px;color:var(--text2)">dias seguidos 🔥</div>
-        </div>
-        <div style="flex:1"></div>
-        <div class="progress-circle-wrap">
-          <div class="progress-circle">
-            <svg width="80" height="80" viewBox="0 0 80 80">
-              <circle cx="40" cy="40" r="34" stroke="rgba(90,171,104,0.12)" stroke-width="6" fill="none"/>
-              <circle id="progress-arc" cx="40" cy="40" r="34" stroke="var(--accent)" stroke-width="6" fill="none"
-                stroke-dasharray="213.6" stroke-dashoffset="213.6" stroke-linecap="round" style="transition:stroke-dashoffset 0.8s"/>
-            </svg>
-            <div class="progress-circle-num">
-              <span class="big" id="progress-num">0</span>
-              <span class="small">XP hoje</span>
-            </div>
-          </div>
-        </div>
-      </div>
+<div class="scroll-area">
+<div class="section-pad">
+<!-- Streak banner -->
+<div class="streak-banner">
+<div>
+<div style="font-size:11px;color:var(--text2);font-family:'JetBrains Mono',monospace;letter-spacing:1px;margin-bottom:2px">SEQUÊNCIA</div>
+<div class="streak-num" id="streak-num">0</div>
+<div style="font-size:12px;color:var(--text2)">dias seguidos 🔥</div>
+</div>
+<div style="flex:1"></div>
+<div class="progress-circle-wrap">
+<div class="progress-circle">
+<svg width="80" height="80" viewBox="0 0 80 80">
+<circle cx="40" cy="40" r="34" stroke="rgba(90,171,104,0.12)" stroke-width="6" fill="none"/>
+<circle id="progress-arc" cx="40" cy="40" r="34" stroke="var(--accent)" stroke-width="6" fill="none"
+stroke-dasharray="213.6" stroke-dashoffset="213.6" stroke-linecap="round" style="transition:stroke-dashoffset 0.8s"/>
+</svg>
+<div class="progress-circle-num">
+<span class="big" id="progress-num">0</span>
+<span class="small">XP hoje</span>
+</div>
+</div>
+</div>
+</div>
 
-      <!-- Tarefas do dia -->
-      <div>
-        <div class="card-title" style="margin-bottom:10px"><span>✅</span> Missões do dia</div>
-        <div id="tarefas-list" style="display:flex;flex-direction:column;gap:10px"></div>
-      </div>
+```
+<!-- Tarefas do dia -->
+<div>
+<div class="card-title" style="margin-bottom:10px"><span>✅</span> Missões do dia</div>
+<div id="tarefas-list" style="display:flex;flex-direction:column;gap:10px"></div>
+</div>
 
-      <!-- Semana -->
-      <div class="card">
-        <div class="card-title"><span>📅</span> Semana atual</div>
-        <div style="display:flex;justify-content:space-between;align-items:center">
-          <div>
-            <div style="font-family:'Black Han Sans',sans-serif;font-size:24px;color:var(--accent)" id="xp-semana-num">0</div>
-            <div style="font-size:11px;color:var(--text2)">XP acumulado</div>
-          </div>
-          <div style="text-align:right">
-            <div class="badge badge-green" id="rank-pos-badge">—</div>
-            <div style="font-size:11px;color:var(--text2);margin-top:4px">sua posição</div>
-          </div>
-        </div>
-        <div style="margin-top:12px" class="xp-bar-wrap">
-          <div class="xp-bar-fill" id="xp-semana-bar" style="width:0%"></div>
-        </div>
-      </div>
-    </div>
-  </div>
+<!-- Semana -->
+<div class="card">
+<div class="card-title"><span>📅</span> Semana atual</div>
+<div style="display:flex;justify-content:space-between;align-items:center">
+<div>
+<div style="font-family:'Black Han Sans',sans-serif;font-size:24px;color:var(--accent)" id="xp-semana-num">0</div>
+<div style="font-size:11px;color:var(--text2)">XP acumulado</div>
+</div>
+<div style="text-align:right">
+<div class="badge badge-green" id="rank-pos-badge">—</div>
+<div style="font-size:11px;color:var(--text2);margin-top:4px">sua posição</div>
+</div>
+</div>
+<div style="margin-top:12px" class="xp-bar-wrap">
+<div class="xp-bar-fill" id="xp-semana-bar" style="width:0%"></div>
+</div>
+</div>
+</div>
+```
+
+</div>
 </div>
 
 <!-- SCREEN: RANKING -->
+
 <div class="screen hidden" id="screen-ranking">
-  <div class="tab-row" style="margin-top:12px">
-    <div class="tab-btn active" id="tab-vendedores" onclick="switchRankTab('vendedores')">🛍️ Vendedores</div>
-    <div class="tab-btn" id="tab-caixas" onclick="switchRankTab('caixas')">🖥️ Caixas</div>
-  </div>
-  <div class="scroll-area" style="padding-bottom:calc(72px + var(--safe-bot))">
-    <div id="podium-vendedores"></div>
-    <div id="podium-caixas" style="display:none"></div>
-    <div class="section-pad" style="padding-top:0">
-      <div id="ranking-list-vendedores"></div>
-      <div id="ranking-list-caixas" style="display:none"></div>
-    </div>
-  </div>
+<div class="tab-row" style="margin-top:12px">
+<div class="tab-btn active" id="tab-vendedores" onclick="switchRankTab('vendedores')">🛍️ Vendedores</div>
+<div class="tab-btn" id="tab-caixas" onclick="switchRankTab('caixas')">🖥️ Caixas</div>
+</div>
+<div class="scroll-area" style="padding-bottom:calc(72px + var(--safe-bot))">
+<div id="podium-vendedores"></div>
+<div id="podium-caixas" style="display:none"></div>
+<div class="section-pad" style="padding-top:0">
+<div id="ranking-list-vendedores"></div>
+<div id="ranking-list-caixas" style="display:none"></div>
+</div>
+</div>
 </div>
 
 <!-- SCREEN: ANÁLISE -->
+
 <div class="screen hidden" id="screen-analise">
-  <div class="scroll-area">
-    <div class="section-pad">
-      <!-- KPIs pessoais -->
-      <div class="kpi-grid">
-        <div class="card">
-          <div class="card-title"><span>⚡</span> Meu XP</div>
-          <div class="kpi-val" id="kpi-xp">0</div>
-          <div class="kpi-label">semana atual</div>
-          <div class="kpi-delta delta-up" id="kpi-xp-delta">—</div>
-        </div>
-        <div class="card">
-          <div class="card-title"><span>🔥</span> Streak</div>
-          <div class="kpi-val" id="kpi-streak">0</div>
-          <div class="kpi-label">dias seguidos</div>
-          <div class="kpi-delta" id="kpi-streak-status">—</div>
-        </div>
-        <div class="card">
-          <div class="card-title"><span>✅</span> Tarefas</div>
-          <div class="kpi-val" id="kpi-tarefas">0</div>
-          <div class="kpi-label">concluídas hoje</div>
-        </div>
-        <div class="card">
-          <div class="card-title"><span>🏆</span> Posição</div>
-          <div class="kpi-val" id="kpi-posicao">—</div>
-          <div class="kpi-label">no ranking</div>
-        </div>
-      </div>
+<div class="scroll-area">
+<div class="section-pad">
+<!-- KPIs pessoais -->
+<div class="kpi-grid">
+<div class="card">
+<div class="card-title"><span>⚡</span> Meu XP</div>
+<div class="kpi-val" id="kpi-xp">0</div>
+<div class="kpi-label">semana atual</div>
+<div class="kpi-delta delta-up" id="kpi-xp-delta">—</div>
+</div>
+<div class="card">
+<div class="card-title"><span>🔥</span> Streak</div>
+<div class="kpi-val" id="kpi-streak">0</div>
+<div class="kpi-label">dias seguidos</div>
+<div class="kpi-delta" id="kpi-streak-status">—</div>
+</div>
+<div class="card">
+<div class="card-title"><span>✅</span> Tarefas</div>
+<div class="kpi-val" id="kpi-tarefas">0</div>
+<div class="kpi-label">concluídas hoje</div>
+</div>
+<div class="card">
+<div class="card-title"><span>🏆</span> Posição</div>
+<div class="kpi-val" id="kpi-posicao">—</div>
+<div class="kpi-label">no ranking</div>
+</div>
+</div>
 
-      <!-- Gráfico XP semana -->
-      <div class="card">
-        <div class="card-title"><span>📈</span> XP — semana atual</div>
-        <div class="chart-wrap"><canvas id="chart-xp-semana"></canvas></div>
-      </div>
+```
+<!-- Gráfico XP semana -->
+<div class="card">
+<div class="card-title"><span>📈</span> XP — semana atual</div>
+<div class="chart-wrap"><canvas id="chart-xp-semana"></canvas></div>
+</div>
 
-      <!-- Adesão por tarefa -->
-      <div class="card">
-        <div class="card-title"><span>📊</span> Adesão da equipe — hoje</div>
-        <div id="adesao-list"></div>
-      </div>
+<!-- Adesão por tarefa -->
+<div class="card">
+<div class="card-title"><span>📊</span> Adesão da equipe — hoje</div>
+<div id="adesao-list"></div>
+</div>
 
-      <!-- Comparativo equipe -->
-      <div class="card">
-        <div class="card-title"><span>👥</span> XP da equipe</div>
-        <div class="chart-wrap"><canvas id="chart-xp-equipe"></canvas></div>
-      </div>
-    </div>
-  </div>
+<!-- Comparativo equipe -->
+<div class="card">
+<div class="card-title"><span>👥</span> XP da equipe</div>
+<div class="chart-wrap"><canvas id="chart-xp-equipe"></canvas></div>
+</div>
+</div>
+```
+
+</div>
 </div>
 
 <!-- SCREEN: GESTOR -->
+
 <div class="screen hidden" id="screen-gestor">
-  <!-- Menu principal gestor -->
-  <div class="gestor-sub active" id="gestor-main">
-    <div class="scroll-area">
-      <div class="section-pad">
-        <div style="padding:8px 0 4px">
-          <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--text2);margin-bottom:4px">CENTRO DE COMANDO</div>
-          <div style="font-family:'Black Han Sans',sans-serif;font-size:22px;color:var(--accent)">Painel do Gestor</div>
-        </div>
+<!-- Menu principal gestor -->
+<div class="gestor-sub active" id="gestor-main">
+<div class="scroll-area">
+<div class="section-pad">
+<div style="padding:8px 0 4px">
+<div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--text2);margin-bottom:4px">CENTRO DE COMANDO</div>
+<div style="font-family:'Black Han Sans',sans-serif;font-size:22px;color:var(--accent)">Painel do Gestor</div>
+</div>
 
-        <div onclick="showGestorSub('sub-equipe')" class="gestor-menu-item">
-          <div class="gestor-menu-icon">👥</div>
-          <div class="gestor-menu-info">
-            <div class="gestor-menu-title">Equipe</div>
-            <div class="gestor-menu-desc">Membros, apelidos, senhas, turnos</div>
-          </div>
-          <div class="gestor-menu-arrow">›</div>
-        </div>
+```
+<div onclick="showGestorSub('sub-equipe')" class="gestor-menu-item">
+<div class="gestor-menu-icon">👥</div>
+<div class="gestor-menu-info">
+<div class="gestor-menu-title">Equipe</div>
+<div class="gestor-menu-desc">Membros, apelidos, senhas, turnos</div>
+</div>
+<div class="gestor-menu-arrow">›</div>
+</div>
 
-        <div onclick="showGestorSub('sub-semana')" class="gestor-menu-item">
-          <div class="gestor-menu-icon">🔄</div>
-          <div class="gestor-menu-info">
-            <div class="gestor-menu-title">Controle de Semana</div>
-            <div class="gestor-menu-desc">Reset, histórico, líderes</div>
-          </div>
-          <div class="gestor-menu-arrow">›</div>
-        </div>
+<div onclick="showGestorSub('sub-semana')" class="gestor-menu-item">
+<div class="gestor-menu-icon">🔄</div>
+<div class="gestor-menu-info">
+<div class="gestor-menu-title">Controle de Semana</div>
+<div class="gestor-menu-desc">Reset, histórico, líderes</div>
+</div>
+<div class="gestor-menu-arrow">›</div>
+</div>
 
-        <div onclick="showGestorSub('sub-balcoes')" class="gestor-menu-item">
-          <div class="gestor-menu-icon">🗺️</div>
-          <div class="gestor-menu-info">
-            <div class="gestor-menu-title">Balcões</div>
-            <div class="gestor-menu-desc">Mapa da loja, fotos de referência</div>
-          </div>
-          <div class="gestor-menu-arrow">›</div>
-        </div>
+<div onclick="showGestorSub('sub-balcoes')" class="gestor-menu-item">
+<div class="gestor-menu-icon">🗺️</div>
+<div class="gestor-menu-info">
+<div class="gestor-menu-title">Balcões</div>
+<div class="gestor-menu-desc">Mapa da loja, fotos de referência</div>
+</div>
+<div class="gestor-menu-arrow">›</div>
+</div>
 
-        <div onclick="showGestorSub('sub-logs')" class="gestor-menu-item">
-          <div class="gestor-menu-icon">📋</div>
-          <div class="gestor-menu-info">
-            <div class="gestor-menu-title">Logs do sistema</div>
-            <div class="gestor-menu-desc">Histórico de ações e eventos</div>
-          </div>
-          <div class="gestor-menu-arrow">›</div>
-        </div>
+<div onclick="showGestorSub('sub-logs')" class="gestor-menu-item">
+<div class="gestor-menu-icon">📋</div>
+<div class="gestor-menu-info">
+<div class="gestor-menu-title">Logs do sistema</div>
+<div class="gestor-menu-desc">Histórico de ações e eventos</div>
+</div>
+<div class="gestor-menu-arrow">›</div>
+</div>
 
-        <div onclick="logoutGestor()" class="gestor-menu-item" style="border-color:rgba(255,95,95,0.2)">
-          <div class="gestor-menu-icon">🚪</div>
-          <div class="gestor-menu-info">
-            <div class="gestor-menu-title" style="color:var(--red)">Sair do gestor</div>
-            <div class="gestor-menu-desc">Voltar à tela de login</div>
-          </div>
-        </div>
+<div onclick="logoutGestor()" class="gestor-menu-item" style="border-color:rgba(255,95,95,0.2)">
+<div class="gestor-menu-icon">🚪</div>
+<div class="gestor-menu-info">
+<div class="gestor-menu-title" style="color:var(--red)">Sair do gestor</div>
+<div class="gestor-menu-desc">Voltar à tela de login</div>
+</div>
+</div>
 
-        <!-- KPIs rápidos -->
-        <div class="kpi-grid" style="margin-top:4px">
-          <div class="card">
-            <div class="card-title"><span>✈️</span> XP total hoje</div>
-            <div class="kpi-val">487</div>
-            <div class="kpi-delta delta-up">▲ +12%</div>
-          </div>
-          <div class="card">
-            <div class="card-title"><span>✅</span> Tarefas</div>
-            <div class="kpi-val">23<span style="font-size:14px;color:var(--text2)">/30</span></div>
-            <div class="kpi-label">76% adesão</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+<!-- KPIs rápidos -->
+<div class="kpi-grid" style="margin-top:4px">
+<div class="card">
+<div class="card-title"><span>✈️</span> XP total hoje</div>
+<div class="kpi-val">487</div>
+<div class="kpi-delta delta-up">▲ +12%</div>
+</div>
+<div class="card">
+<div class="card-title"><span>✅</span> Tarefas</div>
+<div class="kpi-val">23<span style="font-size:14px;color:var(--text2)">/30</span></div>
+<div class="kpi-label">76% adesão</div>
+</div>
+</div>
+</div>
+</div>
+```
 
-  <!-- Sub: Equipe -->
-  <div class="gestor-sub" id="sub-equipe">
-    <div class="gestor-back" onclick="hideGestorSub('sub-equipe')">‹ Voltar</div>
-    <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;flex-shrink:0">
-      <span style="font-family:'Black Han Sans',sans-serif;font-size:18px;color:var(--accent)">Equipe</span>
-      <button class="btn btn-primary" style="width:auto;padding:8px 14px;font-size:12px" onclick="openModal('modal-add-membro')">✚ Novo</button>
-    </div>
-    <div class="scroll-area" style="padding-bottom:20px">
-      <div style="padding:0 16px">
-        <div class="card-title" style="margin-bottom:8px"><span>🛍️</span> Vendedores</div>
-        <div id="gestor-tabela-vendedores" style="margin-bottom:20px"></div>
-        <div class="card-title" style="margin-bottom:8px"><span>🖥️</span> Caixas</div>
-        <div id="gestor-tabela-caixas"></div>
-      </div>
-    </div>
-  </div>
+</div>
 
-  <!-- Sub: Semana -->
-  <div class="gestor-sub" id="sub-semana">
-    <div class="gestor-back" onclick="hideGestorSub('sub-semana')">‹ Voltar</div>
-    <div class="scroll-area" style="padding-bottom:20px">
-      <div class="section-pad">
-        <div class="card">
-          <div class="card-title"><span>📅</span> Semana atual</div>
-          <div style="font-family:'Black Han Sans',sans-serif;font-size:28px;color:var(--accent)" id="g-semana-num">S12</div>
-          <div style="font-size:12px;color:var(--text2)" id="g-semana-datas">12–18 mai 2025</div>
-        </div>
-        <div class="card">
-          <div class="card-title"><span>📜</span> Histórico</div>
-          <div id="g-historico"></div>
-        </div>
-        <div class="danger-zone">
-          <div class="danger-title">⚠️ Zona de controle</div>
-          <div style="display:flex;flex-direction:column;gap:10px">
-            <button class="btn btn-danger" onclick="confirmarReset('semana')">🔄 Resetar semana agora</button>
-            <button class="btn btn-ghost" onclick="confirmarReset('xp')">⚡ Zerar XP de membro</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+<!-- Sub: Equipe -->
 
-  <!-- Sub: Balcões -->
-  <div class="gestor-sub" id="sub-balcoes">
-    <div class="gestor-back" onclick="hideGestorSub('sub-balcoes')">‹ Voltar</div>
-    <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;flex-shrink:0">
-      <span style="font-family:'Black Han Sans',sans-serif;font-size:18px;color:var(--accent)">Balcões</span>
-      <button class="btn btn-primary" style="width:auto;padding:8px 14px;font-size:12px" onclick="openModal('modal-add-balcao')">✚ Novo</button>
-    </div>
-    <div class="scroll-area" style="padding-bottom:20px">
-      <div style="padding:0 16px" id="g-balcoes-list"></div>
-    </div>
-  </div>
+<div class="gestor-sub" id="sub-equipe">
+<div class="gestor-back" onclick="hideGestorSub('sub-equipe')">‹ Voltar</div>
+<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;flex-shrink:0">
+<span style="font-family:'Black Han Sans',sans-serif;font-size:18px;color:var(--accent)">Equipe</span>
+<button class="btn btn-primary" style="width:auto;padding:8px 14px;font-size:12px" onclick="openModal('modal-add-membro')">✚ Novo</button>
+</div>
+<div class="scroll-area" style="padding-bottom:20px">
+<div style="padding:0 16px">
+<div class="card-title" style="margin-bottom:8px"><span>🛍️</span> Vendedores</div>
+<div id="gestor-tabela-vendedores" style="margin-bottom:20px"></div>
+<div class="card-title" style="margin-bottom:8px"><span>🖥️</span> Caixas</div>
+<div id="gestor-tabela-caixas"></div>
+</div>
+</div>
+</div>
 
-  <!-- Sub: Logs -->
-  <div class="gestor-sub" id="sub-logs">
-    <div class="gestor-back" onclick="hideGestorSub('sub-logs')">‹ Voltar</div>
-    <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;flex-shrink:0">
-      <select id="filtro-log" style="width:auto;padding:6px 10px;font-size:12px" onchange="renderLogs()">
-        <option value="todos">Todos</option>
-        <option value="login">Logins</option>
-        <option value="tarefa">Tarefas</option>
-        <option value="foto">Fotos</option>
-        <option value="reset">Resets</option>
-        <option value="gestor">Gestor</option>
-      </select>
-      <button class="btn btn-ghost" style="width:auto;padding:6px 12px;font-size:11px" onclick="exportarLogs()">⬇ CSV</button>
-    </div>
-    <div class="scroll-area" style="padding-bottom:20px">
-      <div style="padding:0 16px" id="g-logs-list"></div>
-    </div>
-  </div>
+<!-- Sub: Semana -->
+
+<div class="gestor-sub" id="sub-semana">
+<div class="gestor-back" onclick="hideGestorSub('sub-semana')">‹ Voltar</div>
+<div class="scroll-area" style="padding-bottom:20px">
+<div class="section-pad">
+<div class="card">
+<div class="card-title"><span>📅</span> Semana atual</div>
+<div style="font-family:'Black Han Sans',sans-serif;font-size:28px;color:var(--accent)" id="g-semana-num">S12</div>
+<div style="font-size:12px;color:var(--text2)" id="g-semana-datas">12–18 mai 2025</div>
+</div>
+<div class="card">
+<div class="card-title"><span>📜</span> Histórico</div>
+<div id="g-historico"></div>
+</div>
+<div class="danger-zone">
+<div class="danger-title">⚠️ Zona de controle</div>
+<div style="display:flex;flex-direction:column;gap:10px">
+<button class="btn btn-danger" onclick="confirmarReset('semana')">🔄 Resetar semana agora</button>
+<button class="btn btn-ghost" onclick="confirmarReset('xp')">⚡ Zerar XP de membro</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- Sub: Balcões -->
+
+<div class="gestor-sub" id="sub-balcoes">
+<div class="gestor-back" onclick="hideGestorSub('sub-balcoes')">‹ Voltar</div>
+<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;flex-shrink:0">
+<span style="font-family:'Black Han Sans',sans-serif;font-size:18px;color:var(--accent)">Balcões</span>
+<button class="btn btn-primary" style="width:auto;padding:8px 14px;font-size:12px" onclick="openModal('modal-add-balcao')">✚ Novo</button>
+</div>
+<div class="scroll-area" style="padding-bottom:20px">
+<div style="padding:0 16px" id="g-balcoes-list"></div>
+</div>
+</div>
+
+<!-- Sub: Logs -->
+
+<div class="gestor-sub" id="sub-logs">
+<div class="gestor-back" onclick="hideGestorSub('sub-logs')">‹ Voltar</div>
+<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;flex-shrink:0">
+<select id="filtro-log" style="width:auto;padding:6px 10px;font-size:12px" onchange="renderLogs()">
+<option value="todos">Todos</option>
+<option value="login">Logins</option>
+<option value="tarefa">Tarefas</option>
+<option value="foto">Fotos</option>
+<option value="reset">Resets</option>
+<option value="gestor">Gestor</option>
+</select>
+<button class="btn btn-ghost" style="width:auto;padding:6px 12px;font-size:11px" onclick="exportarLogs()">⬇ CSV</button>
+</div>
+<div class="scroll-area" style="padding-bottom:20px">
+<div style="padding:0 16px" id="g-logs-list"></div>
+</div>
+</div>
 </div>
 
 <!-- BOTTOM NAV -->
+
 <nav class="bottom-nav hidden" id="bottom-nav">
-  <div class="nav-item active" id="nav-feed"    onclick="goTo('feed')">
-    <span class="nav-icon">📸</span><span class="nav-label">Feed</span>
-  </div>
-  <div class="nav-item" id="nav-tarefas" onclick="goTo('tarefas')">
-    <span class="nav-icon">✅</span><span class="nav-label">Tarefas</span>
-  </div>
-  <div class="nav-item" id="nav-ranking" onclick="goTo('ranking')">
-    <span class="nav-icon">🏆</span><span class="nav-label">Ranking</span>
-  </div>
-  <div class="nav-item" id="nav-analise" onclick="goTo('analise')">
-    <span class="nav-icon">📊</span><span class="nav-label">Análise</span>
-  </div>
-  <div class="nav-item" id="nav-gestor"  onclick="goTo('gestor')" style="display:none">
-    <span class="nav-icon">⚙️</span><span class="nav-label">Gestor</span>
-  </div>
+<div class="nav-item active" id="nav-feed" onclick="goTo('feed')">
+<span class="nav-icon">📸</span><span class="nav-label">Feed</span>
+</div>
+<div class="nav-item" id="nav-tarefas" onclick="goTo('tarefas')">
+<span class="nav-icon">✅</span><span class="nav-label">Tarefas</span>
+</div>
+<div class="nav-item" id="nav-ranking" onclick="goTo('ranking')">
+<span class="nav-icon">🏆</span><span class="nav-label">Ranking</span>
+</div>
+<div class="nav-item" id="nav-analise" onclick="goTo('analise')">
+<span class="nav-icon">📊</span><span class="nav-label">Análise</span>
+</div>
+<div class="nav-item" id="nav-gestor" onclick="goTo('gestor')" style="display:none">
+<span class="nav-icon">⚙️</span><span class="nav-label">Gestor</span>
+</div>
 </nav>
 
 <!-- ══════════════════════════════════════
-     MODAIS
+MODAIS
 ══════════════════════════════════════ -->
+
 <div class="modal-overlay" id="modal-primeiro-acesso">
-  <div class="modal">
-    <div class="modal-title">🔑 Criar senha</div>
-    <div class="modal-form-group">
-      <label>Apelido</label>
-      <select id="pa-select"><option value="">Selecione...</option></select>
-    </div>
-    <div class="modal-form-group">
-      <label>Nova senha</label>
-      <input type="password" id="pa-senha" placeholder="Mínimo 4 caracteres">
-    </div>
-    <div class="modal-form-group">
-      <label>Confirmar senha</label>
-      <input type="password" id="pa-confirm" placeholder="Repita a senha">
-    </div>
-    <div class="modal-actions">
-      <button class="btn btn-ghost" onclick="closeModal('modal-primeiro-acesso')">Cancelar</button>
-      <button class="btn btn-primary" onclick="criarSenha()">✔ Confirmar</button>
-    </div>
-  </div>
+<div class="modal">
+<div class="modal-title">🔑 Criar senha</div>
+<div class="modal-form-group">
+<label>Apelido</label>
+<select id="pa-select"><option value="">Selecione...</option></select>
+</div>
+<div class="modal-form-group">
+<label>Nova senha</label>
+<input type="password" id="pa-senha" placeholder="Mínimo 4 caracteres">
+</div>
+<div class="modal-form-group">
+<label>Confirmar senha</label>
+<input type="password" id="pa-confirm" placeholder="Repita a senha">
+</div>
+<div class="modal-actions">
+<button class="btn btn-ghost" onclick="closeModal('modal-primeiro-acesso')">Cancelar</button>
+<button class="btn btn-primary" onclick="criarSenha()">✔ Confirmar</button>
+</div>
+</div>
 </div>
 
 <div class="modal-overlay" id="modal-add-membro">
-  <div class="modal">
-    <div class="modal-title">✚ Novo Membro</div>
-    <div class="modal-form-group"><label>Apelido</label><input type="text" id="nm-apelido" placeholder="Ex: Marquinhos"></div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-      <div class="modal-form-group"><label>Função</label>
-        <select id="nm-funcao"><option value="vendedor">Vendedor</option><option value="caixa">Caixa</option></select>
-      </div>
-      <div class="modal-form-group"><label>Turno</label>
-        <select id="nm-turno"><option value="manha">Manhã</option><option value="tarde">Tarde</option></select>
-      </div>
-    </div>
-    <div class="modal-actions">
-      <button class="btn btn-ghost" onclick="closeModal('modal-add-membro')">Cancelar</button>
-      <button class="btn btn-primary" onclick="addMembro()">✚ Adicionar</button>
-    </div>
-  </div>
+<div class="modal">
+<div class="modal-title">✚ Novo Membro</div>
+<div class="modal-form-group"><label>Apelido</label><input type="text" id="nm-apelido" placeholder="Ex: Augusto"></div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+<div class="modal-form-group"><label>Função</label>
+<select id="nm-funcao"><option value="vendedor">Vendedor</option><option value="caixa">Caixa</option></select>
+</div>
+<div class="modal-form-group"><label>Turno</label>
+<select id="nm-turno"><option value="manha">Manhã</option><option value="tarde">Tarde</option></select>
+</div>
+</div>
+<div class="modal-actions">
+<button class="btn btn-ghost" onclick="closeModal('modal-add-membro')">Cancelar</button>
+<button class="btn btn-primary" onclick="addMembro()">✚ Adicionar</button>
+</div>
+</div>
 </div>
 
 <div class="modal-overlay" id="modal-edit-membro">
-  <div class="modal">
-    <div class="modal-title">✏️ Editar Membro</div>
-    <input type="hidden" id="em-id">
-    <div class="modal-form-group"><label>Apelido</label><input type="text" id="em-apelido"></div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-      <div class="modal-form-group"><label>Turno</label>
-        <select id="em-turno"><option value="manha">Manhã</option><option value="tarde">Tarde</option></select>
-      </div>
-      <div class="modal-form-group"><label>Resetar senha</label>
-        <button class="btn btn-ghost" style="height:46px;margin-top:0" onclick="resetarSenhaModal()">🔑 Resetar</button>
-      </div>
-    </div>
-    <div class="modal-actions">
-      <button class="btn btn-ghost" onclick="closeModal('modal-edit-membro')">Cancelar</button>
-      <button class="btn btn-primary" onclick="salvarEdicao()">💾 Salvar</button>
-    </div>
-  </div>
+<div class="modal">
+<div class="modal-title">✏️ Editar Membro</div>
+<input type="hidden" id="em-id">
+<div class="modal-form-group"><label>Apelido</label><input type="text" id="em-apelido"></div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+<div class="modal-form-group"><label>Turno</label>
+<select id="em-turno"><option value="manha">Manhã</option><option value="tarde">Tarde</option></select>
+</div>
+<div class="modal-form-group"><label>Resetar senha</label>
+<button class="btn btn-ghost" style="height:46px;margin-top:0" onclick="resetarSenhaModal()">🔑 Resetar</button>
+</div>
+</div>
+<div class="modal-actions">
+<button class="btn btn-ghost" onclick="closeModal('modal-edit-membro')">Cancelar</button>
+<button class="btn btn-primary" onclick="salvarEdicao()">💾 Salvar</button>
+</div>
+</div>
 </div>
 
 <div class="modal-overlay" id="modal-add-balcao">
-  <div class="modal">
-    <div class="modal-title">✚ Novo Balcão</div>
-    <div class="modal-form-group"><label>Nome</label><input type="text" id="nb-nome" placeholder="Ex: Prateleira A1"></div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-      <div class="modal-form-group"><label>Tipo</label>
-        <select id="nb-tipo"><option>Prateleira</option><option>Balcão</option><option>Vitrine</option><option>Ilha</option></select>
-      </div>
-      <div class="modal-form-group"><label>Degradê</label>
-        <select id="nb-degrade"><option value="vertical">↕ Vertical</option><option value="horizontal">↔ Horizontal</option></select>
-      </div>
-    </div>
-    <div class="modal-actions">
-      <button class="btn btn-ghost" onclick="closeModal('modal-add-balcao')">Cancelar</button>
-      <button class="btn btn-primary" onclick="addBalcao()">✚ Cadastrar</button>
-    </div>
-  </div>
+<div class="modal">
+<div class="modal-title">✚ Novo Balcão</div>
+<div class="modal-form-group"><label>Nome</label><input type="text" id="nb-nome" placeholder="Ex: Prateleira A1"></div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+<div class="modal-form-group"><label>Tipo</label>
+<select id="nb-tipo"><option>Prateleira</option><option>Balcão</option><option>Vitrine</option><option>Ilha</option></select>
+</div>
+<div class="modal-form-group"><label>Degradê</label>
+<select id="nb-degrade"><option value="vertical">↕ Vertical</option><option value="horizontal">↔ Horizontal</option></select>
+</div>
+</div>
+<div class="modal-actions">
+<button class="btn btn-ghost" onclick="closeModal('modal-add-balcao')">Cancelar</button>
+<button class="btn btn-primary" onclick="addBalcao()">✚ Cadastrar</button>
+</div>
+</div>
 </div>
 
 <div class="modal-overlay" id="modal-confirmar-reset">
-  <div class="modal">
-    <div class="modal-title" id="reset-titulo">⚠️ Confirmar</div>
-    <div style="background:rgba(255,95,95,0.1);border:1px solid rgba(255,95,95,0.25);border-radius:10px;padding:12px;font-size:13px;color:var(--red);margin-bottom:16px" id="reset-msg"></div>
-    <div id="reset-select-wrap" style="display:none;margin-bottom:16px">
-      <label>Selecionar membro</label>
-      <select id="reset-membro-select"></select>
-    </div>
-    <div class="modal-actions">
-      <button class="btn btn-ghost" onclick="closeModal('modal-confirmar-reset')">Cancelar</button>
-      <button class="btn btn-danger" onclick="executarReset()">⚠️ Confirmar</button>
-    </div>
-  </div>
+<div class="modal">
+<div class="modal-title" id="reset-titulo">⚠️ Confirmar</div>
+<div style="background:rgba(255,95,95,0.1);border:1px solid rgba(255,95,95,0.25);border-radius:10px;padding:12px;font-size:13px;color:var(--red);margin-bottom:16px" id="reset-msg"></div>
+<div id="reset-select-wrap" style="display:none;margin-bottom:16px">
+<label>Selecionar membro</label>
+<select id="reset-membro-select"></select>
+</div>
+<div class="modal-actions">
+<button class="btn btn-ghost" onclick="closeModal('modal-confirmar-reset')">Cancelar</button>
+<button class="btn btn-danger" onclick="executarReset()">⚠️ Confirmar</button>
+</div>
+</div>
 </div>
 
 <!-- LOADING SCREEN -->
+
 <div id="loading-screen" style="position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px">
-  <div style="font-size:52px;animation:plane-bob 1s ease-in-out infinite">✈️</div>
-  <div style="font-family:'Black Han Sans',sans-serif;font-size:24px;letter-spacing:3px;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent">AVIÕES</div>
-  <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text2);letter-spacing:2px">Conectando ao servidor...</div>
-  <div style="width:120px;height:3px;background:var(--s2);border-radius:2px;overflow:hidden;margin-top:4px">
-    <div style="height:100%;background:var(--accent);border-radius:2px;animation:load-bar 1.5s ease-in-out infinite"></div>
-  </div>
+<div style="font-size:52px;animation:plane-bob 1s ease-in-out infinite">✈️</div>
+<div style="font-family:'Black Han Sans',sans-serif;font-size:24px;letter-spacing:3px;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent">AVIÕES</div>
+<div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text2);letter-spacing:2px">Conectando ao servidor...</div>
+<div style="width:120px;height:3px;background:var(--s2);border-radius:2px;overflow:hidden;margin-top:4px">
+<div style="height:100%;background:var(--accent);border-radius:2px;animation:load-bar 1.5s ease-in-out infinite"></div>
+</div>
 </div>
 <style>
 @keyframes load-bar {
-  0%{width:0%;margin-left:0}
-  50%{width:60%;margin-left:20%}
-  100%{width:0%;margin-left:100%}
+0%{width:0%;margin-left:0}
+50%{width:60%;margin-left:20%}
+100%{width:0%;margin-left:100%}
 }
 </style>
 
 <!-- TOAST -->
+
 <div id="toast"></div>
 <div class="xp-celebration" id="xp-celebration"><div class="xp-burst" id="xp-burst-text"></div></div>
 
@@ -954,90 +980,65 @@ tr:active td{background:rgba(90,171,104,0.04)}
 // ════════════════════════════════════════════
 
 const SUPABASE_URL = 'https://xhfzcfefqinoyajwedgc.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_awF5rTXO_7ulgLAbNy9Eiw_jctYNNxv';
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhoZnpjZmVmcWlub3lhandlZGdjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkxMzYzOTMsImV4cCI6MjA5NDcxMjM5M30.tVIqLyu5sUsag0qic5NudXTMUVQ0BaXLUXCbH9xneKQ';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
+realtime: { transport: 'websocket', timeout: 10000 },
+global: { fetch: (...args) => fetch(...args) }
+});
 
 // ════════════════════════════════════════════
 // STATE — espelho local do banco
 // ════════════════════════════════════════════
 
 const PLANE_LEVELS = [
-  { name:'Teco-teco',          emoji:'🛩️',  minXP:0,   src:'plane-1-teco.png' },
-  { name:'Avião comercial',    emoji:'✈️',  minXP:50,  src:'plane-2-comercial.png' },
-  { name:'Jato executivo',     emoji:'🛫',  minXP:100, src:'plane-3-jato.png' },
-  { name:'Acrobacia',          emoji:'🎯',  minXP:175, src:'plane-4-acrobacia.png' },
-  { name:'Bombardeiro',        emoji:'💣',  minXP:275, src:'plane-5-bombardeiro.png' },
-  { name:'Caça Força Aérea',   emoji:'🚀',  minXP:400, src:'plane-6-caca.png' },
+{ name:'Teco-teco', emoji:'🛩️', minXP:0, src:'plane-1-teco.png' },
+{ name:'Avião comercial', emoji:'✈️', minXP:50, src:'plane-2-comercial.png' },
+{ name:'Jato executivo', emoji:'🛫', minXP:100, src:'plane-3-jato.png' },
+{ name:'Acrobacia', emoji:'🎯', minXP:175, src:'plane-4-acrobacia.png' },
+{ name:'Bombardeiro', emoji:'💣', minXP:275, src:'plane-5-bombardeiro.png' },
+{ name:'Caça Força Aérea', emoji:'🚀', minXP:400, src:'plane-6-caca.png' },
 ];
 
 function getPlaneLevel(xp) {
-  let level = PLANE_LEVELS[0];
-  for (const p of PLANE_LEVELS) { if (xp >= p.minXP) level = p; }
-  return level;
+let level = PLANE_LEVELS[0];
+for (const p of PLANE_LEVELS) { if (xp >= p.minXP) level = p; }
+return level;
 }
 
 const STATE = {
-  currentUser: null,
-  isGestor: false,
-  currentScreen: 'login',
-  rankTab: 'vendedores',
-  semana: 12,
-  resetTipo: '',
+currentUser: null,
+isGestor: false,
+currentScreen: 'login',
+rankTab: 'vendedores',
+semana: 12,
+resetTipo: '',
 
-  membros: [
-    { id:1, apelido:'Marquinhos', funcao:'vendedor', turno:'tarde',  xp:320, streak:5, senha:'1234', tarefasHoje:[true,true,true,false,true] },
-    { id:2, apelido:'Bianca',     funcao:'vendedor', turno:'manha',  xp:185, streak:3, senha:'1234', tarefasHoje:[true,false,true,false,true] },
-    { id:3, apelido:'Léo',        funcao:'vendedor', turno:'manha',  xp:210, streak:4, senha:'1234', tarefasHoje:[true,true,false,true,true] },
-    { id:4, apelido:'Duda',       funcao:'vendedor', turno:'tarde',  xp:95,  streak:1, senha:'1234', tarefasHoje:[true,false,false,false,true] },
-    { id:5, apelido:'Carol N.',   funcao:'caixa',    turno:'manha',  xp:215, streak:6, senha:'1234', tarefasHoje:[true,true,false,true,true] },
-    { id:6, apelido:'Rafaela',    funcao:'caixa',    turno:'tarde',  xp:140, streak:2, senha:'1234', tarefasHoje:[true,false,true,false,false] },
-  ],
+membros: [], // carregado do Supabase
 
-  tarefasVendedor: [
-    { nome:'Pontualidade',       xp:10,  emoji:'⏰', desc:'Chegou no horário?' },
-    { nome:'Arrumação da loja',  xp:15,  emoji:'👔', desc:'Foto aprovada pela IA' },
-    { nome:'Prospecção ativa',   xp:25,  emoji:'🎯', desc:'Clientes abordados na porta' },
-    { nome:'Meta de vendas',     xp:30,  emoji:'💰', desc:'Bateu a meta do dia?' },
-    { nome:'Atendimento nota 10',xp:20,  emoji:'⭐', desc:'Feedback positivo do cliente' },
-  ],
+tarefasVendedor: [
+{ nome:'Pontualidade', xp:10, emoji:'⏰', desc:'Chegou no horário?' },
+{ nome:'Arrumação da loja', xp:15, emoji:'👔', desc:'Foto aprovada pela IA' },
+{ nome:'Prospecção ativa', xp:25, emoji:'🎯', desc:'Clientes abordados na porta' },
+{ nome:'Meta de vendas', xp:30, emoji:'💰', desc:'Bateu a meta do dia?' },
+{ nome:'Atendimento nota 10',xp:20, emoji:'⭐', desc:'Feedback positivo do cliente' },
+],
 
-  tarefasCaixa: [
-    { nome:'Pontualidade',       xp:10,  emoji:'⏰', desc:'Chegou no horário?' },
-    { nome:'Envelopes cortados', xp:12,  emoji:'✂️', desc:'Envelopes do dia cortados' },
-    { nome:'Tickets conferidos', xp:15,  emoji:'🧾', desc:'Todos os tickets ok' },
-    { nome:'Caixa organizado',   xp:12,  emoji:'📦', desc:'Mesa limpa e organizada' },
-    { nome:'Fechamento preciso', xp:25,  emoji:'✔️', desc:'Caixa fechou sem diferença' },
-  ],
+tarefasCaixa: [
+{ nome:'Pontualidade', xp:10, emoji:'⏰', desc:'Chegou no horário?' },
+{ nome:'Envelopes cortados', xp:12, emoji:'✂️', desc:'Envelopes do dia cortados' },
+{ nome:'Tickets conferidos', xp:15, emoji:'🧾', desc:'Todos os tickets ok' },
+{ nome:'Caixa organizado', xp:12, emoji:'📦', desc:'Mesa limpa e organizada' },
+{ nome:'Fechamento preciso', xp:25, emoji:'✔️', desc:'Caixa fechou sem diferença' },
+],
 
-  balcoes: [
-    { id:1, nome:'Prateleira A1', tipo:'Prateleira', degrade:'vertical',   temFoto:true  },
-    { id:2, nome:'Prateleira A2', tipo:'Prateleira', degrade:'vertical',   temFoto:true  },
-    { id:3, nome:'Vitrine Frente',tipo:'Vitrine',    degrade:'horizontal', temFoto:false },
-    { id:4, nome:'Ilha Central',  tipo:'Ilha',       degrade:'horizontal', temFoto:true  },
-    { id:5, nome:'Balcão Caixa',  tipo:'Balcão',     degrade:'vertical',   temFoto:false },
-  ],
+balcoes: [], // carregado do Supabase
 
-  historico: [
-    { semana:'S11', periodo:'05–11 mai', lidVend:'Léo',        xpVend:290, lidCaixa:'Carol N.', xpCaixa:195 },
-    { semana:'S10', periodo:'28 abr–04 mai', lidVend:'Marquinhos', xpVend:310, lidCaixa:'Rafaela',  xpCaixa:180 },
-    { semana:'S09', periodo:'21–27 abr', lidVend:'Bianca',     xpVend:265, lidCaixa:'Carol N.', xpCaixa:210 },
-  ],
+historico: [], // carregado do Supabase
 
-  logs: [
-    { ts:'18/05 14h02', tipo:'foto',   icon:'📸', texto:'<strong>Léo</strong> foto aprovada · Prateleira A1 (+15 XP)' },
-    { ts:'18/05 13h47', tipo:'tarefa', icon:'✅', texto:'<strong>Carol N.</strong> completou Envelopes (+12 XP)' },
-    { ts:'18/05 11h33', tipo:'foto',   icon:'📸', texto:'<strong>Bianca</strong> score 971 · Prateleira A2 🔥' },
-    { ts:'18/05 10h45', tipo:'login',  icon:'🔐', texto:'<strong>Marquinhos</strong> login — turno tarde' },
-    { ts:'18/05 10h15', tipo:'tarefa', icon:'✅', texto:'<strong>Duda</strong> completou Pontualidade (+10 XP)' },
-    { ts:'18/05 09h52', tipo:'reset',  icon:'🔄', texto:'Sistema verificou reset — próximo: seg 00h00' },
-  ],
+logs: [], // carregado do Supabase
 
-  feedData: [
-    { id:1, author:'Bianca',   initials:'BI', plane:'✈️', time:'11h33', balcao:'Prateleira A2', score:971, xp:15, rankUp:'✈️ Avião comercial', emoji:'👗', reactions:{'🔥':7,'😮':5,'👏':6}, myReaction:null, comments:[{author:'Léo',initials:'LÉ',text:'CARA 971!! absurdo isso 🔥',time:'11h35'},{author:'Carol N.',initials:'CN',text:'Como fez esse degradê tão perfeito??',time:'11h38'}], liked:false, likes:12 },
-    { id:2, author:'Léo',      initials:'LÉ', plane:'🛫', time:'14h02', balcao:'Prateleira A1', score:847, xp:15, rankUp:null, emoji:'👕', reactions:{'🔥':3,'👏':2}, myReaction:null, comments:[{author:'Carol N.',initials:'CN',text:'Ficou incrível! 🙌',time:'14h05'}], liked:false, likes:4 },
-    { id:3, author:'Carol N.', initials:'CN', plane:'✈️', time:'13h47', balcao:'Balcão Caixa',  score:612, xp:12, rankUp:null, emoji:'🖥️', reactions:{'👏':4,'🔥':1}, myReaction:null, comments:[], liked:false, likes:3 },
-    { id:4, author:'Rafaela',  initials:'RF', plane:'🛩️', time:'09h58', balcao:'Balcão Caixa',  score:688, xp:12, rankUp:null, emoji:'🧾', reactions:{'🔥':2,'👏':3}, myReaction:null, comments:[{author:'Carol N.',initials:'CN',text:'Arrasando Rafa!',time:'10h01'}], liked:false, likes:3 },
-  ],
+feedData: [], // carregado do Supabase
 };
 
 const EMOJIS = ['🔥','😮','👏','💛','😂','🎯','✈️','🏆'];
@@ -1047,48 +1048,48 @@ const EMOJIS = ['🔥','😮','👏','💛','😂','🎯','✈️','🏆'];
 // ════════════════════════════════════════════
 
 function goTo(screen) {
-  const screens = ['feed','tarefas','ranking','analise','gestor'];
-  screens.forEach(s => {
-    document.getElementById('screen-' + s).classList.add('hidden');
-    const nav = document.getElementById('nav-' + s);
-    if (nav) nav.classList.remove('active');
-  });
-  document.getElementById('screen-' + screen).classList.remove('hidden');
-  const nav = document.getElementById('nav-' + screen);
-  if (nav) nav.classList.add('active');
-  STATE.currentScreen = screen;
+const screens = ['feed','tarefas','ranking','analise','gestor'];
+screens.forEach(s => {
+document.getElementById('screen-' + s).classList.add('hidden');
+const nav = document.getElementById('nav-' + s);
+if (nav) nav.classList.remove('active');
+});
+document.getElementById('screen-' + screen).classList.remove('hidden');
+const nav = document.getElementById('nav-' + screen);
+if (nav) nav.classList.add('active');
+STATE.currentScreen = screen;
 
-  // Lazy render
-  if (screen === 'feed')    renderFeed();
-  if (screen === 'tarefas') renderTarefas();
-  if (screen === 'ranking') renderRanking();
-  if (screen === 'analise') renderAnalise();
-  if (screen === 'gestor')  renderGestor();
+// Lazy render
+if (screen === 'feed') renderFeed();
+if (screen === 'tarefas') renderTarefas();
+if (screen === 'ranking') renderRanking();
+if (screen === 'analise') renderAnalise();
+if (screen === 'gestor') renderGestor();
 }
 
 function loginSuccess(membro, isGestor = false) {
-  STATE.currentUser = membro;
-  STATE.isGestor = isGestor;
+STATE.currentUser = membro;
+STATE.isGestor = isGestor;
 
-  // Atualiza topbar
-  document.getElementById('app-topbar').classList.remove('hidden');
-  document.getElementById('bottom-nav').classList.remove('hidden');
-  document.getElementById('screen-login').classList.add('hidden');
+// Atualiza topbar
+document.getElementById('app-topbar').classList.remove('hidden');
+document.getElementById('bottom-nav').classList.remove('hidden');
+document.getElementById('screen-login').classList.add('hidden');
 
-  const nivel = getPlaneLevel(membro ? membro.xp : 0);
-  document.getElementById('topbar-plane').textContent = nivel.emoji;
-  document.getElementById('topbar-name').textContent = isGestor ? 'GESTOR' : membro.apelido;
-  document.getElementById('topbar-level').textContent = isGestor ? 'ADMIN' : nivel.name;
-  document.getElementById('topbar-ava').textContent = isGestor ? '⚙️' : membro.apelido.slice(0,2).toUpperCase();
+const nivel = getPlaneLevel(membro ? membro.xp : 0);
+document.getElementById('topbar-plane').textContent = nivel.emoji;
+document.getElementById('topbar-name').textContent = isGestor ? 'GESTOR' : membro.apelido;
+document.getElementById('topbar-level').textContent = isGestor ? 'ADMIN' : nivel.name;
+document.getElementById('topbar-ava').textContent = isGestor ? '⚙️' : membro.apelido.slice(0,2).toUpperCase();
 
-  // Mostra nav gestor só se for gestor
-  document.getElementById('nav-gestor').style.display = isGestor ? 'flex' : 'none';
+// Mostra nav gestor só se for gestor
+document.getElementById('nav-gestor').style.display = isGestor ? 'flex' : 'none';
 
-  if (isGestor) {
-    goTo('gestor');
-  } else {
-    goTo('feed');
-  }
+if (isGestor) {
+goTo('gestor');
+} else {
+goTo('feed');
+}
 }
 
 // ════════════════════════════════════════════
@@ -1096,1150 +1097,52 @@ function loginSuccess(membro, isGestor = false) {
 // ════════════════════════════════════════════
 
 function initLoginSelect() {
-  const sel = document.getElementById('login-select');
-  const paSel = document.getElementById('pa-select');
-  sel.innerHTML = '<option value="">Selecione seu apelido...</option>';
-  paSel.innerHTML = '<option value="">Selecione...</option>';
-  STATE.membros.forEach(m => {
-    sel.innerHTML += '<option value="' + m.id + '">' + m.apelido + ' (' + m.funcao + ' · ' + (m.turno === 'manha' ? 'manhã' : 'tarde') + ')</option>';
-    paSel.innerHTML += '<option value="' + m.id + '">' + m.apelido + '</option>';
-  });
+const sel = document.getElementById('login-select');
+const paSel = document.getElementById('pa-select');
+sel.innerHTML = '<option value="">Selecione seu apelido...</option>';
+paSel.innerHTML = '<option value="">Selecione...</option>';
+STATE.membros.forEach(m => {
+sel.innerHTML += '<option value="' + m.id + '">' + m.apelido + ' (' + m.funcao + ' · ' + (m.turno === 'manha' ? 'manhã' : 'tarde') + ')</option>';
+paSel.innerHTML += '<option value="' + m.id + '">' + m.apelido + '</option>';
+});
 }
 
 function tentarLogin() {
-  const id = parseInt(document.getElementById('login-select').value);
-  const senha = document.getElementById('login-senha').value;
-  const errEl = document.getElementById('login-error');
+const id = parseInt(document.getElementById('login-select').value);
+const senha = document.getElementById('login-senha').value;
+const errEl = document.getElementById('login-error');
 
-  if (!id) { showToast('⚠️ Selecione seu apelido'); return; }
+if (!id) { showToast('⚠️ Selecione seu apelido'); return; }
 
-  const membro = STATE.membros.find(m => m.id === id);
-  if (!membro.senha) {
-    errEl.textContent = 'Crie sua senha primeiro (primeiro acesso).';
-    errEl.style.display = 'block'; return;
-  }
-  if (membro.senha !== senha) {
-    errEl.style.display = 'block';
-    document.getElementById('login-senha').value = '';
-    return;
-  }
-  errEl.style.display = 'none';
-  addLog('login', '🔐', '<strong>' + membro.apelido + '</strong> fez login — turno ' + membro.turno);
-  loginSuccess(membro);
+const membro = STATE.membros.find(m => m.id === id);
+if (!membro.senha) {
+errEl.textContent = 'Crie sua senha primeiro (primeiro acesso).';
+errEl.style.display = 'block'; return;
+}
+if (membro.senha !== senha) {
+errEl.style.display = 'block';
+document.getElementById('login-senha').value = '';
+return;
+}
+errEl.style.display = 'none';
+addLog('login', '🔐', '<strong>' + membro.apelido + '</strong> fez login — turno ' + membro.turno);
+loginSuccess(membro);
 }
 
 function loginGestor() {
-  const senha = prompt('Senha do gestor:');
-  if (senha === '0000' || senha === 'gestor') {
-    addLog('login', '⚙️', '<strong>Gestor</strong> acessou o painel');
-    loginSuccess({ apelido:'Gestor', xp:9999, funcao:'gestor' }, true);
-  } else if (senha !== null) {
-    showToast('❌ Senha incorreta');
-  }
+const senha = prompt('Senha do gestor:');
+if (senha === 'avioes2025') {
+addLog('login', '⚙️', '<strong>Gestor</strong> acessou o painel');
+loginSuccess({ apelido:'Gestor', xp:9999, funcao:'gestor' }, true);
+} else if (senha !== null) {
+showToast('❌ Senha incorreta');
+}
 }
 
 function logoutGestor() {
-  STATE.currentUser = null;
-  STATE.isGestor = false;
-  document.getElementById('app-topbar').classList.add('hidden');
-  document.getElementById('bottom-nav').classList.add('hidden');
-  ['feed','tarefas','ranking','analise','gestor'].forEach(s =>
-    document.getElementById('screen-' + s).classList.add('hidden'));
-  document.getElementById('screen-login').classList.remove('hidden');
-  document.getElementById('login-senha').value = '';
-  document.getElementById('login-select').value = '';
-  // Reset all gestor subs
-  document.querySelectorAll('.gestor-sub').forEach(s => s.classList.remove('active'));
-  document.getElementById('gestor-main').classList.add('active');
-}
-
-function criarSenha() {
-  const id = parseInt(document.getElementById('pa-select').value);
-  const senha = document.getElementById('pa-senha').value;
-  const confirm = document.getElementById('pa-confirm').value;
-  if (!id) { showToast('⚠️ Selecione o apelido'); return; }
-  if (senha.length < 4) { showToast('⚠️ Mínimo 4 caracteres'); return; }
-  if (senha !== confirm) { showToast('⚠️ Senhas diferentes'); return; }
-  const m = STATE.membros.find(x => x.id === id);
-  m.senha = senha;
-  addLog('gestor','🔑','<strong>' + m.apelido + '</strong> criou nova senha');
-  closeModal('modal-primeiro-acesso');
-  showToast('✅ Senha criada! Faça login.');
-  salvarSenhaBanco(m.id, senha);
-}
-
-// ════════════════════════════════════════════
-// FEED
-// ════════════════════════════════════════════
-
-function renderFeed() {
-  renderRankStrip();
-  const container = document.getElementById('feed-container');
-  container.innerHTML = '';
-  STATE.feedData.forEach((post, i) => {
-    const el = createPost(post);
-    el.style.animationDelay = i * 0.06 + 's';
-    container.appendChild(el);
-  });
-  setTimeout(animateScores, 200);
-}
-
-function renderRankStrip() {
-  const maxXP = Math.max(...STATE.membros.map(m => m.xp));
-  const strip = document.getElementById('rank-strip');
-  strip.innerHTML = '';
-  [...STATE.membros].sort((a,b) => b.xp - a.xp).forEach(m => {
-    const pct = (m.xp / maxXP * 100).toFixed(0) + '%';
-    const plane = getPlaneLevel(m.xp);
-    const chip = document.createElement('div');
-    chip.className = 'rank-chip';
-    chip.innerHTML = '<div class="rank-ava-wrap"><div class="rank-ava-ring" style="--pct:' + pct + '"></div><div class="rank-ava">' + plane.emoji + '</div></div><div class="rank-name">' + m.apelido.split(' ')[0] + '</div><div class="rank-xp">' + m.xp + 'xp</div>';
-    strip.appendChild(chip);
-  });
-}
-
-function getScoreInfo(score) {
-  if (score >= 950) return { label:'LENDÁRIO', cls:'legendary', barCls:'bar-legendary', tagCls:'tag-legendary' };
-  if (score >= 850) return { label:'ÉPICO',    cls:'epic',      barCls:'bar-epic',      tagCls:'tag-epic' };
-  if (score >= 700) return { label:'EXCELENTE',cls:'great',     barCls:'bar-great',     tagCls:'tag-great' };
-  if (score >= 500) return { label:'BOM',      cls:'good',      barCls:'bar-good',      tagCls:'tag-good' };
-  return                   { label:'REGULAR',  cls:'ok',        barCls:'bar-ok',        tagCls:'tag-ok' };
-}
-
-function createPost(post) {
-  const si = getScoreInfo(post.score);
-  const pct = post.score / 10;
-  const el = document.createElement('div');
-  el.className = 'post';
-  el.id = 'post-' + post.id;
-  const rxHTML = Object.entries(post.reactions).map(([e,c]) =>
-    '<span class="react-pill ' + (post.myReaction===e?'active':'') + '" onclick="toggleReaction(' + post.id + ',\'' + e + '\',this)">' + e + '<span class="react-count">' + c + '</span></span>'
-  ).join('');
-  const visComments = post.comments.slice(0,2);
-  const hidCount = post.comments.length - 2;
-  const commentsHTML = visComments.map(c =>
-    '<div class="comment"><div class="comment-ava">' + c.initials + '</div><div><div class="comment-author">' + c.author + '</div><div class="comment-text">' + c.text + '</div><div class="comment-time">' + c.time + '</div></div></div>'
-  ).join('');
-  const rankUpHTML = post.rankUp ? '<div class="rank-up-overlay"><div class="rank-up-chip">🚀 SUBIU PARA ' + post.rankUp.toUpperCase() + '</div></div>' : '';
-  const moreHTML = hidCount > 0 ? '<span class="view-more-comments" onclick="showAllComments(' + post.id + ')">Ver mais ' + hidCount + ' comentário' + (hidCount>1?'s':'') + '...</span>' : '';
-
-  el.innerHTML =
-    '<div class="post-header">' +
-      '<div class="post-ava">' + post.plane + '</div>' +
-      '<div style="flex:1"><div class="post-author">' + post.author +
-        '<span class="post-plane-badge">' + post.plane + ' ' + getPlaneNameShort(STATE.membros.find(m=>m.apelido===post.author)?.xp||0) + '</span>' +
-      '</div><div class="post-time">⏱ ' + post.time + ' · ' + post.balcao + '</div></div>' +
-    '</div>' +
-    '<div class="post-img-wrap">' +
-      '<div class="post-img-placeholder"><div>' + post.emoji + '</div><span>Foto aprovada pela IA ✓</span></div>' +
-      rankUpHTML +
-      '<div class="score-overlay">' +
-        '<div class="score-badge">' +
-          '<div class="score-label">SCORE</div>' +
-          '<div class="score-number score-' + si.cls + '" data-target="' + post.score + '" data-animated="false">0</div>' +
-          '<div class="score-max">/1000</div>' +
-          '<div class="score-bar-wrap"><div class="score-bar-fill ' + si.barCls + '" style="width:0%" data-target="' + pct + '"></div></div>' +
-        '</div>' +
-        '<div class="score-rank-tag ' + si.tagCls + '">' + si.label + '</div>' +
-      '</div>' +
-      '<div class="xp-pill">⚡ +' + post.xp + ' XP</div>' +
-    '</div>' +
-    '<div class="post-actions">' +
-      '<button class="action-btn ' + (post.liked?'liked':'') + '" onclick="toggleLike(' + post.id + ',this)"><span class="icon">' + (post.liked?'❤️':'🤍') + '</span><span class="like-count">' + post.likes + '</span></button>' +
-      '<button class="action-btn" onclick="toggleEmojiPicker(' + post.id + ')"><span class="icon">😄</span> ' + post.reactions ? Object.values(post.reactions).reduce((a,b)=>a+b,0) : 0 + '</button>' +
-      '<button class="action-btn" onclick="focusComment(' + post.id + ')"><span class="icon">💬</span> ' + post.comments.length + '</button>' +
-      '<div class="reaction-row">' + rxHTML + '</div>' +
-    '</div>' +
-    '<div class="emoji-picker" id="emoji-picker-' + post.id + '">' +
-      EMOJIS.map(e => '<div class="emoji-opt ' + (post.myReaction===e?'selected':'') + '" onclick="pickEmoji(' + post.id + ',\'' + e + '\',this)">' + e + '</div>').join('') +
-    '</div>' +
-    '<div class="comments-section" id="comments-' + post.id + '">' + moreHTML + commentsHTML + '</div>' +
-    '<div class="comment-input-row">' +
-      '<div class="comment-ava" style="width:28px;height:28px;border-radius:50%;background:var(--s2);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">' + (STATE.currentUser?.apelido?.slice(0,2).toUpperCase() || 'EU') + '</div>' +
-      '<input class="comment-input" id="ci-' + post.id + '" type="text" placeholder="Comentar..." onkeydown="if(event.key===\'Enter\')sendComment(' + post.id + ')">' +
-      '<button class="comment-send" onclick="sendComment(' + post.id + ')">➤</button>' +
-    '</div>';
-  return el;
-}
-
-function getPlaneNameShort(xp) {
-  const names = ['Teco','Comercial','Jato','Acrobacia','Bombardeiro','Caça'];
-  const idx = PLANE_LEVELS.findIndex((p,i) => xp >= p.minXP && (i===PLANE_LEVELS.length-1 || xp < PLANE_LEVELS[i+1].minXP));
-  return names[Math.max(0,idx)];
-}
-
-function animateScores() {
-  document.querySelectorAll('.score-number[data-animated="false"]').forEach(el => {
-    const rect = el.getBoundingClientRect();
-    if (rect.top < window.innerHeight + 100) {
-      el.dataset.animated = 'true';
-      const target = parseInt(el.dataset.target);
-      const dur = 1200; const start = performance.now();
-      const step = now => {
-        const p = Math.min((now-start)/dur,1);
-        el.textContent = Math.round((1-Math.pow(1-p,3))*target);
-        if (p < 1) requestAnimationFrame(step); else el.textContent = target;
-      };
-      requestAnimationFrame(step);
-      const bar = el.closest('.score-badge')?.querySelector('.score-bar-fill');
-      if (bar) setTimeout(() => bar.style.width = bar.dataset.target + '%', 200);
-    }
-  });
-}
-
-function toggleLike(id, btn) {
-  const p = STATE.feedData.find(x => x.id === id);
-  p.liked = !p.liked; p.likes += p.liked ? 1 : -1;
-  btn.classList.toggle('liked', p.liked);
-  btn.querySelector('.icon').textContent = p.liked ? '❤️' : '🤍';
-  btn.querySelector('.like-count').textContent = p.likes;
-  if (p.liked) { burstEmoji('❤️', btn); showToast('❤️ Curtido!'); }
-}
-
-function toggleEmojiPicker(id) {
-  document.getElementById('emoji-picker-' + id)?.classList.toggle('open');
-}
-
-function pickEmoji(id, emoji, el) {
-  const p = STATE.feedData.find(x => x.id === id);
-  document.getElementById('emoji-picker-' + id)?.querySelectorAll('.emoji-opt').forEach(e => e.classList.remove('selected'));
-  if (p.myReaction === emoji) {
-    p.reactions[emoji] > 1 ? p.reactions[emoji]-- : delete p.reactions[emoji];
-    p.myReaction = null;
-  } else {
-    if (p.myReaction) { p.reactions[p.myReaction] > 1 ? p.reactions[p.myReaction]-- : delete p.reactions[p.myReaction]; }
-    p.myReaction = emoji; p.reactions[emoji] = (p.reactions[emoji]||0)+1;
-    el.classList.add('selected'); burstEmoji(emoji, el);
-  }
-  document.getElementById('emoji-picker-' + id)?.classList.remove('open');
-  rerenderReactions(id);
-}
-
-function toggleReaction(id, emoji, el) {
-  const p = STATE.feedData.find(x => x.id === id);
-  if (p.myReaction === emoji) {
-    p.reactions[emoji] > 1 ? p.reactions[emoji]-- : delete p.reactions[emoji];
-    p.myReaction = null;
-  } else {
-    if (p.myReaction) { p.reactions[p.myReaction] > 1 ? p.reactions[p.myReaction]-- : delete p.reactions[p.myReaction]; }
-    p.myReaction = emoji; p.reactions[emoji] = (p.reactions[emoji]||0)+1;
-    burstEmoji(emoji, el);
-  }
-  rerenderReactions(id);
-}
-
-function rerenderReactions(id) {
-  const p = STATE.feedData.find(x => x.id === id);
-  const row = document.querySelector('#post-' + id + ' .reaction-row');
-  if (row) row.innerHTML = Object.entries(p.reactions).map(([e,c]) =>
-    '<span class="react-pill ' + (p.myReaction===e?'active':'') + '" onclick="toggleReaction(' + id + ',\'' + e + '\',this)">' + e + '<span class="react-count">' + c + '</span></span>'
-  ).join('');
-}
-
-function focusComment(id) { document.getElementById('ci-' + id)?.focus(); }
-
-function sendComment(id) {
-  const inp = document.getElementById('ci-' + id);
-  const text = inp?.value.trim();
-  if (!text) return;
-  const p = STATE.feedData.find(x => x.id === id);
-  const me = STATE.currentUser;
-  const c = { author: me?.apelido||'Eu', initials: me?.apelido?.slice(0,2).toUpperCase()||'EU', text, time:'agora' };
-  p.comments.push(c);
-  const sec = document.getElementById('comments-' + id);
-  const el = document.createElement('div');
-  el.className = 'comment';
-  el.innerHTML = '<div class="comment-ava">' + c.initials + '</div><div><div class="comment-author">' + c.author + '</div><div class="comment-text">' + text + '</div><div class="comment-time">agora</div></div>';
-  sec?.appendChild(el);
-  inp.value = '';
-  showToast('💬 Comentado!');
-  // Salva no banco em background
-  if (STATE.currentUser) salvarComentarioBanco(id, STATE.currentUser.id, text);
-}
-
-function showAllComments(id) {
-  const p = STATE.feedData.find(x => x.id === id);
-  const sec = document.getElementById('comments-' + id);
-  if (sec) sec.innerHTML = p.comments.map(c =>
-    '<div class="comment"><div class="comment-ava">' + c.initials + '</div><div><div class="comment-author">' + c.author + '</div><div class="comment-text">' + c.text + '</div><div class="comment-time">' + c.time + '</div></div></div>'
-  ).join('');
-}
-
-function burstEmoji(emoji, from) {
-  const r = from.getBoundingClientRect();
-  const el = document.createElement('div');
-  el.className = 'reaction-burst';
-  el.textContent = emoji;
-  el.style.left = (r.left + r.width/2 - 14) + 'px';
-  el.style.top  = (r.top + window.scrollY - 10) + 'px';
-  document.body.appendChild(el);
-  setTimeout(() => el.remove(), 1200);
-}
-
-// ════════════════════════════════════════════
-// TAREFAS
-// ════════════════════════════════════════════
-
-function renderTarefas() {
-  const me = STATE.currentUser;
-  if (!me) return;
-  const tarefas = me.funcao === 'vendedor' ? STATE.tarefasVendedor : STATE.tarefasCaixa;
-
-  // Streak
-  document.getElementById('streak-num').textContent = me.streak;
-
-  // XP hoje
-  const xpHoje = tarefas.reduce((sum, t, i) => sum + (me.tarefasHoje[i] ? t.xp : 0), 0);
-  const xpMax  = tarefas.reduce((sum, t) => sum + t.xp, 0);
-  document.getElementById('progress-num').textContent = xpHoje;
-  const arc = document.getElementById('progress-arc');
-  const circ = 213.6;
-  arc.style.strokeDashoffset = (circ - (xpHoje / xpMax) * circ).toFixed(1);
-
-  // Lista de tarefas
-  const list = document.getElementById('tarefas-list');
-  list.innerHTML = '';
-  tarefas.forEach((t, i) => {
-    const done = me.tarefasHoje[i];
-    const el = document.createElement('div');
-    el.className = 'tarefa-card' + (done ? ' done' : '');
-    el.onclick = () => toggleTarefa(i);
-    el.innerHTML =
-      '<div class="tarefa-check">' + (done ? '✓' : '') + '</div>' +
-      '<div class="tarefa-info">' +
-        '<div class="tarefa-nome">' + t.emoji + ' ' + t.nome + '</div>' +
-        '<div class="tarefa-desc">' + t.desc + '</div>' +
-      '</div>' +
-      '<div class="tarefa-xp">+' + t.xp + ' XP</div>';
-    list.appendChild(el);
-  });
-
-  // Semana
-  const myRank = getRankPos(me);
-  document.getElementById('xp-semana-num').textContent = me.xp;
-  document.getElementById('rank-pos-badge').textContent = myRank + 'º lugar';
-  const maxXP = Math.max(...STATE.membros.filter(m => m.funcao === me.funcao).map(m => m.xp));
-  document.getElementById('xp-semana-bar').style.width = (me.xp / maxXP * 100) + '%';
-}
-
-function toggleTarefa(idx) {
-  const me = STATE.currentUser;
-  if (!me) return;
-  const tarefas = me.funcao === 'vendedor' ? STATE.tarefasVendedor : STATE.tarefasCaixa;
-  const wasDone = me.tarefasHoje[idx];
-  me.tarefasHoje[idx] = !wasDone;
-  const t = tarefas[idx];
-  if (!wasDone) {
-    me.xp += t.xp;
-    addLog('tarefa','✅','<strong>' + me.apelido + '</strong> completou ' + t.nome + ' (+' + t.xp + ' XP)');
-    showXPCelebration('+' + t.xp + ' XP ⚡');
-    const nivel = getPlaneLevel(me.xp);
-    document.getElementById('topbar-level').textContent = nivel.name;
-    document.getElementById('topbar-plane').textContent = nivel.emoji;
-  } else {
-    me.xp = Math.max(0, me.xp - t.xp);
-  }
-  // Salva no banco em background
-  salvarTarefaBanco(me.id, t.nome, t.xp, me.tarefasHoje[idx]);
-  salvarXPBanco(me.id, me.xp, me.streak);
-  salvarLogBanco('tarefa','✅', me.apelido + ' ' + (me.tarefasHoje[idx]?'completou':'desmarcou') + ' ' + t.nome);
-  renderTarefas();
-}
-
-function getRankPos(me) {
-  const mesmaFuncao = STATE.membros.filter(m => m.funcao === me.funcao).sort((a,b) => b.xp - a.xp);
-  return mesmaFuncao.findIndex(m => m.id === me.id) + 1;
-}
-
-// ════════════════════════════════════════════
-// RANKING
-// ════════════════════════════════════════════
-
-function renderRanking() {
-  renderRankingForFunc('vendedores', 'vendedor');
-  renderRankingForFunc('caixas', 'caixa');
-}
-
-function renderRankingForFunc(id, funcao) {
-  const membros = STATE.membros.filter(m => m.funcao === funcao).sort((a,b) => b.xp - a.xp);
-  const medals = ['🥇','🥈','🥉'];
-
-  // Podium (top 3)
-  const podiumEl = document.getElementById('podium-' + id);
-  const order = [membros[1], membros[0], membros[2]].filter(Boolean);
-  const posClasses = ['p2','p1','p3'];
-  podiumEl.innerHTML = '<div class="podium">' + order.map((m, i) => {
-    const realPos = membros.indexOf(m);
-    const plane = getPlaneLevel(m.xp);
-    return '<div class="podium-item ' + posClasses[i] + '">' +
-      '<div class="podium-ava">' + plane.emoji + '</div>' +
-      '<div class="podium-name">' + m.apelido.split(' ')[0] + '</div>' +
-      '<div class="podium-xp">' + m.xp + ' XP</div>' +
-      '<div class="podium-block"><div class="podium-medal">' + medals[realPos] + '</div></div>' +
-    '</div>';
-  }).join('') + '</div>';
-
-  // Lista completa
-  const listEl = document.getElementById('ranking-list-' + id);
-  listEl.innerHTML = '<div class="card">' + membros.map((m, i) => {
-    const plane = getPlaneLevel(m.xp);
-    const isMe = STATE.currentUser?.id === m.id;
-    return '<div class="ranking-list-item" style="' + (isMe ? 'background:rgba(90,171,104,0.06);border-radius:8px;padding:12px 8px;' : '') + '">' +
-      '<div class="rl-pos">' + (medals[i] || (i+1)) + '</div>' +
-      '<div class="rl-ava">' + plane.emoji + '</div>' +
-      '<div class="rl-info">' +
-        '<div class="rl-name">' + m.apelido + (isMe ? ' <span style="font-size:10px;color:var(--accent)">(você)</span>' : '') + '</div>' +
-        '<div class="rl-plane">' + plane.name + '</div>' +
-      '</div>' +
-      '<div style="text-align:right">' +
-        '<div class="rl-xp">' + m.xp + '</div>' +
-        '<div class="rl-streak">🔥 ' + m.streak + 'd</div>' +
-      '</div>' +
-    '</div>';
-  }).join('') + '</div>';
-}
-
-function switchRankTab(tab) {
-  STATE.rankTab = tab;
-  document.getElementById('tab-vendedores').classList.toggle('active', tab === 'vendedores');
-  document.getElementById('tab-caixas').classList.toggle('active', tab === 'caixas');
-  document.getElementById('podium-vendedores').style.display = tab === 'vendedores' ? 'block' : 'none';
-  document.getElementById('podium-caixas').style.display = tab === 'caixas' ? 'block' : 'none';
-  document.getElementById('ranking-list-vendedores').style.display = tab === 'vendedores' ? 'block' : 'none';
-  document.getElementById('ranking-list-caixas').style.display = tab === 'caixas' ? 'block' : 'none';
-}
-
-// ════════════════════════════════════════════
-// ANÁLISE
-// ════════════════════════════════════════════
-
-let chartInstances = {};
-function renderAnalise() {
-  const me = STATE.currentUser;
-  if (!me || STATE.isGestor) return;
-
-  document.getElementById('kpi-xp').textContent = me.xp;
-  document.getElementById('kpi-xp-delta').textContent = '▲ acima da média';
-  document.getElementById('kpi-xp-delta').className = 'kpi-delta delta-up';
-  document.getElementById('kpi-streak').textContent = me.streak;
-  document.getElementById('kpi-streak-status').textContent = me.streak > 3 ? '🔥 Em chamas!' : 'Continue!';
-  document.getElementById('kpi-streak-status').className = 'kpi-delta delta-up';
-  const tarefas = me.funcao === 'vendedor' ? STATE.tarefasVendedor : STATE.tarefasCaixa;
-  const done = me.tarefasHoje.filter(Boolean).length;
-  document.getElementById('kpi-tarefas').textContent = done + '/' + tarefas.length;
-  document.getElementById('kpi-posicao').textContent = getRankPos(me) + 'º';
-
-  // Chart XP semana
-  const ctx1 = document.getElementById('chart-xp-semana').getContext('2d');
-  if (chartInstances.xpSemana) chartInstances.xpSemana.destroy();
-  chartInstances.xpSemana = new Chart(ctx1, {
-    type:'line',
-    data:{ labels:['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'],
-      datasets:[{ data:[45,80,120,160,210,265,me.xp], borderColor:'var(--accent)', backgroundColor:'rgba(90,171,104,0.1)', fill:true, tension:0.4, pointBackgroundColor:'var(--accent)', pointRadius:4 }]},
-    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}},
-      scales:{ x:{ticks:{color:'#5d8f65',font:{size:10}}, grid:{color:'rgba(255,255,255,0.04)'}},
-               y:{ticks:{color:'#5d8f65',font:{size:10}}, grid:{color:'rgba(255,255,255,0.04)'}} } }
-  });
-
-  // Adesão por tarefa
-  const adList = document.getElementById('adesao-list');
-  adList.innerHTML = '';
-  tarefas.forEach((t,i) => {
-    const done2 = STATE.membros.filter(m => m.funcao === me.funcao && m.tarefasHoje[i]).length;
-    const total = STATE.membros.filter(m => m.funcao === me.funcao).length;
-    const pct = Math.round(done2/total*100);
-    const color = pct >= 75 ? 'var(--accent)' : pct >= 50 ? '#f5c842' : 'var(--red)';
-    adList.innerHTML += '<div class="adesao-item"><div class="adesao-label"><span>' + t.emoji + ' ' + t.nome + '</span><span class="adesao-pct" style="color:' + color + '">' + pct + '%</span></div><div class="xp-bar-wrap"><div class="xp-bar-fill" style="width:' + pct + '%;background:' + color + '"></div></div></div>';
-  });
-
-  // Chart equipe
-  const ctx2 = document.getElementById('chart-xp-equipe').getContext('2d');
-  if (chartInstances.equipe) chartInstances.equipe.destroy();
-  const sorted = [...STATE.membros].sort((a,b) => b.xp - a.xp);
-  chartInstances.equipe = new Chart(ctx2, {
-    type:'bar',
-    data:{ labels: sorted.map(m => m.apelido.split(' ')[0]),
-      datasets:[{ data: sorted.map(m => m.xp),
-        backgroundColor: sorted.map(m => m.id === me.id ? 'rgba(90,171,104,0.9)' : 'rgba(90,171,104,0.25)'),
-        borderRadius:6 }]},
-    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}},
-      scales:{ x:{ticks:{color:'#5d8f65',font:{size:10}}, grid:{display:false}},
-               y:{ticks:{color:'#5d8f65',font:{size:10}}, grid:{color:'rgba(255,255,255,0.04)'}} } }
-  });
-}
-
-// ════════════════════════════════════════════
-// GESTOR
-// ════════════════════════════════════════════
-
-function renderGestor() {
-  renderGestorEquipe();
-  renderGestorHistorico();
-  renderGestorBalcoes();
-  renderLogs();
-}
-
-function renderGestorEquipe() {
-  ['vendedor','caixa'].forEach(func => {
-    const id = func === 'vendedor' ? 'gestor-tabela-vendedores' : 'gestor-tabela-caixas';
-    const el = document.getElementById(id);
-    const membros = STATE.membros.filter(m => m.funcao === func).sort((a,b) => b.xp - a.xp);
-    el.innerHTML = membros.map(m => {
-      const plane = getPlaneLevel(m.xp);
-      return '<div style="display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,0.04)">' +
-        '<div style="font-size:20px">' + plane.emoji + '</div>' +
-        '<div style="flex:1"><div style="font-weight:600;font-size:14px">' + m.apelido + '</div>' +
-        '<div style="font-size:11px;color:var(--text2)">' + (m.turno==='manha'?'🌅 Manhã':'🌇 Tarde') + ' · ' + m.xp + ' XP · 🔥' + m.streak + 'd</div></div>' +
-        '<button onclick="abrirEditarMembro(' + m.id + ')" style="background:none;border:1px solid var(--border);border-radius:8px;padding:5px 10px;color:var(--text2);font-size:12px;cursor:pointer">✏️</button>' +
-        '<button onclick="resetarSenhaDireto(' + m.id + ')" style="background:none;border:1px solid rgba(255,95,95,0.3);border-radius:8px;padding:5px 10px;color:var(--red);font-size:12px;cursor:pointer;margin-left:6px">🔑</button>' +
-      '</div>';
-    }).join('');
-  });
-}
-
-function abrirEditarMembro(id) {
-  const m = STATE.membros.find(x => x.id === id);
-  document.getElementById('em-id').value = id;
-  document.getElementById('em-apelido').value = m.apelido;
-  document.getElementById('em-turno').value = m.turno;
-  openModal('modal-edit-membro');
-}
-
-function salvarEdicao() {
-  const id = parseInt(document.getElementById('em-id').value);
-  const m = STATE.membros.find(x => x.id === id);
-  const old = m.apelido;
-  m.apelido = document.getElementById('em-apelido').value.trim() || m.apelido;
-  m.turno   = document.getElementById('em-turno').value;
-  if (old !== m.apelido) addLog('gestor','⚙️','<strong>Gestor</strong> editou: "' + old + '" → "' + m.apelido + '"');
-  closeModal('modal-edit-membro');
-  renderGestorEquipe();
-  // ════════════════════════════════════════════
-// INIT SUPABASE — carrega dados do banco
-// ════════════════════════════════════════════
-
-async function initApp() {
-  showLoadingScreen();
-  try {
-    // Carrega membros
-    const { data: membros, error: eMembros } = await sb.from('membros').select('*').order('xp', { ascending: false });
-    if (eMembros) throw eMembros;
-    STATE.membros = membros.map(m => ({
-      id: m.id,
-      apelido: m.apelido,
-      funcao: m.funcao,
-      turno: m.turno,
-      xp: m.xp,
-      streak: m.streak,
-      senha: m.senha,
-      semana_num: m.semana_num,
-      tarefasHoje: [false, false, false, false, false],
-    }));
-
-    // Carrega tarefas do dia de hoje para cada membro
-    const hoje = new Date().toISOString().split('T')[0];
-    const { data: tarefasDia } = await sb.from('tarefas_dia').select('*').eq('data', hoje);
-    if (tarefasDia) {
-      tarefasDia.forEach(t => {
-        const m = STATE.membros.find(x => x.id === t.membro_id);
-        if (!m) return;
-        const tarefas = m.funcao === 'vendedor' ? STATE.tarefasVendedor : STATE.tarefasCaixa;
-        const idx = tarefas.findIndex(x => x.nome === t.tarefa_nome);
-        if (idx >= 0) m.tarefasHoje[idx] = t.concluida;
-      });
-    }
-
-    // Carrega feed
-    const { data: feedRows } = await sb.from('feed').select('*, membros(apelido), comentarios(*, membros(apelido)), reacoes(emoji, membro_id)').order('criado_em', { ascending: false }).limit(20);
-    if (feedRows && feedRows.length > 0) {
-      STATE.feedData = feedRows.map(p => {
-        const reactions = {};
-        (p.reacoes || []).forEach(r => { reactions[r.emoji] = (reactions[r.emoji] || 0) + 1; });
-        return {
-          id: p.id,
-          author: p.membros?.apelido || '—',
-          initials: (p.membros?.apelido || '??').slice(0,2).toUpperCase(),
-          plane: getPlaneLevel(STATE.membros.find(m => m.apelido === p.membros?.apelido)?.xp || 0).emoji,
-          time: new Date(p.criado_em).toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'}),
-          balcao: p.balcao,
-          score: p.score,
-          xp: p.xp,
-          rankUp: p.rank_up,
-          emoji: p.emoji || '📸',
-          reactions,
-          myReaction: (p.reacoes || []).find(r => r.membro_id === STATE.currentUser?.id)?.emoji || null,
-          comments: (p.comentarios || []).map(c => ({
-            author: c.membros?.apelido || '—',
-            initials: (c.membros?.apelido || '??').slice(0,2).toUpperCase(),
-            text: c.texto,
-            time: new Date(c.criado_em).toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'}),
-          })),
-          liked: false,
-          likes: p.likes || 0,
-        };
-      });
-    }
-
-    // Carrega balcões
-    const { data: balcoes } = await sb.from('balcoes').select('*').order('id');
-    if (balcoes) STATE.balcoes = balcoes.map(b => ({ id: b.id, nome: b.nome, tipo: b.tipo, degrade: b.degrade, temFoto: b.tem_foto }));
-
-    // Carrega histórico
-    const { data: hist } = await sb.from('historico_semanas').select('*').order('semana_num', { ascending: false }).limit(5);
-    if (hist) STATE.historico = hist.map(h => ({ semana: 'S'+h.semana_num, periodo: h.periodo, lidVend: h.lid_vend, xpVend: h.xp_vend, lidCaixa: h.lid_caixa, xpCaixa: h.xp_caixa }));
-
-    // Carrega logs
-    const { data: logs } = await sb.from('logs').select('*').order('criado_em', { ascending: false }).limit(50);
-    if (logs) STATE.logs = logs.map(l => ({ ts: new Date(l.criado_em).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}).replace(',',''), tipo: l.tipo, icon: l.icon, texto: l.texto }));
-
-  } catch(err) {
-    console.error('Erro ao carregar dados:', err);
-    showToast('⚠️ Erro ao conectar banco — usando dados locais');
-  }
-
-  hideLoadingScreen();
-  initLoginSelect();
-}
-
-// ── Salvar tarefa no banco ──
-async function salvarTarefaBanco(membroId, tarefaNome, xp, concluida) {
-  const hoje = new Date().toISOString().split('T')[0];
-  await sb.from('tarefas_dia').upsert({
-    membro_id: membroId, tarefa_nome: tarefaNome, xp, concluida, data: hoje
-  }, { onConflict: 'membro_id,tarefa_nome,data' });
-}
-
-// ── Salvar XP do membro no banco ──
-async function salvarXPBanco(membroId, xp, streak) {
-  await sb.from('membros').update({ xp, streak }).eq('id', membroId);
-}
-
-// ── Salvar comentário no banco ──
-async function salvarComentarioBanco(postId, membroId, texto) {
-  const { data } = await sb.from('comentarios').insert({ post_id: postId, membro_id: membroId, texto }).select('*, membros(apelido)').single();
-  return data;
-}
-
-// ── Salvar reação no banco ──
-async function salvarReacaoBanco(postId, membroId, emoji) {
-  if (emoji) {
-    await sb.from('reacoes').upsert({ post_id: postId, membro_id: membroId, emoji }, { onConflict: 'post_id,membro_id' });
-  } else {
-    await sb.from('reacoes').delete().eq('post_id', postId).eq('membro_id', membroId);
-  }
-}
-
-// ── Salvar log no banco ──
-async function salvarLogBanco(tipo, icon, texto) {
-  await sb.from('logs').insert({ tipo, icon, texto: texto.replace(/<[^>]+>/g,'') });
-}
-
-// ── Criar senha no banco ──
-async function salvarSenhaBanco(membroId, senha) {
-  await sb.from('membros').update({ senha }).eq('id', membroId);
-}
-
-// ── Reset de semana no banco ──
-async function resetarSemanaBanco(semanaNum, lidVend, xpVend, lidCaixa, xpCaixa) {
-  await sb.from('historico_semanas').insert({ semana_num: semanaNum, periodo: '—', lid_vend: lidVend, xp_vend: xpVend, lid_caixa: lidCaixa, xp_caixa: xpCaixa });
-  await sb.from('membros').update({ xp: 0, streak: 0 });
-  // Deleta tarefas da semana
-  await sb.from('tarefas_dia').delete().neq('id', 0);
-}
-
-// ── Loading screen ──
-function showLoadingScreen() {
-  const el = document.getElementById('loading-screen');
-  if (el) el.style.display = 'flex';
-}
-function hideLoadingScreen() {
-  const el = document.getElementById('loading-screen');
-  if (el) el.style.display = 'none';
-}
-
-initApp();
-  showToast('✅ Salvo!');
-}
-
-function resetarSenhaDireto(id) {
-  const m = STATE.membros.find(x => x.id === id);
-  m.senha = null;
-  addLog('gestor','🔑','<strong>Gestor</strong> resetou senha de <strong>' + m.apelido + '</strong>');
-  showToast('🔑 Senha de ' + m.apelido + ' resetada');
-}
-
-function resetarSenhaModal() {
-  const id = parseInt(document.getElementById('em-id').value);
-  resetarSenhaDireto(id);
-  closeModal('modal-edit-membro');
-}
-
-function addMembro() {
-  const apelido = document.getElementById('nm-apelido').value.trim();
-  const funcao  = document.getElementById('nm-funcao').value;
-  const turno   = document.getElementById('nm-turno').value;
-  if (!apelido) { showToast('⚠️ Preencha o apelido'); return; }
-  const novoId = Math.max(...STATE.membros.map(m => m.id)) + 1;
-  STATE.membros.push({ id:novoId, apelido, funcao, turno, xp:0, streak:0, senha:null, tarefasHoje:[false,false,false,false,false] });
-  addLog('gestor','➕','<strong>Gestor</strong> adicionou <strong>' + apelido + '</strong>');
-  document.getElementById('nm-apelido').value = '';
-  closeModal('modal-add-membro');
-  renderGestorEquipe();
-  // ════════════════════════════════════════════
-// INIT SUPABASE — carrega dados do banco
-// ════════════════════════════════════════════
-
-async function initApp() {
-  showLoadingScreen();
-  try {
-    // Carrega membros
-    const { data: membros, error: eMembros } = await sb.from('membros').select('*').order('xp', { ascending: false });
-    if (eMembros) throw eMembros;
-    STATE.membros = membros.map(m => ({
-      id: m.id,
-      apelido: m.apelido,
-      funcao: m.funcao,
-      turno: m.turno,
-      xp: m.xp,
-      streak: m.streak,
-      senha: m.senha,
-      semana_num: m.semana_num,
-      tarefasHoje: [false, false, false, false, false],
-    }));
-
-    // Carrega tarefas do dia de hoje para cada membro
-    const hoje = new Date().toISOString().split('T')[0];
-    const { data: tarefasDia } = await sb.from('tarefas_dia').select('*').eq('data', hoje);
-    if (tarefasDia) {
-      tarefasDia.forEach(t => {
-        const m = STATE.membros.find(x => x.id === t.membro_id);
-        if (!m) return;
-        const tarefas = m.funcao === 'vendedor' ? STATE.tarefasVendedor : STATE.tarefasCaixa;
-        const idx = tarefas.findIndex(x => x.nome === t.tarefa_nome);
-        if (idx >= 0) m.tarefasHoje[idx] = t.concluida;
-      });
-    }
-
-    // Carrega feed
-    const { data: feedRows } = await sb.from('feed').select('*, membros(apelido), comentarios(*, membros(apelido)), reacoes(emoji, membro_id)').order('criado_em', { ascending: false }).limit(20);
-    if (feedRows && feedRows.length > 0) {
-      STATE.feedData = feedRows.map(p => {
-        const reactions = {};
-        (p.reacoes || []).forEach(r => { reactions[r.emoji] = (reactions[r.emoji] || 0) + 1; });
-        return {
-          id: p.id,
-          author: p.membros?.apelido || '—',
-          initials: (p.membros?.apelido || '??').slice(0,2).toUpperCase(),
-          plane: getPlaneLevel(STATE.membros.find(m => m.apelido === p.membros?.apelido)?.xp || 0).emoji,
-          time: new Date(p.criado_em).toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'}),
-          balcao: p.balcao,
-          score: p.score,
-          xp: p.xp,
-          rankUp: p.rank_up,
-          emoji: p.emoji || '📸',
-          reactions,
-          myReaction: (p.reacoes || []).find(r => r.membro_id === STATE.currentUser?.id)?.emoji || null,
-          comments: (p.comentarios || []).map(c => ({
-            author: c.membros?.apelido || '—',
-            initials: (c.membros?.apelido || '??').slice(0,2).toUpperCase(),
-            text: c.texto,
-            time: new Date(c.criado_em).toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'}),
-          })),
-          liked: false,
-          likes: p.likes || 0,
-        };
-      });
-    }
-
-    // Carrega balcões
-    const { data: balcoes } = await sb.from('balcoes').select('*').order('id');
-    if (balcoes) STATE.balcoes = balcoes.map(b => ({ id: b.id, nome: b.nome, tipo: b.tipo, degrade: b.degrade, temFoto: b.tem_foto }));
-
-    // Carrega histórico
-    const { data: hist } = await sb.from('historico_semanas').select('*').order('semana_num', { ascending: false }).limit(5);
-    if (hist) STATE.historico = hist.map(h => ({ semana: 'S'+h.semana_num, periodo: h.periodo, lidVend: h.lid_vend, xpVend: h.xp_vend, lidCaixa: h.lid_caixa, xpCaixa: h.xp_caixa }));
-
-    // Carrega logs
-    const { data: logs } = await sb.from('logs').select('*').order('criado_em', { ascending: false }).limit(50);
-    if (logs) STATE.logs = logs.map(l => ({ ts: new Date(l.criado_em).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}).replace(',',''), tipo: l.tipo, icon: l.icon, texto: l.texto }));
-
-  } catch(err) {
-    console.error('Erro ao carregar dados:', err);
-    showToast('⚠️ Erro ao conectar banco — usando dados locais');
-  }
-
-  hideLoadingScreen();
-  initLoginSelect();
-}
-
-// ── Salvar tarefa no banco ──
-async function salvarTarefaBanco(membroId, tarefaNome, xp, concluida) {
-  const hoje = new Date().toISOString().split('T')[0];
-  await sb.from('tarefas_dia').upsert({
-    membro_id: membroId, tarefa_nome: tarefaNome, xp, concluida, data: hoje
-  }, { onConflict: 'membro_id,tarefa_nome,data' });
-}
-
-// ── Salvar XP do membro no banco ──
-async function salvarXPBanco(membroId, xp, streak) {
-  await sb.from('membros').update({ xp, streak }).eq('id', membroId);
-}
-
-// ── Salvar comentário no banco ──
-async function salvarComentarioBanco(postId, membroId, texto) {
-  const { data } = await sb.from('comentarios').insert({ post_id: postId, membro_id: membroId, texto }).select('*, membros(apelido)').single();
-  return data;
-}
-
-// ── Salvar reação no banco ──
-async function salvarReacaoBanco(postId, membroId, emoji) {
-  if (emoji) {
-    await sb.from('reacoes').upsert({ post_id: postId, membro_id: membroId, emoji }, { onConflict: 'post_id,membro_id' });
-  } else {
-    await sb.from('reacoes').delete().eq('post_id', postId).eq('membro_id', membroId);
-  }
-}
-
-// ── Salvar log no banco ──
-async function salvarLogBanco(tipo, icon, texto) {
-  await sb.from('logs').insert({ tipo, icon, texto: texto.replace(/<[^>]+>/g,'') });
-}
-
-// ── Criar senha no banco ──
-async function salvarSenhaBanco(membroId, senha) {
-  await sb.from('membros').update({ senha }).eq('id', membroId);
-}
-
-// ── Reset de semana no banco ──
-async function resetarSemanaBanco(semanaNum, lidVend, xpVend, lidCaixa, xpCaixa) {
-  await sb.from('historico_semanas').insert({ semana_num: semanaNum, periodo: '—', lid_vend: lidVend, xp_vend: xpVend, lid_caixa: lidCaixa, xp_caixa: xpCaixa });
-  await sb.from('membros').update({ xp: 0, streak: 0 });
-  // Deleta tarefas da semana
-  await sb.from('tarefas_dia').delete().neq('id', 0);
-}
-
-// ── Loading screen ──
-function showLoadingScreen() {
-  const el = document.getElementById('loading-screen');
-  if (el) el.style.display = 'flex';
-}
-function hideLoadingScreen() {
-  const el = document.getElementById('loading-screen');
-  if (el) el.style.display = 'none';
-}
-
-initApp();
-  showToast('✅ ' + apelido + ' adicionado!');
-}
-
-function renderGestorHistorico() {
-  const el = document.getElementById('g-historico');
-  el.innerHTML = STATE.historico.map(h =>
-    '<div style="padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.04)">' +
-    '<div style="display:flex;justify-content:space-between;align-items:center">' +
-    '<span style="font-family:\'JetBrains Mono\',monospace;font-size:11px;color:var(--accent);font-weight:700">' + h.semana + '</span>' +
-    '<span style="font-size:11px;color:var(--text2)">' + h.periodo + '</span></div>' +
-    '<div style="font-size:12px;margin-top:4px">🛍️ <strong>' + h.lidVend + '</strong> ' + h.xpVend + ' XP &nbsp;|&nbsp; 🖥️ <strong>' + h.lidCaixa + '</strong> ' + h.xpCaixa + ' XP</div>' +
-    '</div>'
-  ).join('');
-  document.getElementById('g-semana-num').textContent = 'S' + STATE.semana;
-}
-
-function renderGestorBalcoes() {
-  const el = document.getElementById('g-balcoes-list');
-  el.innerHTML = STATE.balcoes.map(b =>
-    '<div style="display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,0.04)">' +
-    '<div style="font-size:22px">' + (b.tipo==='Vitrine'?'🪟':b.tipo==='Ilha'?'🏝️':b.tipo==='Balcão'?'🖥️':'📦') + '</div>' +
-    '<div style="flex:1"><div style="font-weight:600;font-size:14px">' + b.nome + '</div>' +
-    '<div style="font-size:11px;color:var(--text2)">' + b.tipo + ' · ' + (b.degrade==='vertical'?'↕ Vertical':'↔ Horizontal') + '</div></div>' +
-    '<span class="badge ' + (b.temFoto ? 'badge-green' : 'badge-red') + '">' + (b.temFoto ? '✓ Foto' : '⚠ Sem foto') + '</span>' +
-    '<button onclick="removerBalcao(' + b.id + ')" style="background:none;border:none;color:var(--text3);font-size:16px;cursor:pointer;margin-left:8px">🗑</button>' +
-    '</div>'
-  ).join('');
-}
-
-function addBalcao() {
-  const nome = document.getElementById('nb-nome').value.trim();
-  const tipo = document.getElementById('nb-tipo').value;
-  const degrade = document.getElementById('nb-degrade').value;
-  if (!nome) { showToast('⚠️ Preencha o nome'); return; }
-  const id = Math.max(...STATE.balcoes.map(b => b.id)) + 1;
-  STATE.balcoes.push({ id, nome, tipo, degrade, temFoto:false });
-  addLog('gestor','⚙️','<strong>Gestor</strong> cadastrou balcão: "' + nome + '"');
-  document.getElementById('nb-nome').value = '';
-  closeModal('modal-add-balcao');
-  renderGestorBalcoes();
-  showToast('✅ ' + nome + ' cadastrado!');
-}
-
-function removerBalcao(id) {
-  const b = STATE.balcoes.find(x => x.id === id);
-  STATE.balcoes = STATE.balcoes.filter(x => x.id !== id);
-  addLog('gestor','🗑','<strong>Gestor</strong> removeu balcão: "' + b.nome + '"');
-  renderGestorBalcoes();
-  showToast('🗑 Removido');
-}
-
-function showGestorSub(id) {
-  document.getElementById('gestor-main').classList.remove('active');
-  document.getElementById(id).classList.add('active');
-}
-function hideGestorSub(id) {
-  document.getElementById(id).classList.remove('active');
-  document.getElementById('gestor-main').classList.add('active');
-}
-
-// ════════════════════════════════════════════
-// RESET
-// ════════════════════════════════════════════
-
-function confirmarReset(tipo) {
-  STATE.resetTipo = tipo;
-  const msgs = {
-    semana: 'Isso encerrará a semana atual, registrará os vencedores e zerará o XP de todos.',
-    xp:     'O XP do membro selecionado será zerado.',
-  };
-  document.getElementById('reset-titulo').textContent = tipo === 'semana' ? '🔄 Resetar semana' : '⚡ Zerar XP';
-  document.getElementById('reset-msg').textContent = msgs[tipo];
-  const sw = document.getElementById('reset-select-wrap');
-  sw.style.display = tipo !== 'semana' ? 'block' : 'none';
-  if (tipo !== 'semana') {
-    const sel = document.getElementById('reset-membro-select');
-    sel.innerHTML = STATE.membros.map(m => '<option value="' + m.id + '">' + m.apelido + '</option>').join('');
-  }
-  openModal('modal-confirmar-reset');
-}
-
-function executarReset() {
-  if (STATE.resetTipo === 'semana') {
-    const lv = STATE.membros.filter(m=>m.funcao==='vendedor').sort((a,b)=>b.xp-a.xp)[0];
-    const lc = STATE.membros.filter(m=>m.funcao==='caixa').sort((a,b)=>b.xp-a.xp)[0];
-    STATE.historico.unshift({ semana:'S'+STATE.semana, periodo:'—', lidVend:lv.apelido, xpVend:lv.xp, lidCaixa:lc.apelido, xpCaixa:lc.xp });
-    STATE.membros.forEach(m => { m.xp=0; m.streak=0; m.tarefasHoje=[false,false,false,false,false]; });
-    STATE.semana++;
-    addLog('reset','🔄','<strong>Gestor</strong> resetou semana S' + (STATE.semana-1));
-    resetarSemanaBanco(STATE.semana-1, lv.apelido, lv.xp, lc.apelido, lc.xp);
-    showToast('🔄 Semana resetada!');
-  } else {
-    const id = parseInt(document.getElementById('reset-membro-select').value);
-    const m = STATE.membros.find(x=>x.id===id);
-    m.xp=0;
-    addLog('reset','⚡','<strong>Gestor</strong> zerou XP de <strong>' + m.apelido + '</strong>');
-    showToast('⚡ XP de ' + m.apelido + ' zerado');
-  }
-  closeModal('modal-confirmar-reset');
-  renderGestorHistorico();
-  renderGestorEquipe();
-}
-
-// ════════════════════════════════════════════
-// LOGS
-// ════════════════════════════════════════════
-
-function addLog(tipo, icon, texto) {
-  const now = new Date();
-  const ts = now.getDate().toString().padStart(2,'0') + '/' + (now.getMonth()+1).toString().padStart(2,'0') + ' ' + now.getHours().toString().padStart(2,'0') + 'h' + now.getMinutes().toString().padStart(2,'0');
-  STATE.logs.unshift({ ts, tipo, icon, texto });
-}
-
-function renderLogs() {
-  const filtro = document.getElementById('filtro-log')?.value || 'todos';
-  const lista = filtro === 'todos' ? STATE.logs : STATE.logs.filter(l => l.tipo === filtro);
-  const el = document.getElementById('g-logs-list');
-  el.innerHTML = lista.map(l =>
-    '<div class="log-entry"><div class="log-time">' + l.ts + '</div><div style="font-size:15px">' + l.icon + '</div><div class="log-text">' + l.texto + '</div></div>'
-  ).join('');
-}
-
-function exportarLogs() {
-  const csv = ['Horário,Tipo,Evento',...STATE.logs.map(l => '"'+l.ts+'","'+l.tipo+'","'+l.texto.replace(/<[^>]+>/g,'')+'"')].join('\n');
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
-  a.download = 'logs-avioes.csv';
-  a.click();
-  showToast('⬇ CSV exportado!');
-}
-
-// ════════════════════════════════════════════
-// UI HELPERS
-// ════════════════════════════════════════════
-
-function openModal(id) { document.getElementById(id).classList.add('open'); }
-function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-
-document.querySelectorAll('.modal-overlay').forEach(o =>
-  o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); })
-);
-
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2400);
-}
-
-function showXPCelebration(text) {
-  const cel = document.getElementById('xp-celebration');
-  const burst = document.getElementById('xp-burst-text');
-  burst.textContent = text;
-  burst.style.animation = 'none';
-  cel.classList.add('show');
-  requestAnimationFrame(() => {
-    burst.style.animation = 'xp-burst-anim 0.8s cubic-bezier(0.34,1.56,0.64,1) both';
-  });
-  setTimeout(() => cel.classList.remove('show'), 900);
-}
-
-// Scroll animations
-document.getElementById('screen-feed').querySelector('.scroll-area').addEventListener('scroll', animateScores, { passive:true });
-
-// ════════════════════════════════════════════
-// INIT
-// ════════════════════════════════════════════
-
-// ════════════════════════════════════════════
-// INIT SUPABASE — carrega dados do banco
-// ════════════════════════════════════════════
-
-async function initApp() {
-  showLoadingScreen();
-  try {
-    // Carrega membros
-    const { data: membros, error: eMembros } = await sb.from('membros').select('*').order('xp', { ascending: false });
-    if (eMembros) throw eMembros;
-    STATE.membros = membros.map(m => ({
-      id: m.id,
-      apelido: m.apelido,
-      funcao: m.funcao,
-      turno: m.turno,
-      xp: m.xp,
-      streak: m.streak,
-      senha: m.senha,
-      semana_num: m.semana_num,
-      tarefasHoje: [false, false, false, false, false],
-    }));
-
-    // Carrega tarefas do dia de hoje para cada membro
-    const hoje = new Date().toISOString().split('T')[0];
-    const { data: tarefasDia } = await sb.from('tarefas_dia').select('*').eq('data', hoje);
-    if (tarefasDia) {
-      tarefasDia.forEach(t => {
-        const m = STATE.membros.find(x => x.id === t.membro_id);
-        if (!m) return;
-        const tarefas = m.funcao === 'vendedor' ? STATE.tarefasVendedor : STATE.tarefasCaixa;
-        const idx = tarefas.findIndex(x => x.nome === t.tarefa_nome);
-        if (idx >= 0) m.tarefasHoje[idx] = t.concluida;
-      });
-    }
-
-    // Carrega feed
-    const { data: feedRows } = await sb.from('feed').select('*, membros(apelido), comentarios(*, membros(apelido)), reacoes(emoji, membro_id)').order('criado_em', { ascending: false }).limit(20);
-    if (feedRows && feedRows.length > 0) {
-      STATE.feedData = feedRows.map(p => {
-        const reactions = {};
-        (p.reacoes || []).forEach(r => { reactions[r.emoji] = (reactions[r.emoji] || 0) + 1; });
-        return {
-          id: p.id,
-          author: p.membros?.apelido || '—',
-          initials: (p.membros?.apelido || '??').slice(0,2).toUpperCase(),
-          plane: getPlaneLevel(STATE.membros.find(m => m.apelido === p.membros?.apelido)?.xp || 0).emoji,
-          time: new Date(p.criado_em).toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'}),
-          balcao: p.balcao,
-          score: p.score,
-          xp: p.xp,
-          rankUp: p.rank_up,
-          emoji: p.emoji || '📸',
-          reactions,
-          myReaction: (p.reacoes || []).find(r => r.membro_id === STATE.currentUser?.id)?.emoji || null,
-          comments: (p.comentarios || []).map(c => ({
-            author: c.membros?.apelido || '—',
-            initials: (c.membros?.apelido || '??').slice(0,2).toUpperCase(),
-            text: c.texto,
-            time: new Date(c.criado_em).toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'}),
-          })),
-          liked: false,
-          likes: p.likes || 0,
-        };
-      });
-    }
-
-    // Carrega balcões
-    const { data: balcoes } = await sb.from('balcoes').select('*').order('id');
-    if (balcoes) STATE.balcoes = balcoes.map(b => ({ id: b.id, nome: b.nome, tipo: b.tipo, degrade: b.degrade, temFoto: b.tem_foto }));
-
-    // Carrega histórico
-    const { data: hist } = await sb.from('historico_semanas').select('*').order('semana_num', { ascending: false }).limit(5);
-    if (hist) STATE.historico = hist.map(h => ({ semana: 'S'+h.semana_num, periodo: h.periodo, lidVend: h.lid_vend, xpVend: h.xp_vend, lidCaixa: h.lid_caixa, xpCaixa: h.xp_caixa }));
-
-    // Carrega logs
-    const { data: logs } = await sb.from('logs').select('*').order('criado_em', { ascending: false }).limit(50);
-    if (logs) STATE.logs = logs.map(l => ({ ts: new Date(l.criado_em).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}).replace(',',''), tipo: l.tipo, icon: l.icon, texto: l.texto }));
-
-  } catch(err) {
-    console.error('Erro ao carregar dados:', err);
-    showToast('⚠️ Erro ao conectar banco — usando dados locais');
-  }
-
-  hideLoadingScreen();
-  initLoginSelect();
-}
-
-// ── Salvar tarefa no banco ──
-async function salvarTarefaBanco(membroId, tarefaNome, xp, concluida) {
-  const hoje = new Date().toISOString().split('T')[0];
-  await sb.from('tarefas_dia').upsert({
-    membro_id: membroId, tarefa_nome: tarefaNome, xp, concluida, data: hoje
-  }, { onConflict: 'membro_id,tarefa_nome,data' });
-}
-
-// ── Salvar XP do membro no banco ──
-async function salvarXPBanco(membroId, xp, streak) {
-  await sb.from('membros').update({ xp, streak }).eq('id', membroId);
-}
-
-// ── Salvar comentário no banco ──
-async function salvarComentarioBanco(postId, membroId, texto) {
-  const { data } = await sb.from('comentarios').insert({ post_id: postId, membro_id: membroId, texto }).select('*, membros(apelido)').single();
-  return data;
-}
-
-// ── Salvar reação no banco ──
-async function salvarReacaoBanco(postId, membroId, emoji) {
-  if (emoji) {
-    await sb.from('reacoes').upsert({ post_id: postId, membro_id: membroId, emoji }, { onConflict: 'post_id,membro_id' });
-  } else {
-    await sb.from('reacoes').delete().eq('post_id', postId).eq('membro_id', membroId);
-  }
-}
-
-// ── Salvar log no banco ──
-async function salvarLogBanco(tipo, icon, texto) {
-  await sb.from('logs').insert({ tipo, icon, texto: texto.replace(/<[^>]+>/g,'') });
-}
-
-// ── Criar senha no banco ──
-async function salvarSenhaBanco(membroId, senha) {
-  await sb.from('membros').update({ senha }).eq('id', membroId);
-}
-
-// ── Reset de semana no banco ──
-async function resetarSemanaBanco(semanaNum, lidVend, xpVend, lidCaixa, xpCaixa) {
-  await sb.from('historico_semanas').insert({ semana_num: semanaNum, periodo: '—', lid_vend: lidVend, xp_vend: xpVend, lid_caixa: lidCaixa, xp_caixa: xpCaixa });
-  await sb.from('membros').update({ xp: 0, streak: 0 });
-  // Deleta tarefas da semana
-  await sb.from('tarefas_dia').delete().neq('id', 0);
-}
-
-// ── Loading screen ──
-function showLoadingScreen() {
-  const el = document.getElementById('loading-screen');
-  if (el) el.style.display = 'flex';
-}
-function hideLoadingScreen() {
-  const el = document.getElementById('loading-screen');
-  if (el) el.style.display = 'none';
-}
-
-initApp();
-</script>
-</body>
-</html>
+STATE.currentUser = null;
+STATE.isGestor = false;
+document.getElementById('app-topbar').classList.add('hidden');
+document.getElementById('bottom-nav').classList.add('hidden');
+['feed','tarefas','ranking','analise','gestor'].forEach(s =>
+document.getElementById('screen-' + s).classList.add('hidden'));
