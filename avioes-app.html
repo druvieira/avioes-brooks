@@ -1081,48 +1081,115 @@ tr:active td{background:rgba(90,171,104,0.04)}
 </div>
 
 <div class="modal-overlay" id="modal-perfil">
-  <div class="modal">
-    <div style="text-align:center;margin-bottom:20px">
-      <div style="width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--accent3),var(--accent));display:flex;align-items:center;justify-content:center;font-size:36px;margin:0 auto 10px;box-shadow:0 0 24px rgba(90,171,104,0.4)">
-        <span id="perfil-plane-icon">✈️</span>
+  <div class="modal" style="padding:0;overflow:hidden;max-height:92vh;display:flex;flex-direction:column">
+
+    <!-- Cabeçalho com foto -->
+    <div id="perfil-header" style="position:relative;min-height:130px;background:linear-gradient(135deg,var(--accent3),var(--accent),#5b3fcf);display:flex;align-items:flex-end;padding:16px;flex-shrink:0">
+      <div style="position:relative;cursor:pointer;flex-shrink:0" onclick="trocarFotoPerfil()">
+        <div id="perfil-foto-wrap" style="width:76px;height:76px;border-radius:50%;border:3px solid rgba(255,255,255,0.3);overflow:hidden;background:rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;font-size:30px">
+          <span id="perfil-foto-icon">✈️</span>
+        </div>
+        <div style="position:absolute;bottom:0;right:0;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,0.6);border:2px solid rgba(255,255,255,0.3);display:flex;align-items:center;justify-content:center;font-size:10px">📷</div>
       </div>
-      <div style="font-family:'Black Han Sans',sans-serif;font-size:24px;letter-spacing:2px;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent" id="perfil-nome">—</div>
-      <div style="font-size:11px;color:var(--text2);font-family:'JetBrains Mono',monospace;letter-spacing:2px;margin-top:3px" id="perfil-nivel">—</div>
-      <div style="margin-top:10px;display:flex;gap:6px;justify-content:center" id="perfil-badges"></div>
+      <div style="margin-left:12px;padding-bottom:2px;flex:1">
+        <div id="perfil-nome-display" style="font-family:'Outfit',sans-serif;font-size:20px;font-weight:800;color:#fff;line-height:1.2"></div>
+        <div id="perfil-nivel-display" style="font-size:11px;color:rgba(255,255,255,0.65);font-family:'JetBrains Mono',monospace;margin-top:2px"></div>
+      </div>
+      <button onclick="closeModal('modal-perfil')" style="position:absolute;top:10px;right:10px;background:rgba(0,0,0,0.35);border:none;color:rgba(255,255,255,0.8);width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:16px;line-height:1">×</button>
     </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
-      <div class="card" style="text-align:center;padding:14px">
-        <div style="font-size:10px;color:var(--text2);font-family:'JetBrains Mono',monospace;letter-spacing:1px;margin-bottom:4px">XP SEMANA</div>
-        <div style="font-family:'Black Han Sans',sans-serif;font-size:28px;color:var(--accent)" id="perfil-xp">0</div>
+
+    <!-- Body scrollável -->
+    <div style="padding:20px;overflow-y:auto;flex:1">
+
+      <!-- Badges filial/função -->
+      <div id="perfil-badges" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px"></div>
+
+      <!-- Apelido -->
+      <div class="modal-form-group">
+        <label>Apelido</label>
+        <input type="text" id="perfil-edit-apelido" placeholder="Como aparecer no ranking">
       </div>
-      <div class="card" style="text-align:center;padding:14px">
-        <div style="font-size:10px;color:var(--text2);font-family:'JetBrains Mono',monospace;letter-spacing:1px;margin-bottom:4px">STREAK</div>
-        <div style="font-family:'Black Han Sans',sans-serif;font-size:28px;color:var(--gold)" id="perfil-streak">0🔥</div>
+
+      <!-- Cidade -->
+      <div class="modal-form-group">
+        <label>Cidade</label>
+        <input type="text" id="perfil-edit-cidade" placeholder="Ex: Cuiabá">
       </div>
-      <div class="card" style="text-align:center;padding:14px">
-        <div style="font-size:10px;color:var(--text2);font-family:'JetBrains Mono',monospace;letter-spacing:1px;margin-bottom:4px">POSIÇÃO</div>
-        <div style="font-family:'Black Han Sans',sans-serif;font-size:28px;color:var(--blue)" id="perfil-pos">—</div>
+
+      <!-- Frase -->
+      <div class="modal-form-group" style="margin-bottom:20px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <label style="margin-bottom:0">Frase do feed</label>
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;margin-bottom:0">
+            <span style="font-size:11px;color:var(--text2)">Mostrar</span>
+            <input type="checkbox" id="perfil-frase-ativa" style="width:auto;cursor:pointer;accent-color:var(--accent)">
+          </label>
+        </div>
+        <input type="text" id="perfil-edit-frase" placeholder="Sua frase no feed... (opcional)">
       </div>
-      <div class="card" style="text-align:center;padding:14px">
-        <div style="font-size:10px;color:var(--text2);font-family:'JetBrains Mono',monospace;letter-spacing:1px;margin-bottom:4px">TAREFAS</div>
-        <div style="font-family:'Black Han Sans',sans-serif;font-size:28px;color:var(--accent2)" id="perfil-tarefas">—</div>
+
+      <!-- Stats 2x2 -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+        <div class="card" style="text-align:center;padding:12px">
+          <div style="font-size:9px;color:var(--text2);font-family:'JetBrains Mono',monospace;letter-spacing:1px;margin-bottom:4px">XP SEMANA</div>
+          <div style="font-family:'Outfit',sans-serif;font-size:26px;font-weight:800;color:var(--accent)" id="perfil-xp">0</div>
+        </div>
+        <div class="card" style="text-align:center;padding:12px">
+          <div style="font-size:9px;color:var(--text2);font-family:'JetBrains Mono',monospace;letter-spacing:1px;margin-bottom:4px">RANKING</div>
+          <div style="font-family:'Outfit',sans-serif;font-size:26px;font-weight:800;color:var(--blue)" id="perfil-pos">—</div>
+        </div>
+        <div class="card" style="text-align:center;padding:12px">
+          <div style="font-size:9px;color:var(--text2);font-family:'JetBrains Mono',monospace;letter-spacing:1px;margin-bottom:4px">STREAK</div>
+          <div style="font-family:'Outfit',sans-serif;font-size:26px;font-weight:800;color:var(--gold)" id="perfil-streak">0🔥</div>
+        </div>
+        <div class="card" style="text-align:center;padding:12px">
+          <div style="font-size:9px;color:var(--text2);font-family:'JetBrains Mono',monospace;letter-spacing:1px;margin-bottom:4px">TAREFAS HOJE</div>
+          <div style="font-family:'Outfit',sans-serif;font-size:26px;font-weight:800;color:var(--accent2)" id="perfil-tarefas">—</div>
+        </div>
+      </div>
+
+      <!-- Média das fotos -->
+      <div class="card" style="margin-bottom:14px">
+        <div style="font-size:9px;color:var(--text2);font-family:'JetBrains Mono',monospace;letter-spacing:1px;margin-bottom:12px">📊 MÉDIA DAS FOTOS · chegar a 1000 é quase impossível, como no ENEM</div>
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:10px">
+          <div style="font-family:'Outfit',sans-serif;font-size:48px;font-weight:800;line-height:1" id="perfil-media-num">—</div>
+          <div>
+            <div style="font-size:14px;font-weight:700" id="perfil-media-label">—</div>
+            <div style="font-size:11px;color:var(--text2);margin-top:2px" id="perfil-media-fotos">Sem fotos ainda</div>
+          </div>
+        </div>
+        <div style="background:rgba(255,255,255,0.06);border-radius:4px;height:6px;overflow:hidden">
+          <div id="perfil-media-bar" style="height:100%;border-radius:4px;width:0%;transition:width 1s;background:var(--accent)"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--text3);font-family:'JetBrains Mono',monospace;margin-top:4px">
+          <span>0</span><span>500</span><span>1000</span>
+        </div>
+      </div>
+
+      <!-- Progresso de patente -->
+      <div class="card" style="margin-bottom:18px">
+        <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text2);font-family:'JetBrains Mono',monospace;margin-bottom:6px">
+          <span id="perfil-level-cur">—</span>
+          <span id="perfil-level-next">—</span>
+        </div>
+        <div class="xp-bar-wrap"><div class="xp-bar-fill" id="perfil-xp-bar" style="width:0%;transition:width 1s"></div></div>
+      </div>
+
+      <!-- Sessões -->
+      <div id="perfil-sessoes-wrap" style="margin-bottom:16px;display:none">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--text2);margin-bottom:8px">📍 Minhas Sessões</div>
+        <div class="card" style="padding:8px 16px" id="perfil-sessoes"></div>
+      </div>
+
+      <!-- Ações -->
+      <button class="btn btn-primary" onclick="salvarPerfil()" style="margin-bottom:10px">💾 Salvar perfil</button>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-ghost" style="flex:1" onclick="closeModal('modal-perfil');openModal('modal-trocar-senha')">🔑 Senha</button>
+        <button class="btn btn-danger" style="flex:1" onclick="fazerLogout()">🚪 Sair</button>
       </div>
     </div>
-    <div style="margin-bottom:18px">
-      <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text2);font-family:'JetBrains Mono',monospace;margin-bottom:6px">
-        <span id="perfil-level-cur">Teco-teco</span>
-        <span id="perfil-level-next"></span>
-      </div>
-      <div class="xp-bar-wrap"><div class="xp-bar-fill" id="perfil-xp-bar" style="width:0%;transition:width 1s"></div></div>
-    </div>
-    <div id="perfil-sessoes-wrap" style="margin-bottom:16px;display:none">
-      <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text2);margin-bottom:8px">📍 Minhas Sessões</div>
-      <div class="card" style="padding:8px 16px" id="perfil-sessoes"></div>
-    </div>
-    <div style="display:flex;flex-direction:column;gap:10px">
-      <button class="btn btn-ghost" onclick="closeModal('modal-perfil');openModal('modal-trocar-senha')">🔑 Trocar senha</button>
-      <button class="btn btn-danger" onclick="fazerLogout()">🚪 Sair</button>
-    </div>
+
+    <input type="file" id="perfil-foto-input" accept="image/*" style="display:none" onchange="processarFotoPerfil(this)">
   </div>
 </div>
 
@@ -1351,13 +1418,27 @@ function loginSuccess(membro, isGestor = false) {
   document.getElementById('bottom-nav').classList.remove('hidden');
   document.getElementById('screen-login').classList.add('hidden');
 
+  // Carrega dados salvos localmente
+  if (!isGestor && membro) {
+    const saved = localStorage.getItem('avioes_perfil_' + membro.id);
+    if (saved) { try { const p = JSON.parse(saved); membro.apelido=p.apelido||membro.apelido; membro.frase=p.frase; membro.fraseAtiva=p.fraseAtiva; membro.cidade=p.cidade; } catch(_) {} }
+    const savedFoto = localStorage.getItem('avioes_foto_' + membro.id);
+    if (savedFoto) membro.foto = savedFoto;
+  }
   const nivel = getPlaneLevel(membro ? membro.xp : 0);
   document.getElementById('topbar-plane').textContent = nivel.emoji;
   document.getElementById('topbar-name').textContent = isGestor ? 'GESTOR' : membro.apelido;
   document.getElementById('topbar-level').textContent = isGestor ? 'ADMIN' : nivel.name;
   const filialEl = document.getElementById('topbar-filial');
   if (filialEl) filialEl.textContent = isGestor ? '' : (FILIAL_NOMES[membro?.filial] || '');
-  document.getElementById('topbar-ava').textContent = isGestor ? '⚙️' : membro.apelido.slice(0,2).toUpperCase();
+  const avaEl = document.getElementById('topbar-ava');
+  if (avaEl) {
+    if (!isGestor && membro?.foto) {
+      avaEl.innerHTML = '<img src="' + membro.foto + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';
+    } else {
+      avaEl.textContent = isGestor ? '⚙️' : membro.apelido.slice(0,2).toUpperCase();
+    }
+  }
 
   // Mostra nav gestor só se for gestor
   document.getElementById('nav-gestor').style.display = isGestor ? 'flex' : 'none';
@@ -2531,51 +2612,141 @@ async function submeterFoto() {
 function abrirPerfil() {
   const me = STATE.currentUser;
   if (!me) return;
-  const plane = getPlaneLevel(me.xp);
-  const tarefas = me.funcao === 'vendedor' ? STATE.tarefasVendedor : STATE.tarefasCaixa;
-  const done = me.tarefasHoje.filter(Boolean).length;
-  const pos = getRankPos(me);
-  const curIdx = PLANE_LEVELS.findIndex((p,i) => me.xp >= p.minXP && (i === PLANE_LEVELS.length-1 || me.xp < PLANE_LEVELS[i+1].minXP));
-  const nextLevel = PLANE_LEVELS[curIdx + 1];
+  const plane    = getPlaneLevel(me.xp);
+  const tarefas  = me.funcao === 'vendedor' ? STATE.tarefasVendedor : STATE.tarefasCaixa;
+  const done     = me.tarefasHoje.filter(Boolean).length;
+  const pos      = getRankPos(me);
+  const curIdx   = PLANE_LEVELS.findIndex((p,i) => me.xp >= p.minXP && (i===PLANE_LEVELS.length-1 || me.xp < PLANE_LEVELS[i+1].minXP));
+  const nextLevel= PLANE_LEVELS[curIdx + 1];
 
-  document.getElementById('perfil-plane-icon').textContent = plane.emoji;
-  document.getElementById('perfil-nome').textContent = me.apelido;
-  document.getElementById('perfil-nivel').textContent = plane.name.toUpperCase();
+  // Header
+  document.getElementById('perfil-nome-display').textContent = me.apelido;
+  document.getElementById('perfil-nivel-display').textContent = plane.emoji + '  ' + plane.name.toUpperCase();
+
+  // Foto
+  const fotoWrap = document.getElementById('perfil-foto-wrap');
+  const savedFoto = me.foto || localStorage.getItem('avioes_foto_' + me.id);
+  if (savedFoto) {
+    fotoWrap.innerHTML = '<img src="' + savedFoto + '" style="width:100%;height:100%;object-fit:cover">';
+  } else {
+    fotoWrap.innerHTML = '<span id="perfil-foto-icon" style="font-size:30px">' + plane.emoji + '</span>';
+  }
+
+  // Campos editáveis
+  document.getElementById('perfil-edit-apelido').value = me.apelido;
+  document.getElementById('perfil-edit-frase').value   = me.frase || '';
+  document.getElementById('perfil-frase-ativa').checked = me.fraseAtiva !== false;
+  document.getElementById('perfil-edit-cidade').value  = me.cidade || '';
+
+  // Badges
   document.getElementById('perfil-badges').innerHTML =
-    '<span class="badge badge-green">' + (me.funcao === 'vendedor' ? '🛍️ Vendedor' : '🖥️ Caixa') + '</span>' +
-    '<span class="badge badge-blue">' + (me.turno === 'manha' ? '🌅 Manhã' : '🌇 Tarde') + '</span>';
-  document.getElementById('perfil-xp').textContent = me.xp;
-  document.getElementById('perfil-streak').textContent = me.streak + '🔥';
-  document.getElementById('perfil-pos').textContent = pos + 'º';
+    '<span class="badge badge-green">' + (me.funcao==='vendedor'?'🛍️ Vendedor':'🖥️ Caixa') + '</span>' +
+    '<span class="badge badge-blue">' + (FILIAL_NOMES[me.filial]||me.filial||'') + '</span>' +
+    (me.cidade ? '<span class="badge" style="background:var(--s3);border:1px solid var(--border);color:var(--text2)">🌆 ' + me.cidade + '</span>' : '');
+
+  // Stats
+  document.getElementById('perfil-xp').textContent      = me.xp;
+  document.getElementById('perfil-pos').textContent     = pos + 'º';
+  document.getElementById('perfil-streak').textContent  = me.streak + '🔥';
   document.getElementById('perfil-tarefas').textContent = done + '/' + tarefas.length;
 
-  const curMin = plane.minXP;
-  const nextMin = nextLevel ? nextLevel.minXP : curMin;
-  const pct = nextLevel ? Math.min(100, ((me.xp - curMin) / (nextMin - curMin)) * 100) : 100;
-  document.getElementById('perfil-level-cur').textContent = plane.name;
-  document.getElementById('perfil-level-next').textContent = nextLevel
-    ? nextLevel.name + ' em ' + (nextMin - me.xp) + ' XP'
-    : '🏆 Nível máximo!';
+  // Barra de patente
+  const curMin = plane.minXP, nextMin = nextLevel ? nextLevel.minXP : curMin;
+  const pct = nextLevel ? Math.min(100, ((me.xp-curMin)/(nextMin-curMin))*100) : 100;
+  document.getElementById('perfil-level-cur').textContent  = plane.emoji + ' ' + plane.name;
+  document.getElementById('perfil-level-next').textContent = nextLevel ? nextLevel.name + ' +' + (nextMin-me.xp) + ' XP' : '🏆 Nível máximo';
   setTimeout(() => { document.getElementById('perfil-xp-bar').style.width = pct + '%'; }, 80);
 
-  // Sessões do vendedor
+  // Média das fotos
+  const meusPosts = STATE.feedData.filter(p => p.author === me.apelido && p.score > 0);
+  const numFotos  = meusPosts.length;
+  const mediaEl   = document.getElementById('perfil-media-num');
+  const labelEl   = document.getElementById('perfil-media-label');
+  const fotosEl   = document.getElementById('perfil-media-fotos');
+  const barEl     = document.getElementById('perfil-media-bar');
+  if (numFotos > 0) {
+    const media = Math.round(meusPosts.reduce((s,p) => s+p.score, 0) / numFotos);
+    const TIERS = [
+      { min:950, label:'LENDÁRIO ✨', color:'#fcd34d', bar:'linear-gradient(90deg,#f59e0b,#fcd34d)' },
+      { min:850, label:'ÉPICO 🔥',    color:'var(--accent2)', bar:'linear-gradient(90deg,var(--accent3),var(--accent))' },
+      { min:700, label:'EXCELENTE ⭐',color:'var(--green)',  bar:'var(--green)' },
+      { min:500, label:'BOM 👍',       color:'var(--blue)',   bar:'var(--blue)' },
+      { min:0,   label:'REGULAR',      color:'var(--text2)',  bar:'rgba(255,255,255,0.2)' },
+    ];
+    const tier = TIERS.find(t => media >= t.min);
+    mediaEl.textContent    = media;
+    mediaEl.style.color    = tier.color;
+    labelEl.textContent    = tier.label;
+    labelEl.style.color    = tier.color;
+    fotosEl.textContent    = numFotos + (numFotos===1?' foto avaliada':' fotos avaliadas');
+    setTimeout(() => { barEl.style.width = (media/10)+'%'; barEl.style.background = tier.bar; }, 80);
+  } else {
+    mediaEl.textContent   = '—';
+    mediaEl.style.color   = 'var(--text2)';
+    labelEl.textContent   = 'Sem fotos ainda';
+    labelEl.style.color   = 'var(--text2)';
+    fotosEl.textContent   = 'Poste sua primeira foto!';
+    barEl.style.width     = '0%';
+  }
+
+  // Sessões
   const minhasSessoes = getMinhaSessoes(me);
   const sessaoEl = document.getElementById('perfil-sessoes');
-  if (sessaoEl) {
-    if (minhasSessoes.length > 0) {
-      sessaoEl.innerHTML = minhasSessoes.map(s =>
-        '<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.04)">' +
-        '<span style="font-size:16px">📍</span>' +
-        '<div><div style="font-weight:600;font-size:13px">' + s.nome + '</div>' +
-        '<div style="font-size:11px;color:var(--text2)">' + (s.desc || '—') + '</div></div>' +
-        '</div>'
-      ).join('');
-      sessaoEl.parentElement.style.display = 'block';
-    } else {
-      sessaoEl.parentElement.style.display = 'none';
-    }
+  if (sessaoEl && minhasSessoes.length > 0) {
+    sessaoEl.innerHTML = minhasSessoes.map(s =>
+      '<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.04)">' +
+      '<span>📍</span><div><div style="font-weight:600;font-size:13px">' + s.nome + '</div>' +
+      '<div style="font-size:11px;color:var(--text2)">' + (s.desc||'—') + '</div></div></div>'
+    ).join('');
+    sessaoEl.parentElement.style.display = 'block';
+  } else if (sessaoEl) {
+    sessaoEl.parentElement.style.display = 'none';
   }
+
   openModal('modal-perfil');
+}
+
+
+function salvarPerfil() {
+  const me = STATE.currentUser;
+  if (!me) return;
+  const novoApelido = document.getElementById('perfil-edit-apelido').value.trim() || me.apelido;
+  const frase       = document.getElementById('perfil-edit-frase').value.trim();
+  const fraseAtiva  = document.getElementById('perfil-frase-ativa').checked;
+  const cidade      = document.getElementById('perfil-edit-cidade').value.trim();
+  me.apelido   = novoApelido;
+  me.frase     = frase;
+  me.fraseAtiva= fraseAtiva;
+  me.cidade    = cidade;
+  document.getElementById('topbar-name').textContent = novoApelido;
+  localStorage.setItem('avioes_perfil_' + me.id, JSON.stringify({ apelido:novoApelido, frase, fraseAtiva, cidade }));
+  if (sb) sb.from('membros').update({ apelido:novoApelido, cidade }).eq('id', me.id).catch(() => {});
+  closeModal('modal-perfil');
+  showToast('✅ Perfil salvo!');
+}
+
+function trocarFotoPerfil() {
+  document.getElementById('perfil-foto-input').click();
+}
+
+function processarFotoPerfil(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const foto = ev.target.result;
+    const me = STATE.currentUser;
+    if (!me) return;
+    me.foto = foto;
+    localStorage.setItem('avioes_foto_' + me.id, foto);
+    const fotoWrap = document.getElementById('perfil-foto-wrap');
+    if (fotoWrap) fotoWrap.innerHTML = '<img src="' + foto + '" style="width:100%;height:100%;object-fit:cover">';
+    // Atualiza avatar na topbar
+    const ava = document.getElementById('topbar-ava');
+    if (ava) ava.innerHTML = '<img src="' + foto + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';
+    showToast('📷 Foto de perfil atualizada!');
+  };
+  reader.readAsDataURL(file);
 }
 
 function fazerLogout() {
