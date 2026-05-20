@@ -2614,8 +2614,8 @@ function abrirPerfil() {
   if (!me) return;
   const plane    = getPlaneLevel(me.xp);
   const tarefas  = me.funcao === 'vendedor' ? STATE.tarefasVendedor : STATE.tarefasCaixa;
-  const done     = me.tarefasHoje.filter(Boolean).length;
-  const pos      = getRankPos(me);
+  const done     = (me.tarefasHoje || []).filter(Boolean).length;
+  const pos      = STATE.isGestor ? null : getRankPos(me);
   const curIdx   = PLANE_LEVELS.findIndex((p,i) => me.xp >= p.minXP && (i===PLANE_LEVELS.length-1 || me.xp < PLANE_LEVELS[i+1].minXP));
   const nextLevel= PLANE_LEVELS[curIdx + 1];
 
@@ -2645,10 +2645,10 @@ function abrirPerfil() {
     (me.cidade ? '<span class="badge" style="background:var(--s3);border:1px solid var(--border);color:var(--text2)">🌆 ' + me.cidade + '</span>' : '');
 
   // Stats
-  document.getElementById('perfil-xp').textContent      = me.xp;
-  document.getElementById('perfil-pos').textContent     = pos + 'º';
+  document.getElementById('perfil-xp').textContent      = STATE.isGestor ? '∞' : me.xp;
+  document.getElementById('perfil-pos').textContent     = pos ? pos + 'º' : 'ADMIN';
   document.getElementById('perfil-streak').textContent  = me.streak + '🔥';
-  document.getElementById('perfil-tarefas').textContent = done + '/' + tarefas.length;
+  document.getElementById('perfil-tarefas').textContent = STATE.isGestor ? '—' : done + '/' + tarefas.length;
 
   // Barra de patente
   const curMin = plane.minXP, nextMin = nextLevel ? nextLevel.minXP : curMin;
