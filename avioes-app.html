@@ -2499,11 +2499,15 @@ function mostrarStep(n) {
   });
 }
 
+function getMinhaSessoes(me) {
+  return (STATE.sessoes || []).filter(s => s.responsavelId === (me && me.id));
+}
+
 function abrirModalFoto() {
   try {
   if (!STATE.currentUser || STATE.isGestor) { showToast('⚠️ Só membros podem postar fotos'); return; }
   const sel = document.getElementById('foto-sessao-sel');
-  const minhas = getMinhaSessoes(STATE.currentUser);
+  const minhas = STATE.sessoes.filter(s => s.responsavelId === STATE.currentUser.id);
   const outras  = STATE.sessoes.filter(s => s.responsavelId !== STATE.currentUser.id);
   const balcoes = STATE.balcoes;
   let html = '';
