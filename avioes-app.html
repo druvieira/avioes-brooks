@@ -1596,12 +1596,27 @@ function loginGestorConfirm() {
   }
   if (senha === '0000' || senha === 'gestor') {
     addLog('login', '⚙️', '<strong>Gestor</strong> acessou o painel');
+    localStorage.setItem('avioes_session', JSON.stringify({ isGestor: true }));
     closeModal('modal-gestor-login');
     loginSuccess({ apelido:'Gestor', xp:9999, funcao:'gestor' }, true);
   } else {
     errEl.textContent = 'Senha incorreta';
     errEl.style.display = 'block';
   }
+}
+
+function fazerLogout() {
+  localStorage.removeItem('avioes_session');
+  closeModal('modal-perfil');
+  STATE.currentUser = null;
+  STATE.isGestor = false;
+  document.getElementById('app-topbar').classList.add('hidden');
+  document.getElementById('bottom-nav').classList.add('hidden');
+  ['feed','tarefas','ranking','analise','gestor'].forEach(s =>
+    document.getElementById('screen-' + s).classList.add('hidden'));
+  document.getElementById('screen-login').classList.remove('hidden');
+  document.getElementById('login-senha').value = '';
+  document.getElementById('login-select').value = '';
 }
 
 function logoutGestor() {
