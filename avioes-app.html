@@ -1576,6 +1576,7 @@ function tentarLogin() {
   }
   errEl.style.display = 'none';
   addLog('login','🔐','<strong>' + membro.apelido + '</strong> entrou · ' + (FILIAL_NOMES[membro.filial]||membro.filial));
+  localStorage.setItem('avioes_session', JSON.stringify({ memberId: membro.id, isGestor: false }));
   loginSuccess(membro);
 }
 
@@ -1604,6 +1605,7 @@ function loginGestorConfirm() {
 }
 
 function logoutGestor() {
+  localStorage.removeItem('avioes_session');
   STATE.currentUser = null;
   STATE.isGestor = false;
   document.getElementById('app-topbar').classList.add('hidden');
@@ -2423,6 +2425,20 @@ async function initApp() {
 
   hideLoadingScreen();
   initLoginSelect();
+
+  // Auto-login: restaura sessao salva
+  const _sess = localStorage.getItem('avioes_session');
+  if (_sess) {
+    try {
+      const _s = JSON.parse(_sess);
+      if (_s.isGestor) {
+        loginSuccess({ apelido:'Gestor', xp:9999, funcao:'gestor' }, true);
+        return;
+      }
+      const _m = STATE.membros.find(x => x.id === _s.memberId);
+      if (_m) { loginSuccess(_m, false); return; }
+    } catch(_e) {}
+  }
   checkFirstRun();
 }
 
