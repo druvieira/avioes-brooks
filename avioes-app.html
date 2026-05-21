@@ -45,7 +45,8 @@ body{font-family:'Inter',sans-serif;color:var(--text);display:flex;flex-directio
    SCREENS
 ══════════════════════════════════════ */
 .screen{
-  position:absolute;inset:0;
+  position:absolute;
+  top:var(--topbar-h,0px);left:0;right:0;bottom:0;
   display:flex;flex-direction:column;
   background:var(--bg);
   transition:transform 0.35s cubic-bezier(0.4,0,0.2,1),opacity 0.35s;
@@ -1473,6 +1474,10 @@ function loginSuccess(membro, isGestor = false) {
 
   // Atualiza topbar
   document.getElementById('app-topbar').classList.remove('hidden');
+  setTimeout(() => {
+    const _h = document.getElementById('app-topbar').offsetHeight;
+    document.documentElement.style.setProperty('--topbar-h', _h + 'px');
+  }, 30);
   document.getElementById('bottom-nav').classList.remove('hidden');
   document.getElementById('screen-login').classList.add('hidden');
 
@@ -1607,6 +1612,7 @@ function loginGestorConfirm() {
 
 function fazerLogout() {
   localStorage.removeItem('avioes_session');
+  document.documentElement.style.setProperty('--topbar-h', '0px');
   closeModal('modal-perfil');
   STATE.currentUser = null;
   STATE.isGestor = false;
@@ -1621,6 +1627,7 @@ function fazerLogout() {
 
 function logoutGestor() {
   localStorage.removeItem('avioes_session');
+  document.documentElement.style.setProperty('--topbar-h', '0px');
   STATE.currentUser = null;
   STATE.isGestor = false;
   document.getElementById('app-topbar').classList.add('hidden');
@@ -1667,10 +1674,12 @@ function renderFeed() {
 }
 
 function renderRankStrip() {
-  const maxXP = Math.max(...STATE.membros.map(m => m.xp));
   const strip = document.getElementById('rank-strip');
+  const comXP = STATE.membros.filter(m => m.xp > 0);
+  if (comXP.length === 0) { strip.innerHTML = ''; return; }
+  const maxXP = Math.max(...comXP.map(m => m.xp));
   strip.innerHTML = '';
-  [...STATE.membros].sort((a,b) => b.xp - a.xp).forEach(m => {
+  [...comXP].sort((a,b) => b.xp - a.xp).forEach(m => {
     const pct = (m.xp / maxXP * 100).toFixed(0) + '%';
     const plane = getPlaneLevel(m.xp);
     const chip = document.createElement('div');
