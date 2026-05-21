@@ -1587,6 +1587,8 @@ function loginSuccess(membro, isGestor = false) {
     goTo('feed');
     verificarPrimeiroLogin(membro);
   }
+  // Verifica reset diário
+  if (!isGestor && membro) verificarResetDiario(membro);
   // Inicia sincronização em tempo real
   setTimeout(iniciarRealtime, 1000);
 }
@@ -2059,6 +2061,7 @@ function toggleTarefa(idx) {
   const t = tarefas[idx];
   if (!wasDone) {
     me.xp += t.xp;
+    marcarDataTarefa(me.id);
     addLog('tarefa','✅','<strong>' + me.apelido + '</strong> completou ' + t.nome + ' (+' + t.xp + ' XP)');
     showXPCelebration('+' + t.xp + ' XP ⚡');
     const nivel = getPlaneLevel(me.xp);
@@ -3022,6 +3025,63 @@ function pararRealtime() {
   if (_rtChannel) { sb?.removeChannel(_rtChannel); _rtChannel = null; }
   if (_pollTimer)  { clearInterval(_pollTimer); _pollTimer = null; }
 }
+
+
+// ════════════════════════════════════════════
+// RESET DIÁRIO — tarefas + streak
+// ════════════════════════════════════════════
+
+function getDataHoje() {
+  return new Date().toISOString().split('T')[0]; // 'YYYY-MM-DD'
+}
+
+function getDataOntem() {
+  const d = new Date();
+  d.setDate(d.getDate() - 1);
+  return d.toISOString().split('T')[0];
+}
+
+function verificarResetDiario(membro) {
+  if (!membro || membro.funcao === 'gestor') return;
+  const hoje   = getDataHoje();
+  const ontem  = getDataOntem();
+  const chave  = 'avioes_task_date_' + membro.id;
+  const ultima = localStorage.getItem(chave);
+
+  if (ultima === hoje) return; // já resetou hoje
+
+  // Novo dia detectado
+  const tarefasAntes = membro.tarefasHoje.filter(Boolean).length;
+
+  // Atualiza streak
+  if (ultima === ontem && tarefasAntes > 0) {
+    // Completou tarefas ontem → mantém/incrementa streak (já incrementado pelo server)
+    // Não faz nada — o server cuida
+  } else if (ultima && ultima !== ontem) {
+    // Pulou um dia → zera streak
+    membro.streak = 0;
+    if (sb) sb.from('membros').update({ streak: 0 }).eq('id', membro.id).catch(() => {});
+  }
+
+  // Reseta tarefas do dia
+  membro.tarefasHoje = [false, false, false, false, false];
+  localStorage.setItem(chave, hoje);
+
+  // Reseta XP do dia na UI (mantém XP total, só reseta a view local)
+  console.log('Novo dia — tarefas resetadas para', membro.apelido);
+}
+
+// Marca data quando completa uma tarefa
+function marcarDataTarefa(membroId) {
+  localStorage.setItem('avioes_task_date_' + membroId, getDataHoje());
+}
+
+// Verifica reset quando app volta do background
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden && STATE.currentUser && !STATE.isGestor) {
+    verificarResetDiario(STATE.currentUser);
+  }
+});
 
 initApp();
 </script>
