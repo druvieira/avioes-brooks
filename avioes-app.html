@@ -2557,6 +2557,7 @@ async function initApp() {
           xp: p.xp,
           rankUp: p.rank_up,
           emoji: p.emoji || '📸',
+          imageUrl: p.foto_url || null,
           reactions,
           myReaction: (p.reacoes || []).find(r => r.membro_id === STATE.currentUser?.id)?.emoji || null,
           comments: (p.comentarios || []).map(c => ({
@@ -2851,6 +2852,13 @@ async function publicarNoFeed() {
   const me = STATE.currentUser;
   if (!me || !_fotoB64) return;
   const sessao = document.getElementById('foto-sessao-sel').value || '—';
+
+  // Upload da foto para o servidor (Supabase Storage)
+  let fotoUrl = null;
+  if (_fotoB64 && sb) {
+    fotoUrl = await uploadFotoStorage(_fotoB64, me.id);
+  }
+
   const nivelAntes = getPlaneLevel(me.xp);
   me.xp += _fotoXP;
   const nivelDepois = getPlaneLevel(me.xp);
@@ -2867,7 +2875,7 @@ async function publicarNoFeed() {
     plane: getPlaneLevel(me.xp).emoji,
     time: new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}),
     balcao: sessao, score: _fotoScore, xp: _fotoXP, rankUp,
-    emoji: '📸', imageUrl: _fotoB64,
+    emoji: '📸', imageUrl: fotoUrl || _fotoB64,
     reactions:{}, myReaction:null, comments:[], liked:false, likes:0,
   });
   const b = STATE.balcoes.find(x=>x.nome===sessao) || STATE.sessoes.find(x=>x.nome===sessao);
@@ -2875,7 +2883,7 @@ async function publicarNoFeed() {
   addLog('foto','📸','<strong>'+me.apelido+'</strong> score '+_fotoScore+' · '+sessao+' (+'+_fotoXP+' XP)');
   if (sb) {
     salvarXPBanco(me.id, me.xp, me.streak).catch(()=>{});
-    sb.from('feed').insert({membro_id:me.id,balcao:sessao,score:_fotoScore,xp:_fotoXP,emoji:'📸',rank_up:rankUp}).catch(()=>{});
+    sb.from('feed').insert({membro_id:me.id,balcao:sessao,score:_fotoScore,xp:_fotoXP,emoji:'📸',rank_up:rankUp,foto_url:fotoUrl}).catch(()=>{});
     salvarLogBanco('foto','📸',me.apelido+' score '+_fotoScore+' · '+sessao).catch(()=>{});
   }
   document.getElementById('topbar-plane').textContent = getPlaneLevel(me.xp).emoji;
@@ -3082,6 +3090,34 @@ document.addEventListener('visibilitychange', () => {
     verificarResetDiario(STATE.currentUser);
   }
 });
+
+
+// ════════════════════════════════════════════
+// STORAGE — upload de fotos para o servidor
+// ════════════════════════════════════════════
+
+async function uploadFotoStorage(base64DataUrl, membroId) {
+  if (!sb) return null;
+  try {
+    // Converte base64 para Blob
+    const res  = await fetch(base64DataUrl);
+    const blob = await res.blob();
+    const ext  = blob.type.includes('png') ? 'png' : 'jpg';
+    const nome = Date.now() + '_' + membroId + '.' + ext;
+
+    const { error } = await sb.storage
+      .from('fotos')
+      .upload(nome, blob, { contentType: blob.type, upsert: false });
+
+    if (error) { console.warn('Upload erro:', error.message); return null; }
+
+    const { data } = sb.storage.from('fotos').getPublicUrl(nome);
+    return data.publicUrl;
+  } catch(e) {
+    console.warn('Storage falhou:', e.message);
+    return null;
+  }
+}
 
 initApp();
 </script>
