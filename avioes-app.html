@@ -613,7 +613,7 @@ tr:active td{background:rgba(90,171,104,0.04)}
       </div>
       <div style="margin-bottom:14px">
         <label>Seu nome</label>
-        <input type="text" id="id-nome" placeholder="Como te chamam..." autocorrect="off" autocapitalize="words">
+        <input type="text" id="id-nome" placeholder="Seu apelido (ex: Arthur, Leela...)" autocorrect="off" autocapitalize="words">
       </div>
       <div style="margin-bottom:14px">
         <label>Telefone (será sua senha inicial)</label>
@@ -1560,8 +1560,11 @@ function loginSuccess(membro, isGestor = false) {
   if (!isGestor && membro) {
     const saved = localStorage.getItem('avioes_perfil_' + membro.id);
     if (saved) { try { const p = JSON.parse(saved); membro.apelido=p.apelido||membro.apelido; membro.frase=p.frase; membro.fraseAtiva=p.fraseAtiva; membro.cidade=p.cidade; } catch(_) {} }
-    const savedFoto = localStorage.getItem('avioes_foto_' + membro.id);
-    if (savedFoto) membro.foto = savedFoto;
+    const savedFoto = membro.fotoPerfil || localStorage.getItem('avioes_foto_' + membro.id);
+    if (savedFoto) {
+      membro.foto = savedFoto;
+      localStorage.setItem('avioes_foto_' + membro.id, savedFoto);
+    }
   }
   const nivel = getPlaneLevel(membro ? membro.xp : 0);
   document.getElementById('topbar-plane').textContent = nivel.emoji;
@@ -1689,6 +1692,36 @@ function loginGestorConfirm() {
   }
 }
 
+function processarFotoPerfil(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = async ev => {
+    const foto = ev.target.result;
+    const me   = STATE.currentUser;
+    if (!me) return;
+    me.foto = foto;
+    localStorage.setItem("avioes_foto_" + me.id, foto);
+    const fw = document.getElementById("perfil-foto-wrap");
+        if (fw) fw.innerHTML = '<img src="' + foto + '" style="width:100%;height:100%;object-fit:cover">';
+    const av = document.getElementById("topbar-ava");
+        if (av) av.innerHTML = '<img src="' + foto + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';
+    showToast("📷 Salvando...");
+    if (sb) {
+      try {
+        const blob = await (await fetch(foto)).blob();
+        const nome = "perfil_" + me.id + ".jpg";
+        await sb.storage.from("fotos").upload(nome, blob, { contentType: blob.type, upsert: true });
+        const { data } = sb.storage.from("fotos").getPublicUrl(nome);
+        me.fotoPerfil = data.publicUrl;
+        await sb.from("membros").update({ foto_perfil: data.publicUrl }).eq("id", me.id);
+        showToast("📷 Foto salva!");
+      } catch(_) { showToast("📷 Foto salva no celular!"); }
+    } else { showToast("📷 Foto atualizada!"); }
+  };
+  reader.readAsDataURL(file);
+}
+
 function fazerLogout() {
   pararRealtime();
   localStorage.removeItem('avioes_session');
@@ -1774,7 +1807,7 @@ function renderRankStrip() {
     const plane = getPlaneLevel(m.xp);
     const isMe  = me && m.id === me.id;
     const ativo = temStory(m);
-    const foto  = m.foto || localStorage.getItem('avioes_foto_' + m.id);
+    const foto  = m.foto || m.fotoPerfil || localStorage.getItem('avioes_foto_' + m.id);
     const frase = (m.frase && m.fraseAtiva !== false) ? m.frase : null;
 
     let ringCls = '';
@@ -1923,7 +1956,12 @@ function toggleLike(id, btn) {
   btn.classList.toggle('liked', p.liked);
   btn.querySelector('.icon').textContent = p.liked ? '❤️' : '🤍';
   btn.querySelector('.like-count').textContent = p.likes;
-  if (p.liked) { burstEmoji('❤️', btn); showToast('❤️ Curtido!'); }
+  if (p.liked) {
+    burstEmoji('❤️', btn); showToast('❤️ Curtido!');
+    if (sb && typeof p.id === 'number') sb.from('feed').update({ likes: p.likes }).eq('id', p.id).catch(()=>{});
+  } else {
+    if (sb && typeof p.id === 'number') sb.from('feed').update({ likes: p.likes }).eq('id', p.id).catch(()=>{});
+  }
 }
 
 function toggleEmojiPicker(id) {
@@ -2160,16 +2198,23 @@ function renderAnalise() {
   document.getElementById('kpi-tarefas').textContent = done + '/' + tarefas.length;
   document.getElementById('kpi-posicao').textContent = getRankPos(me) + 'º';
 
-  // Chart XP semana
+  // Chart XP semana — dados reais
   const ctx1 = document.getElementById('chart-xp-semana').getContext('2d');
   if (chartInstances.xpSemana) chartInstances.xpSemana.destroy();
-  chartInstances.xpSemana = new Chart(ctx1, {
-    type:'line',
-    data:{ labels:['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'],
-      datasets:[{ data:[45,80,120,160,210,265,me.xp], borderColor:'var(--accent)', backgroundColor:'rgba(90,171,104,0.1)', fill:true, tension:0.4, pointBackgroundColor:'var(--accent)', pointRadius:4 }]},
-    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}},
-      scales:{ x:{ticks:{color:'#5d8f65',font:{size:10}}, grid:{color:'rgba(255,255,255,0.04)'}},
-               y:{ticks:{color:'#5d8f65',font:{size:10}}, grid:{color:'rgba(255,255,255,0.04)'}} } }
+  carregarXPSemana(me.id).then(xpData => {
+    if (chartInstances.xpSemana) chartInstances.xpSemana.destroy();
+    const hoje2 = new Date().getDay();
+    const lbls  = ["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"];
+    const lblsOrd = [...lbls.slice(hoje2+1), ...lbls.slice(0,hoje2+1)];
+    chartInstances.xpSemana = new Chart(ctx1, {
+      type:"line",
+      data:{ labels:lblsOrd, datasets:[{ data: xpData||[0,0,0,0,0,0,me.xp],
+        borderColor:"var(--accent)", backgroundColor:"rgba(124,108,252,0.1)",
+        fill:true, tension:0.4, pointBackgroundColor:"var(--accent)", pointRadius:4 }]},
+      options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}},
+        scales:{ x:{ticks:{color:"#5d8f65",font:{size:10}},grid:{color:"rgba(255,255,255,0.04)"}},
+                 y:{ticks:{color:"#5d8f65",font:{size:10}},grid:{color:"rgba(255,255,255,0.04)"}} } }
+    });
   });
 
   // Adesão por tarefa
@@ -2306,6 +2351,7 @@ async function addMembro() {
       frase:      data.frase      || null,
       fraseAtiva: data.frase_ativa !== false,
       cidade:     data.cidade     || '',
+      fotoPerfil: data.foto_perfil || null,
       xp: data.xp ?? 0,
       streak: data.streak ?? 0,
       senha: data.senha ?? null,
@@ -2420,6 +2466,8 @@ function executarReset() {
     STATE.semana++;
     addLog('reset','🔄','<strong>Gestor</strong> resetou semana S' + (STATE.semana-1));
     resetarSemanaBanco(STATE.semana-1, lv.apelido, lv.xp, lc.apelido, lc.xp);
+    // Atualiza no banco: zera XP de todos
+    if (sb) sb.from('membros').update({ xp: 0, streak: 0 }).gt('id', 0).catch(()=>{});
     showToast('🔄 Semana resetada!');
   } else {
     const id = parseInt(document.getElementById('reset-membro-select').value);
@@ -2521,9 +2569,10 @@ async function initApp() {
       sobrenome:  m.sobrenome  || '',
       telefone:   m.telefone   || '',
       filial:     m.filial     || 'goiabeiras',
-      frase:      m.frase      || null,
+      frase:      m.frase       || null,
       fraseAtiva: m.frase_ativa !== false,
-      cidade:     m.cidade     || '',
+      cidade:     m.cidade      || '',
+      fotoPerfil: m.foto_perfil || null,
       tarefasHoje: [false, false, false, false, false],
     }));
 
@@ -3117,6 +3166,26 @@ async function uploadFotoStorage(base64DataUrl, membroId) {
     console.warn('Storage falhou:', e.message);
     return null;
   }
+}
+
+
+async function carregarXPSemana(membroId) {
+  if (!sb) return null;
+  try {
+    const hoje = new Date();
+    const dias = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(hoje); d.setDate(d.getDate() - i);
+      dias.push(d.toISOString().split('T')[0]);
+    }
+    const { data } = await sb.from('tarefas_dia')
+      .select('data, xp').eq('membro_id', membroId).eq('concluida', true)
+      .in('data', dias);
+    const xpPorDia = {};
+    dias.forEach(d => xpPorDia[d] = 0);
+    (data || []).forEach(t => { xpPorDia[t.data] = (xpPorDia[t.data] || 0) + t.xp; });
+    return Object.values(xpPorDia);
+  } catch(_) { return null; }
 }
 
 initApp();
