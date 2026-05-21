@@ -1,0 +1,1148 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#070d08">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Aviões">
+<title>Aviões · Brooksfield</title>
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
+<style>
+/* ══════════════════════════════════════
+RESET & VARIABLES
+══════════════════════════════════════ */
+:root {
+--bg: #070d08;
+--s1: #0c1610;
+--s2: #111e14;
+--s3: #162a1a;
+--border: rgba(90,171,104,0.14);
+--accent: #5aab68;
+--accent2: #7dcf8a;
+--accent3: #3d7a48;
+--text: #cce8cc;
+--text2: #5d8f65;
+--text3: #2e4d33;
+--gold: #f5c842;
+--red: #ff5f5f;
+--blue: #4f8ef7;
+--safe-top: env(safe-area-inset-top, 0px);
+--safe-bot: env(safe-area-inset-bottom, 0px);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden;background:var(--bg)}
+body{font-family:'DM Sans',sans-serif;color:var(--text);display:flex;flex-direction:column}
+
+/* ══════════════════════════════════════
+SCREENS
+══════════════════════════════════════ */
+.screen{
+position:absolute;inset:0;
+display:flex;flex-direction:column;
+background:var(–bg);
+transition:transform 0.35s cubic-bezier(0.4,0,0.2,1),opacity 0.35s;
+overflow:hidden;
+}
+.screen.hidden{transform:translateX(100%);opacity:0;pointer-events:none}
+.screen.slide-left{transform:translateX(-40%);opacity:0;pointer-events:none}
+
+/* ══════════════════════════════════════
+SCROLLABLE CONTENT AREA
+══════════════════════════════════════ */
+.scroll-area{
+flex:1;overflow-y:auto;overflow-x:hidden;
+-webkit-overflow-scrolling:touch;
+padding-bottom:calc(72px + var(–safe-bot));
+}
+.scroll-area::-webkit-scrollbar{display:none}
+
+/* ══════════════════════════════════════
+TOP BAR
+══════════════════════════════════════ */
+.topbar{
+padding:calc(var(–safe-top) + 10px) 16px 10px;
+background:rgba(7,13,8,0.92);
+backdrop-filter:blur(20px);
+border-bottom:1px solid var(–border);
+display:flex;align-items:center;justify-content:space-between;
+flex-shrink:0;
+z-index:10;
+}
+.topbar-brand{display:flex;align-items:center;gap:10px}
+.topbar-title{
+font-family:‘Black Han Sans’,sans-serif;
+font-size:18px;letter-spacing:2px;
+background:linear-gradient(135deg,var(–accent),var(–accent2));
+-webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.topbar-sub{
+font-family:‘JetBrains Mono’,monospace;
+font-size:9px;letter-spacing:3px;color:var(–text2);margin-top:1px;
+}
+.plane-anim{
+font-size:28px;
+animation:plane-bob 3s ease-in-out infinite;
+filter:drop-shadow(0 0 6px rgba(90,171,104,0.5));
+}
+@keyframes plane-bob{
+0%,100%{transform:translateY(0) rotate(-3deg)}
+50%{transform:translateY(-3px) rotate(3deg)}
+}
+
+/* ══════════════════════════════════════
+BOTTOM NAV
+══════════════════════════════════════ */
+.bottom-nav{
+position:fixed;bottom:0;left:0;right:0;
+height:calc(60px + var(–safe-bot));
+background:rgba(7,13,8,0.96);
+backdrop-filter:blur(24px);
+border-top:1px solid var(–border);
+display:flex;align-items:flex-start;justify-content:space-around;
+padding-top:6px;
+z-index:100;
+}
+.nav-item{
+display:flex;flex-direction:column;align-items:center;gap:3px;
+cursor:pointer;padding:4px 12px;border-radius:12px;
+transition:all 0.2s;min-width:52px;
+}
+.nav-item .nav-icon{font-size:20px;transition:transform 0.2s}
+.nav-item .nav-label{
+font-size:9px;font-weight:600;letter-spacing:1px;
+text-transform:uppercase;color:var(–text2);
+font-family:‘JetBrains Mono’,monospace;
+}
+.nav-item.active .nav-label{color:var(–accent)}
+.nav-item.active .nav-icon{transform:scale(1.15)}
+.nav-item.active{background:rgba(90,171,104,0.08)}
+
+/* ══════════════════════════════════════
+CARDS & COMMON
+══════════════════════════════════════ */
+.card{
+background:var(–s1);
+border:1px solid var(–border);
+border-radius:14px;
+padding:16px;
+position:relative;overflow:hidden;
+}
+.card::before{
+content:’’;position:absolute;top:0;left:0;
+width:3px;height:100%;
+background:linear-gradient(180deg,var(–accent),transparent);
+}
+.card-title{
+font-family:‘JetBrains Mono’,monospace;
+font-size:10px;letter-spacing:2px;text-transform:uppercase;
+color:var(–text2);margin-bottom:12px;
+display:flex;align-items:center;gap:6px;
+}
+.section-pad{padding:16px;display:flex;flex-direction:column;gap:14px}
+
+.badge{
+display:inline-flex;align-items:center;gap:4px;
+padding:3px 10px;border-radius:20px;
+font-size:11px;font-weight:600;
+font-family:‘JetBrains Mono’,monospace;letter-spacing:1px;
+}
+.badge-green{background:rgba(90,171,104,0.15);color:var(–accent);border:1px solid rgba(90,171,104,0.3)}
+.badge-gold{background:rgba(245,200,66,0.15);color:var(–gold);border:1px solid rgba(245,200,66,0.3)}
+.badge-red{background:rgba(255,95,95,0.15);color:var(–red);border:1px solid rgba(255,95,95,0.3)}
+.badge-blue{background:rgba(79,142,247,0.15);color:var(–blue);border:1px solid rgba(79,142,247,0.3)}
+
+.btn{
+display:inline-flex;align-items:center;justify-content:center;gap:8px;
+padding:12px 20px;border-radius:12px;border:none;cursor:pointer;
+font-family:‘Black Han Sans’,sans-serif;font-size:14px;letter-spacing:2px;
+text-transform:uppercase;transition:all 0.2s;width:100%;
+}
+.btn-primary{background:linear-gradient(135deg,var(–accent3),var(–accent));color:#fff}
+.btn-primary:active{transform:scale(0.97)}
+.btn-ghost{background:transparent;border:1px solid var(–border);color:var(–text2)}
+.btn-danger{background:transparent;border:1px solid var(–red);color:var(–red)}
+
+input,select{
+width:100%;background:var(–s2);
+border:1px solid var(–border);border-radius:10px;
+padding:12px 14px;color:var(–text);
+font-family:‘DM Sans’,sans-serif;font-size:15px;outline:none;
+transition:border-color 0.2s;
+}
+input:focus,select:focus{border-color:var(–accent);box-shadow:0 0 0 3px rgba(90,171,104,0.12)}
+select option{background:var(–s2)}
+label{
+display:block;
+font-family:‘JetBrains Mono’,monospace;
+font-size:10px;letter-spacing:2px;text-transform:uppercase;
+color:var(–text2);margin-bottom:6px;
+}
+
+/* XP Bar */
+.xp-bar-wrap{background:rgba(255,255,255,0.06);border-radius:4px;height:6px;overflow:hidden}
+.xp-bar-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(–accent),var(–accent2));transition:width 0.8s}
+
+/* ══════════════════════════════════════
+SCREEN: LOGIN
+══════════════════════════════════════ */
+#screen-login{
+justify-content:center;align-items:center;
+background:radial-gradient(ellipse at 50% 30%,#0d2016 0%,var(–bg) 70%);
+padding:32px 24px;gap:0;
+}
+.login-hero{text-align:center;margin-bottom:36px}
+.login-plane{font-size:64px;animation:plane-bob 3s ease-in-out infinite;display:block;margin-bottom:12px;filter:drop-shadow(0 0 16px rgba(90,171,104,0.4))}
+.login-title{
+font-family:‘Black Han Sans’,sans-serif;font-size:36px;letter-spacing:4px;
+background:linear-gradient(135deg,var(–accent),var(–accent2),var(–gold));
+-webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.login-sub{font-size:12px;color:var(–text2);letter-spacing:3px;margin-top:4px;font-family:‘JetBrains Mono’,monospace}
+.login-card{background:var(–s1);border:1px solid var(–border);border-radius:20px;padding:24px;width:100%;max-width:360px}
+.login-form-group{margin-bottom:16px}
+.login-error{
+background:rgba(255,95,95,0.1);border:1px solid rgba(255,95,95,0.3);
+border-radius:8px;padding:10px 14px;font-size:13px;color:var(–red);
+display:none;margin-bottom:12px;
+}
+
+/* ══════════════════════════════════════
+SCREEN: FEED
+══════════════════════════════════════ */
+.rank-strip{
+display:flex;gap:10px;overflow-x:auto;padding:12px 16px;
+scrollbar-width:none;flex-shrink:0;
+}
+.rank-strip::-webkit-scrollbar{display:none}
+.rank-chip{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer}
+.rank-ava-wrap{position:relative;width:50px;height:50px}
+.rank-ava-ring{position:absolute;inset:-2px;border-radius:50%;background:conic-gradient(var(–accent) var(–pct,0%),rgba(90,171,104,0.1) var(–pct,0%))}
+.rank-ava{position:absolute;inset:3px;border-radius:50%;background:var(–s2);display:flex;align-items:center;justify-content:center;font-size:18px;border:2px solid var(–bg)}
+.rank-name{font-size:10px;color:var(–text2);font-weight:500;max-width:50px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rank-xp{font-family:‘JetBrains Mono’,monospace;font-size:9px;color:var(–accent);font-weight:700}
+
+.post{background:var(–s1);border-top:1px solid var(–border);border-bottom:1px solid var(–border);margin-bottom:2px;animation:post-in 0.4s ease both}
+@keyframes post-in{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.post-header{padding:12px 16px;display:flex;align-items:center;gap:10px}
+.post-ava{width:38px;height:38px;border-radius:50%;background:var(–s2);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;border:2px solid var(–accent3)}
+.post-author{font-weight:600;font-size:14px;display:flex;align-items:center;gap:6px}
+.post-plane-badge{font-size:10px;background:rgba(90,171,104,0.12);color:var(–accent);border:1px solid rgba(90,171,104,0.25);border-radius:4px;padding:1px 6px;font-family:‘JetBrains Mono’,monospace}
+.post-time{font-size:11px;color:var(–text2);margin-top:1px}
+.post-img-wrap{position:relative;background:#000;overflow:hidden}
+.post-img-placeholder{width:100%;aspect-ratio:1;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;font-size:52px;background:linear-gradient(135deg,var(–s2),#0a1a0d)}
+.post-img-placeholder span{font-size:12px;color:var(–text2)}
+.score-overlay{position:absolute;top:12px;right:12px;display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.score-badge{display:flex;flex-direction:column;align-items:center;background:rgba(0,0,0,0.75);backdrop-filter:blur(12px);border-radius:12px;padding:8px 12px;border:1px solid rgba(255,255,255,0.08);min-width:76px}
+.score-label{font-family:‘JetBrains Mono’,monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-bottom:2px}
+.score-number{font-family:‘Black Han Sans’,sans-serif;font-size:30px;line-height:1}
+.score-max{font-family:‘JetBrains Mono’,monospace;font-size:9px;color:rgba(255,255,255,0.3)}
+.score-bar-wrap{width:100%;height:3px;background:rgba(255,255,255,0.1);border-radius:2px;margin-top:4px;overflow:hidden}
+.score-bar-fill{height:100%;border-radius:2px;transition:width 1.2s cubic-bezier(0.23,1,0.32,1)}
+.score-rank-tag{font-family:‘JetBrains Mono’,monospace;font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;letter-spacing:1px}
+.xp-pill{position:absolute;bottom:12px;right:12px;background:rgba(0,0,0,0.75);backdrop-filter:blur(12px);border:1px solid rgba(90,171,104,0.3);border-radius:20px;padding:5px 12px;font-family:‘JetBrains Mono’,monospace;font-size:12px;font-weight:700;color:var(–accent)}
+.rank-up-overlay{position:absolute;inset:0;background:linear-gradient(135deg,rgba(90,171,104,0.12),transparent);pointer-events:none;display:flex;align-items:flex-end;padding:12px}
+.rank-up-chip{background:linear-gradient(135deg,var(–accent3),var(–accent));color:#fff;border-radius:8px;padding:5px 12px;font-size:11px;font-weight:700;font-family:‘JetBrains Mono’,monospace;letter-spacing:1px;animation:rank-pop 0.5s cubic-bezier(0.34,1.56,0.64,1) both}
+@keyframes rank-pop{from{transform:scale(0.6) translateY(10px);opacity:0}to{transform:scale(1) translateY(0);opacity:1}}
+.post-actions{padding:10px 16px 6px;display:flex;align-items:center;gap:14px}
+.action-btn{background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:5px;color:var(–text2);font-size:13px;font-weight:500;font-family:‘DM Sans’,sans-serif;transition:all 0.15s;padding:4px 0}
+.action-btn .icon{font-size:20px;transition:transform 0.2s cubic-bezier(0.34,1.56,0.64,1)}
+.action-btn.liked{color:var(–red)}
+.action-btn.liked .icon{animation:heart-pop 0.3s cubic-bezier(0.34,1.56,0.64,1)}
+@keyframes heart-pop{0%{transform:scale(1)}50%{transform:scale(1.5)}100%{transform:scale(1)}}
+.reaction-row{margin-left:auto;display:flex;gap:4px;flex-wrap:wrap}
+.react-pill{background:var(–s2);border:1px solid var(–border);border-radius:20px;padding:3px 8px;font-size:13px;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;gap:3px;user-select:none}
+.react-pill:active{transform:scale(1.1)}
+.react-pill.active{background:rgba(90,171,104,0.15);border-color:rgba(90,171,104,0.4)}
+.react-count{font-family:‘JetBrains Mono’,monospace;font-size:10px;color:var(–text2)}
+.emoji-picker{display:none;padding:8px 16px;gap:8px;flex-wrap:wrap}
+.emoji-picker.open{display:flex}
+.emoji-opt{width:40px;height:40px;border-radius:12px;background:var(–s2);border:1px solid var(–border);display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer;transition:all 0.15s}
+.emoji-opt:active{transform:scale(1.2)}
+.emoji-opt.selected{border-color:var(–accent);background:rgba(90,171,104,0.12)}
+.comments-section{padding:0 16px}
+.comment{display:flex;gap:8px;padding:7px 0;border-top:1px solid rgba(255,255,255,0.03);animation:comment-in 0.25s ease}
+@keyframes comment-in{from{opacity:0;transform:translateX(-6px)}to{opacity:1;transform:translateX(0)}}
+.comment-ava{width:26px;height:26px;border-radius:50%;background:var(–s2);display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;font-weight:700}
+.comment-author{font-size:12px;font-weight:600;color:var(–text)}
+.comment-text{font-size:13px;color:var(–text2);line-height:1.4;margin-top:1px}
+.comment-time{font-size:10px;color:var(–text3);margin-top:2px;font-family:‘JetBrains Mono’,monospace}
+.view-more-comments{font-size:12px;color:var(–text2);cursor:pointer;padding:4px 0 8px;font-weight:500;display:block;border-top:1px solid rgba(255,255,255,0.03)}
+.comment-input-row{display:flex;align-items:center;gap:8px;padding:8px 16px 14px;border-top:1px solid var(–border)}
+.comment-input{flex:1;background:var(–s2);border:1px solid var(–border);border-radius:20px;padding:8px 14px;font-family:‘DM Sans’,sans-serif;font-size:13px;color:var(–text);outline:none;transition:border-color 0.2s}
+.comment-input:focus{border-color:rgba(90,171,104,0.4)}
+.comment-input::placeholder{color:var(–text3)}
+.comment-send{width:32px;height:32px;border-radius:50%;background:var(–accent);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.score-legendary{color:#ffd066}.score-epic{color:#a78bfa}.score-great{color:#3ddc84}.score-good{color:var(–blue)}.score-ok{color:var(–text2)}
+.bar-legendary{background:linear-gradient(90deg,#ff9f0a,#ffcc02)}.bar-epic{background:linear-gradient(90deg,#a78bfa,#c084fc)}.bar-great{background:linear-gradient(90deg,#3ddc84,#34d399)}.bar-good{background:linear-gradient(90deg,var(–blue),#818cf8)}.bar-ok{background:rgba(255,255,255,0.3)}
+.tag-legendary{background:rgba(255,159,10,0.2);color:#ffd066;border:1px solid rgba(255,159,10,0.4)}
+.tag-epic{background:rgba(167,139,250,0.2);color:#a78bfa;border:1px solid rgba(167,139,250,0.4)}
+.tag-great{background:rgba(61,220,132,0.2);color:#3ddc84;border:1px solid rgba(61,220,132,0.4)}
+.tag-good{background:rgba(79,142,247,0.2);color:var(–blue);border:1px solid rgba(79,142,247,0.4)}
+.tag-ok{background:rgba(120,120,160,0.2);color:var(–text2);border:1px solid rgba(120,120,160,0.3)}
+.reaction-burst{position:fixed;pointer-events:none;z-index:9998;font-size:28px;animation:burst-float 1.2s ease forwards}
+@keyframes burst-float{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-80px) scale(1.6)}}
+
+/* ══════════════════════════════════════
+SCREEN: TAREFAS
+══════════════════════════════════════ */
+.tarefa-card{
+background:var(–s1);border:1px solid var(–border);border-radius:14px;
+padding:16px;display:flex;align-items:center;gap:14px;
+transition:all 0.2s;cursor:pointer;
+}
+.tarefa-card.done{opacity:0.6;border-color:rgba(90,171,104,0.3)}
+.tarefa-card.done .tarefa-check{background:var(–accent);border-color:var(–accent)}
+.tarefa-check{
+width:26px;height:26px;border-radius:50%;border:2px solid var(–border);
+display:flex;align-items:center;justify-content:center;flex-shrink:0;
+font-size:13px;transition:all 0.2s;
+}
+.tarefa-info{flex:1}
+.tarefa-nome{font-weight:600;font-size:15px;margin-bottom:3px}
+.tarefa-xp{font-family:‘JetBrains Mono’,monospace;font-size:11px;color:var(–accent)}
+.tarefa-desc{font-size:12px;color:var(–text2);margin-top:2px}
+.streak-banner{
+background:linear-gradient(135deg,rgba(245,200,66,0.12),rgba(90,171,104,0.08));
+border:1px solid rgba(245,200,66,0.25);border-radius:14px;
+padding:16px;display:flex;align-items:center;gap:12px;
+}
+.streak-num{font-family:‘Black Han Sans’,sans-serif;font-size:42px;color:var(–gold);line-height:1}
+.progress-circle-wrap{display:flex;align-items:center;justify-content:center}
+.progress-circle{position:relative;width:80px;height:80px}
+.progress-circle svg{transform:rotate(-90deg)}
+.progress-circle-num{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.progress-circle-num .big{font-family:‘Black Han Sans’,sans-serif;font-size:22px;color:var(–accent);line-height:1}
+.progress-circle-num .small{font-size:9px;color:var(–text2);font-family:‘JetBrains Mono’,monospace}
+
+/* ══════════════════════════════════════
+SCREEN: RANKING
+══════════════════════════════════════ */
+.podium{display:flex;align-items:flex-end;justify-content:center;gap:8px;padding:20px 16px 0}
+.podium-item{display:flex;flex-direction:column;align-items:center;gap:6px;flex:1;max-width:110px}
+.podium-ava{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;border:3px solid transparent}
+.podium-item.p1 .podium-ava{border-color:var(–gold);box-shadow:0 0 16px rgba(245,200,66,0.3)}
+.podium-item.p2 .podium-ava{border-color:#aaa;box-shadow:0 0 10px rgba(170,170,170,0.2)}
+.podium-item.p3 .podium-ava{border-color:#c87d2f;box-shadow:0 0 10px rgba(200,125,47,0.2)}
+.podium-name{font-size:12px;font-weight:600;text-align:center}
+.podium-xp{font-family:‘JetBrains Mono’,monospace;font-size:11px;color:var(–accent)}
+.podium-block{border-radius:8px 8px 0 0;width:100%;display:flex;align-items:center;justify-content:center;padding:8px 0}
+.podium-item.p1 .podium-block{height:64px;background:linear-gradient(180deg,rgba(245,200,66,0.3),rgba(245,200,66,0.1));border-top:2px solid var(–gold)}
+.podium-item.p2 .podium-block{height:46px;background:rgba(170,170,170,0.1);border-top:2px solid #aaa}
+.podium-item.p3 .podium-block{height:34px;background:rgba(200,125,47,0.1);border-top:2px solid #c87d2f}
+.podium-medal{font-size:20px}
+.ranking-list-item{
+display:flex;align-items:center;gap:12px;padding:12px 0;
+border-bottom:1px solid rgba(255,255,255,0.04);
+}
+.rl-pos{font-family:‘JetBrains Mono’,monospace;font-size:13px;font-weight:700;color:var(–text2);min-width:24px;text-align:center}
+.rl-ava{width:38px;height:38px;border-radius:50%;background:var(–s2);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.rl-info{flex:1}
+.rl-name{font-weight:600;font-size:14px}
+.rl-plane{font-size:11px;color:var(–text2);margin-top:1px}
+.rl-xp{font-family:‘Black Han Sans’,sans-serif;font-size:20px;color:var(–accent)}
+.rl-streak{font-size:12px;font-family:‘JetBrains Mono’,monospace;color:var(–gold)}
+.tab-row{display:flex;background:var(–s2);border-radius:10px;padding:3px;margin:0 16px 16px;flex-shrink:0}
+.tab-btn{flex:1;padding:8px;text-align:center;border-radius:8px;font-family:‘JetBrains Mono’,monospace;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(–text2);cursor:pointer;transition:all 0.2s}
+.tab-btn.active{background:var(–s3);color:var(–accent)}
+
+/* ══════════════════════════════════════
+SCREEN: ANÁLISE
+══════════════════════════════════════ */
+.kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.kpi-val{font-family:‘Black Han Sans’,sans-serif;font-size:32px;color:var(–accent);line-height:1;margin-bottom:2px}
+.kpi-label{font-size:11px;color:var(–text2)}
+.kpi-delta{font-size:11px;font-family:‘JetBrains Mono’,monospace;margin-top:4px}
+.delta-up{color:#3ddc84}.delta-down{color:var(–red)}
+.chart-wrap{position:relative;height:180px}
+.adesao-item{margin-bottom:10px}
+.adesao-label{display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px}
+.adesao-pct{font-family:‘JetBrains Mono’,monospace;font-size:11px}
+
+/* ══════════════════════════════════════
+SCREEN: GESTOR
+══════════════════════════════════════ */
+.gestor-menu-item{
+display:flex;align-items:center;gap:14px;
+padding:16px;background:var(–s1);border:1px solid var(–border);
+border-radius:14px;cursor:pointer;transition:all 0.2s;
+}
+.gestor-menu-item:active{background:var(–s2)}
+.gestor-menu-icon{font-size:28px;flex-shrink:0}
+.gestor-menu-info{flex:1}
+.gestor-menu-title{font-weight:600;font-size:15px;margin-bottom:2px}
+.gestor-menu-desc{font-size:12px;color:var(–text2)}
+.gestor-menu-arrow{color:var(–text3);font-size:18px}
+
+/* sub-telas gestor */
+.gestor-sub{display:none;flex-direction:column;height:100%}
+.gestor-sub.active{display:flex}
+.gestor-back{display:flex;align-items:center;gap:8px;padding:12px 16px;cursor:pointer;color:var(–accent);font-weight:600;font-size:14px;flex-shrink:0;border-bottom:1px solid var(–border)}
+
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{font-family:‘JetBrains Mono’,monospace;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(–text2);padding:8px 10px;text-align:left;border-bottom:1px solid var(–border)}
+td{padding:10px;border-bottom:1px solid rgba(255,255,255,0.04);vertical-align:middle}
+tr:active td{background:rgba(90,171,104,0.04)}
+
+.log-entry{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:12px}
+.log-time{font-family:‘JetBrains Mono’,monospace;font-size:10px;color:var(–text2);min-width:80px;flex-shrink:0}
+.log-text{color:var(–text);line-height:1.4}
+.log-text strong{color:var(–accent)}
+.danger-zone{border:1px solid rgba(255,95,95,0.3);border-radius:12px;padding:16px;background:rgba(255,95,95,0.04)}
+.danger-title{font-family:‘JetBrains Mono’,monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(–red);margin-bottom:12px}
+
+/* ══════════════════════════════════════
+MODAL
+══════════════════════════════════════ */
+.modal-overlay{
+display:none;position:fixed;inset:0;
+background:rgba(0,0,0,0.75);backdrop-filter:blur(6px);
+z-index:500;align-items:flex-end;justify-content:center;
+}
+.modal-overlay.open{display:flex}
+.modal{
+background:var(–s1);border:1px solid var(–border);
+border-radius:20px 20px 0 0;padding:24px;width:100%;max-width:500px;
+animation:modal-up 0.3s cubic-bezier(0.34,1.2,0.64,1);
+padding-bottom:calc(24px + var(–safe-bot));
+max-height:90vh;overflow-y:auto;
+}
+@keyframes modal-up{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-title{font-family:‘Black Han Sans’,sans-serif;font-size:18px;letter-spacing:2px;color:var(–accent);margin-bottom:20px}
+.modal-form-group{margin-bottom:14px}
+.modal-actions{display:flex;gap:10px;margin-top:16px}
+.modal-actions .btn{flex:1}
+
+/* ══════════════════════════════════════
+TOAST & CELEBRATION
+══════════════════════════════════════ */
+#toast{
+position:fixed;top:calc(var(–safe-top) + 64px);
+left:50%;transform:translateX(-50%) translateY(-20px);
+background:var(–s1);border:1px solid var(–border);border-radius:20px;
+padding:10px 20px;font-size:13px;font-weight:600;color:var(–text);
+box-shadow:0 8px 30px rgba(0,0,0,0.5);z-index:9000;
+opacity:0;pointer-events:none;
+transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+white-space:nowrap;
+}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* XP Celebration */
+.xp-celebration{
+position:fixed;inset:0;z-index:8000;pointer-events:none;
+display:flex;align-items:center;justify-content:center;
+opacity:0;transition:opacity 0.3s;
+}
+.xp-celebration.show{opacity:1}
+.xp-burst{
+font-family:‘Black Han Sans’,sans-serif;font-size:60px;
+color:var(–accent);text-shadow:0 0 30px rgba(90,171,104,0.8);
+animation:xp-burst-anim 0.8s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+@keyframes xp-burst-anim{
+0%{transform:scale(0.3);opacity:0}
+60%{transform:scale(1.1);opacity:1}
+100%{transform:scale(1);opacity:0}
+}
+
+/* ══════════════════════════════════════
+USER PILL in topbar
+══════════════════════════════════════ */
+.user-pill{
+display:flex;align-items:center;gap:7px;
+background:var(–s2);border:1px solid var(–border);
+border-radius:20px;padding:5px 12px 5px 5px;cursor:pointer;
+}
+.user-pill .ava{
+width:26px;height:26px;border-radius:50%;
+background:linear-gradient(135deg,var(–accent3),var(–accent));
+display:flex;align-items:center;justify-content:center;
+font-size:11px;font-weight:700;color:#fff;flex-shrink:0;
+}
+.user-pill-name{font-size:12px;font-weight:600}
+.user-pill-level{font-size:9px;color:var(–text2);font-family:‘JetBrains Mono’,monospace}
+
+/* FAB */
+.fab{
+position:fixed;bottom:calc(72px + var(–safe-bot) + 12px);right:20px;
+width:52px;height:52px;border-radius:50%;
+background:linear-gradient(135deg,var(–accent3),var(–accent));
+border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;
+font-size:22px;box-shadow:0 6px 20px rgba(90,171,104,0.4);
+transition:all 0.2s;z-index:90;
+}
+.fab:active{transform:scale(0.93)}
+</style>
+
+</head>
+<body>
+
+<!-- ══════════════════════════════════════
+SCREEN: LOGIN
+══════════════════════════════════════ -->
+
+<div class="screen" id="screen-login">
+<div class="login-hero">
+<span class="login-plane" id="login-plane-icon">✈️</span>
+<div class="login-title">AVIÕES</div>
+<div class="login-sub">Brooksfield</div>
+</div>
+<div class="login-card">
+<div class="login-form-group">
+<label>Quem é você?</label>
+<select id="login-select">
+<option value="">Selecione seu apelido...</option>
+</select>
+</div>
+<div class="login-form-group">
+<label>Senha</label>
+<input type="password" id="login-senha" placeholder="Digite sua senha" autocomplete="current-password">
+</div>
+<div class="login-error" id="login-error">Senha incorreta. Tente novamente.</div>
+<button class="btn btn-primary" onclick="tentarLogin()">✈️ DECOLAR</button>
+<div style="text-align:center;margin-top:14px">
+<span style="font-size:12px;color:var(--text2);cursor:pointer" onclick="openModal('modal-primeiro-acesso')">Primeiro acesso? Crie sua senha</span>
+</div>
+<div style="text-align:center;margin-top:8px">
+<span style="font-size:11px;color:var(--text3);cursor:pointer;font-family:'JetBrains Mono',monospace;letter-spacing:1px" onclick="loginGestor()">ACESSO GESTOR</span>
+</div>
+</div>
+</div>
+
+<!-- ══════════════════════════════════════
+APP SHELL (visível após login)
+══════════════════════════════════════ -->
+
+<!-- TOPBAR -->
+
+<div class="topbar hidden" id="app-topbar">
+<div class="topbar-brand">
+<span class="plane-anim" id="topbar-plane">✈️</span>
+<div>
+<div class="topbar-title">AVIÕES</div>
+<div class="topbar-sub">Brooksfield</div>
+</div>
+</div>
+<div class="user-pill" onclick="showToast('⚙️ Perfil em breve!')">
+<div class="ava" id="topbar-ava">—</div>
+<div>
+<div class="user-pill-name" id="topbar-name">—</div>
+<div class="user-pill-level" id="topbar-level">—</div>
+</div>
+</div>
+</div>
+
+<!-- SCREEN: FEED -->
+
+<div class="screen hidden" id="screen-feed">
+<div class="scroll-area">
+<div class="rank-strip" id="rank-strip"></div>
+<div style="height:1px;background:var(--border);margin:0 16px"></div>
+<div id="feed-container"></div>
+</div>
+<button class="fab" onclick="showToast('📸 Integrado com tela de missão!')">📸</button>
+</div>
+
+<!-- SCREEN: TAREFAS -->
+
+<div class="screen hidden" id="screen-tarefas">
+<div class="scroll-area">
+<div class="section-pad">
+<!-- Streak banner -->
+<div class="streak-banner">
+<div>
+<div style="font-size:11px;color:var(--text2);font-family:'JetBrains Mono',monospace;letter-spacing:1px;margin-bottom:2px">SEQUÊNCIA</div>
+<div class="streak-num" id="streak-num">0</div>
+<div style="font-size:12px;color:var(--text2)">dias seguidos 🔥</div>
+</div>
+<div style="flex:1"></div>
+<div class="progress-circle-wrap">
+<div class="progress-circle">
+<svg width="80" height="80" viewBox="0 0 80 80">
+<circle cx="40" cy="40" r="34" stroke="rgba(90,171,104,0.12)" stroke-width="6" fill="none"/>
+<circle id="progress-arc" cx="40" cy="40" r="34" stroke="var(--accent)" stroke-width="6" fill="none"
+stroke-dasharray="213.6" stroke-dashoffset="213.6" stroke-linecap="round" style="transition:stroke-dashoffset 0.8s"/>
+</svg>
+<div class="progress-circle-num">
+<span class="big" id="progress-num">0</span>
+<span class="small">XP hoje</span>
+</div>
+</div>
+</div>
+</div>
+
+```
+<!-- Tarefas do dia -->
+<div>
+<div class="card-title" style="margin-bottom:10px"><span>✅</span> Missões do dia</div>
+<div id="tarefas-list" style="display:flex;flex-direction:column;gap:10px"></div>
+</div>
+
+<!-- Semana -->
+<div class="card">
+<div class="card-title"><span>📅</span> Semana atual</div>
+<div style="display:flex;justify-content:space-between;align-items:center">
+<div>
+<div style="font-family:'Black Han Sans',sans-serif;font-size:24px;color:var(--accent)" id="xp-semana-num">0</div>
+<div style="font-size:11px;color:var(--text2)">XP acumulado</div>
+</div>
+<div style="text-align:right">
+<div class="badge badge-green" id="rank-pos-badge">—</div>
+<div style="font-size:11px;color:var(--text2);margin-top:4px">sua posição</div>
+</div>
+</div>
+<div style="margin-top:12px" class="xp-bar-wrap">
+<div class="xp-bar-fill" id="xp-semana-bar" style="width:0%"></div>
+</div>
+</div>
+</div>
+```
+
+</div>
+</div>
+
+<!-- SCREEN: RANKING -->
+
+<div class="screen hidden" id="screen-ranking">
+<div class="tab-row" style="margin-top:12px">
+<div class="tab-btn active" id="tab-vendedores" onclick="switchRankTab('vendedores')">🛍️ Vendedores</div>
+<div class="tab-btn" id="tab-caixas" onclick="switchRankTab('caixas')">🖥️ Caixas</div>
+</div>
+<div class="scroll-area" style="padding-bottom:calc(72px + var(--safe-bot))">
+<div id="podium-vendedores"></div>
+<div id="podium-caixas" style="display:none"></div>
+<div class="section-pad" style="padding-top:0">
+<div id="ranking-list-vendedores"></div>
+<div id="ranking-list-caixas" style="display:none"></div>
+</div>
+</div>
+</div>
+
+<!-- SCREEN: ANÁLISE -->
+
+<div class="screen hidden" id="screen-analise">
+<div class="scroll-area">
+<div class="section-pad">
+<!-- KPIs pessoais -->
+<div class="kpi-grid">
+<div class="card">
+<div class="card-title"><span>⚡</span> Meu XP</div>
+<div class="kpi-val" id="kpi-xp">0</div>
+<div class="kpi-label">semana atual</div>
+<div class="kpi-delta delta-up" id="kpi-xp-delta">—</div>
+</div>
+<div class="card">
+<div class="card-title"><span>🔥</span> Streak</div>
+<div class="kpi-val" id="kpi-streak">0</div>
+<div class="kpi-label">dias seguidos</div>
+<div class="kpi-delta" id="kpi-streak-status">—</div>
+</div>
+<div class="card">
+<div class="card-title"><span>✅</span> Tarefas</div>
+<div class="kpi-val" id="kpi-tarefas">0</div>
+<div class="kpi-label">concluídas hoje</div>
+</div>
+<div class="card">
+<div class="card-title"><span>🏆</span> Posição</div>
+<div class="kpi-val" id="kpi-posicao">—</div>
+<div class="kpi-label">no ranking</div>
+</div>
+</div>
+
+```
+<!-- Gráfico XP semana -->
+<div class="card">
+<div class="card-title"><span>📈</span> XP — semana atual</div>
+<div class="chart-wrap"><canvas id="chart-xp-semana"></canvas></div>
+</div>
+
+<!-- Adesão por tarefa -->
+<div class="card">
+<div class="card-title"><span>📊</span> Adesão da equipe — hoje</div>
+<div id="adesao-list"></div>
+</div>
+
+<!-- Comparativo equipe -->
+<div class="card">
+<div class="card-title"><span>👥</span> XP da equipe</div>
+<div class="chart-wrap"><canvas id="chart-xp-equipe"></canvas></div>
+</div>
+</div>
+```
+
+</div>
+</div>
+
+<!-- SCREEN: GESTOR -->
+
+<div class="screen hidden" id="screen-gestor">
+<!-- Menu principal gestor -->
+<div class="gestor-sub active" id="gestor-main">
+<div class="scroll-area">
+<div class="section-pad">
+<div style="padding:8px 0 4px">
+<div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--text2);margin-bottom:4px">CENTRO DE COMANDO</div>
+<div style="font-family:'Black Han Sans',sans-serif;font-size:22px;color:var(--accent)">Painel do Gestor</div>
+</div>
+
+```
+<div onclick="showGestorSub('sub-equipe')" class="gestor-menu-item">
+<div class="gestor-menu-icon">👥</div>
+<div class="gestor-menu-info">
+<div class="gestor-menu-title">Equipe</div>
+<div class="gestor-menu-desc">Membros, apelidos, senhas, turnos</div>
+</div>
+<div class="gestor-menu-arrow">›</div>
+</div>
+
+<div onclick="showGestorSub('sub-semana')" class="gestor-menu-item">
+<div class="gestor-menu-icon">🔄</div>
+<div class="gestor-menu-info">
+<div class="gestor-menu-title">Controle de Semana</div>
+<div class="gestor-menu-desc">Reset, histórico, líderes</div>
+</div>
+<div class="gestor-menu-arrow">›</div>
+</div>
+
+<div onclick="showGestorSub('sub-balcoes')" class="gestor-menu-item">
+<div class="gestor-menu-icon">🗺️</div>
+<div class="gestor-menu-info">
+<div class="gestor-menu-title">Balcões</div>
+<div class="gestor-menu-desc">Mapa da loja, fotos de referência</div>
+</div>
+<div class="gestor-menu-arrow">›</div>
+</div>
+
+<div onclick="showGestorSub('sub-logs')" class="gestor-menu-item">
+<div class="gestor-menu-icon">📋</div>
+<div class="gestor-menu-info">
+<div class="gestor-menu-title">Logs do sistema</div>
+<div class="gestor-menu-desc">Histórico de ações e eventos</div>
+</div>
+<div class="gestor-menu-arrow">›</div>
+</div>
+
+<div onclick="logoutGestor()" class="gestor-menu-item" style="border-color:rgba(255,95,95,0.2)">
+<div class="gestor-menu-icon">🚪</div>
+<div class="gestor-menu-info">
+<div class="gestor-menu-title" style="color:var(--red)">Sair do gestor</div>
+<div class="gestor-menu-desc">Voltar à tela de login</div>
+</div>
+</div>
+
+<!-- KPIs rápidos -->
+<div class="kpi-grid" style="margin-top:4px">
+<div class="card">
+<div class="card-title"><span>✈️</span> XP total hoje</div>
+<div class="kpi-val">487</div>
+<div class="kpi-delta delta-up">▲ +12%</div>
+</div>
+<div class="card">
+<div class="card-title"><span>✅</span> Tarefas</div>
+<div class="kpi-val">23<span style="font-size:14px;color:var(--text2)">/30</span></div>
+<div class="kpi-label">76% adesão</div>
+</div>
+</div>
+</div>
+</div>
+```
+
+</div>
+
+<!-- Sub: Equipe -->
+
+<div class="gestor-sub" id="sub-equipe">
+<div class="gestor-back" onclick="hideGestorSub('sub-equipe')">‹ Voltar</div>
+<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;flex-shrink:0">
+<span style="font-family:'Black Han Sans',sans-serif;font-size:18px;color:var(--accent)">Equipe</span>
+<button class="btn btn-primary" style="width:auto;padding:8px 14px;font-size:12px" onclick="openModal('modal-add-membro')">✚ Novo</button>
+</div>
+<div class="scroll-area" style="padding-bottom:20px">
+<div style="padding:0 16px">
+<div class="card-title" style="margin-bottom:8px"><span>🛍️</span> Vendedores</div>
+<div id="gestor-tabela-vendedores" style="margin-bottom:20px"></div>
+<div class="card-title" style="margin-bottom:8px"><span>🖥️</span> Caixas</div>
+<div id="gestor-tabela-caixas"></div>
+</div>
+</div>
+</div>
+
+<!-- Sub: Semana -->
+
+<div class="gestor-sub" id="sub-semana">
+<div class="gestor-back" onclick="hideGestorSub('sub-semana')">‹ Voltar</div>
+<div class="scroll-area" style="padding-bottom:20px">
+<div class="section-pad">
+<div class="card">
+<div class="card-title"><span>📅</span> Semana atual</div>
+<div style="font-family:'Black Han Sans',sans-serif;font-size:28px;color:var(--accent)" id="g-semana-num">S12</div>
+<div style="font-size:12px;color:var(--text2)" id="g-semana-datas">12–18 mai 2025</div>
+</div>
+<div class="card">
+<div class="card-title"><span>📜</span> Histórico</div>
+<div id="g-historico"></div>
+</div>
+<div class="danger-zone">
+<div class="danger-title">⚠️ Zona de controle</div>
+<div style="display:flex;flex-direction:column;gap:10px">
+<button class="btn btn-danger" onclick="confirmarReset('semana')">🔄 Resetar semana agora</button>
+<button class="btn btn-ghost" onclick="confirmarReset('xp')">⚡ Zerar XP de membro</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- Sub: Balcões -->
+
+<div class="gestor-sub" id="sub-balcoes">
+<div class="gestor-back" onclick="hideGestorSub('sub-balcoes')">‹ Voltar</div>
+<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;flex-shrink:0">
+<span style="font-family:'Black Han Sans',sans-serif;font-size:18px;color:var(--accent)">Balcões</span>
+<button class="btn btn-primary" style="width:auto;padding:8px 14px;font-size:12px" onclick="openModal('modal-add-balcao')">✚ Novo</button>
+</div>
+<div class="scroll-area" style="padding-bottom:20px">
+<div style="padding:0 16px" id="g-balcoes-list"></div>
+</div>
+</div>
+
+<!-- Sub: Logs -->
+
+<div class="gestor-sub" id="sub-logs">
+<div class="gestor-back" onclick="hideGestorSub('sub-logs')">‹ Voltar</div>
+<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;flex-shrink:0">
+<select id="filtro-log" style="width:auto;padding:6px 10px;font-size:12px" onchange="renderLogs()">
+<option value="todos">Todos</option>
+<option value="login">Logins</option>
+<option value="tarefa">Tarefas</option>
+<option value="foto">Fotos</option>
+<option value="reset">Resets</option>
+<option value="gestor">Gestor</option>
+</select>
+<button class="btn btn-ghost" style="width:auto;padding:6px 12px;font-size:11px" onclick="exportarLogs()">⬇ CSV</button>
+</div>
+<div class="scroll-area" style="padding-bottom:20px">
+<div style="padding:0 16px" id="g-logs-list"></div>
+</div>
+</div>
+</div>
+
+<!-- BOTTOM NAV -->
+
+<nav class="bottom-nav hidden" id="bottom-nav">
+<div class="nav-item active" id="nav-feed" onclick="goTo('feed')">
+<span class="nav-icon">📸</span><span class="nav-label">Feed</span>
+</div>
+<div class="nav-item" id="nav-tarefas" onclick="goTo('tarefas')">
+<span class="nav-icon">✅</span><span class="nav-label">Tarefas</span>
+</div>
+<div class="nav-item" id="nav-ranking" onclick="goTo('ranking')">
+<span class="nav-icon">🏆</span><span class="nav-label">Ranking</span>
+</div>
+<div class="nav-item" id="nav-analise" onclick="goTo('analise')">
+<span class="nav-icon">📊</span><span class="nav-label">Análise</span>
+</div>
+<div class="nav-item" id="nav-gestor" onclick="goTo('gestor')" style="display:none">
+<span class="nav-icon">⚙️</span><span class="nav-label">Gestor</span>
+</div>
+</nav>
+
+<!-- ══════════════════════════════════════
+MODAIS
+══════════════════════════════════════ -->
+
+<div class="modal-overlay" id="modal-primeiro-acesso">
+<div class="modal">
+<div class="modal-title">🔑 Criar senha</div>
+<div class="modal-form-group">
+<label>Apelido</label>
+<select id="pa-select"><option value="">Selecione...</option></select>
+</div>
+<div class="modal-form-group">
+<label>Nova senha</label>
+<input type="password" id="pa-senha" placeholder="Mínimo 4 caracteres">
+</div>
+<div class="modal-form-group">
+<label>Confirmar senha</label>
+<input type="password" id="pa-confirm" placeholder="Repita a senha">
+</div>
+<div class="modal-actions">
+<button class="btn btn-ghost" onclick="closeModal('modal-primeiro-acesso')">Cancelar</button>
+<button class="btn btn-primary" onclick="criarSenha()">✔ Confirmar</button>
+</div>
+</div>
+</div>
+
+<div class="modal-overlay" id="modal-add-membro">
+<div class="modal">
+<div class="modal-title">✚ Novo Membro</div>
+<div class="modal-form-group"><label>Apelido</label><input type="text" id="nm-apelido" placeholder="Ex: Augusto"></div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+<div class="modal-form-group"><label>Função</label>
+<select id="nm-funcao"><option value="vendedor">Vendedor</option><option value="caixa">Caixa</option></select>
+</div>
+<div class="modal-form-group"><label>Turno</label>
+<select id="nm-turno"><option value="manha">Manhã</option><option value="tarde">Tarde</option></select>
+</div>
+</div>
+<div class="modal-actions">
+<button class="btn btn-ghost" onclick="closeModal('modal-add-membro')">Cancelar</button>
+<button class="btn btn-primary" onclick="addMembro()">✚ Adicionar</button>
+</div>
+</div>
+</div>
+
+<div class="modal-overlay" id="modal-edit-membro">
+<div class="modal">
+<div class="modal-title">✏️ Editar Membro</div>
+<input type="hidden" id="em-id">
+<div class="modal-form-group"><label>Apelido</label><input type="text" id="em-apelido"></div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+<div class="modal-form-group"><label>Turno</label>
+<select id="em-turno"><option value="manha">Manhã</option><option value="tarde">Tarde</option></select>
+</div>
+<div class="modal-form-group"><label>Resetar senha</label>
+<button class="btn btn-ghost" style="height:46px;margin-top:0" onclick="resetarSenhaModal()">🔑 Resetar</button>
+</div>
+</div>
+<div class="modal-actions">
+<button class="btn btn-ghost" onclick="closeModal('modal-edit-membro')">Cancelar</button>
+<button class="btn btn-primary" onclick="salvarEdicao()">💾 Salvar</button>
+</div>
+</div>
+</div>
+
+<div class="modal-overlay" id="modal-add-balcao">
+<div class="modal">
+<div class="modal-title">✚ Novo Balcão</div>
+<div class="modal-form-group"><label>Nome</label><input type="text" id="nb-nome" placeholder="Ex: Prateleira A1"></div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+<div class="modal-form-group"><label>Tipo</label>
+<select id="nb-tipo"><option>Prateleira</option><option>Balcão</option><option>Vitrine</option><option>Ilha</option></select>
+</div>
+<div class="modal-form-group"><label>Degradê</label>
+<select id="nb-degrade"><option value="vertical">↕ Vertical</option><option value="horizontal">↔ Horizontal</option></select>
+</div>
+</div>
+<div class="modal-actions">
+<button class="btn btn-ghost" onclick="closeModal('modal-add-balcao')">Cancelar</button>
+<button class="btn btn-primary" onclick="addBalcao()">✚ Cadastrar</button>
+</div>
+</div>
+</div>
+
+<div class="modal-overlay" id="modal-confirmar-reset">
+<div class="modal">
+<div class="modal-title" id="reset-titulo">⚠️ Confirmar</div>
+<div style="background:rgba(255,95,95,0.1);border:1px solid rgba(255,95,95,0.25);border-radius:10px;padding:12px;font-size:13px;color:var(--red);margin-bottom:16px" id="reset-msg"></div>
+<div id="reset-select-wrap" style="display:none;margin-bottom:16px">
+<label>Selecionar membro</label>
+<select id="reset-membro-select"></select>
+</div>
+<div class="modal-actions">
+<button class="btn btn-ghost" onclick="closeModal('modal-confirmar-reset')">Cancelar</button>
+<button class="btn btn-danger" onclick="executarReset()">⚠️ Confirmar</button>
+</div>
+</div>
+</div>
+
+<!-- LOADING SCREEN -->
+
+<div id="loading-screen" style="position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px">
+<div style="font-size:52px;animation:plane-bob 1s ease-in-out infinite">✈️</div>
+<div style="font-family:'Black Han Sans',sans-serif;font-size:24px;letter-spacing:3px;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent">AVIÕES</div>
+<div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text2);letter-spacing:2px">Conectando ao servidor...</div>
+<div style="width:120px;height:3px;background:var(--s2);border-radius:2px;overflow:hidden;margin-top:4px">
+<div style="height:100%;background:var(--accent);border-radius:2px;animation:load-bar 1.5s ease-in-out infinite"></div>
+</div>
+</div>
+<style>
+@keyframes load-bar {
+0%{width:0%;margin-left:0}
+50%{width:60%;margin-left:20%}
+100%{width:0%;margin-left:100%}
+}
+</style>
+
+<!-- TOAST -->
+
+<div id="toast"></div>
+<div class="xp-celebration" id="xp-celebration"><div class="xp-burst" id="xp-burst-text"></div></div>
+
+<script>
+// ════════════════════════════════════════════
+// SUPABASE — conexão com banco de dados real
+// ════════════════════════════════════════════
+
+const SUPABASE_URL = 'https://xhfzcfefqinoyajwedgc.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhoZnpjZmVmcWlub3lhandlZGdjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkxMzYzOTMsImV4cCI6MjA5NDcxMjM5M30.tVIqLyu5sUsag0qic5NudXTMUVQ0BaXLUXCbH9xneKQ';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
+realtime: { transport: 'websocket', timeout: 10000 },
+global: { fetch: (...args) => fetch(...args) }
+});
+
+// ════════════════════════════════════════════
+// STATE — espelho local do banco
+// ════════════════════════════════════════════
+
+const PLANE_LEVELS = [
+{ name:'Teco-teco', emoji:'🛩️', minXP:0, src:'plane-1-teco.png' },
+{ name:'Avião comercial', emoji:'✈️', minXP:50, src:'plane-2-comercial.png' },
+{ name:'Jato executivo', emoji:'🛫', minXP:100, src:'plane-3-jato.png' },
+{ name:'Acrobacia', emoji:'🎯', minXP:175, src:'plane-4-acrobacia.png' },
+{ name:'Bombardeiro', emoji:'💣', minXP:275, src:'plane-5-bombardeiro.png' },
+{ name:'Caça Força Aérea', emoji:'🚀', minXP:400, src:'plane-6-caca.png' },
+];
+
+function getPlaneLevel(xp) {
+let level = PLANE_LEVELS[0];
+for (const p of PLANE_LEVELS) { if (xp >= p.minXP) level = p; }
+return level;
+}
+
+const STATE = {
+currentUser: null,
+isGestor: false,
+currentScreen: 'login',
+rankTab: 'vendedores',
+semana: 12,
+resetTipo: '',
+
+membros: [], // carregado do Supabase
+
+tarefasVendedor: [
+{ nome:'Pontualidade', xp:10, emoji:'⏰', desc:'Chegou no horário?' },
+{ nome:'Arrumação da loja', xp:15, emoji:'👔', desc:'Foto aprovada pela IA' },
+{ nome:'Prospecção ativa', xp:25, emoji:'🎯', desc:'Clientes abordados na porta' },
+{ nome:'Meta de vendas', xp:30, emoji:'💰', desc:'Bateu a meta do dia?' },
+{ nome:'Atendimento nota 10',xp:20, emoji:'⭐', desc:'Feedback positivo do cliente' },
+],
+
+tarefasCaixa: [
+{ nome:'Pontualidade', xp:10, emoji:'⏰', desc:'Chegou no horário?' },
+{ nome:'Envelopes cortados', xp:12, emoji:'✂️', desc:'Envelopes do dia cortados' },
+{ nome:'Tickets conferidos', xp:15, emoji:'🧾', desc:'Todos os tickets ok' },
+{ nome:'Caixa organizado', xp:12, emoji:'📦', desc:'Mesa limpa e organizada' },
+{ nome:'Fechamento preciso', xp:25, emoji:'✔️', desc:'Caixa fechou sem diferença' },
+],
+
+balcoes: [], // carregado do Supabase
+
+historico: [], // carregado do Supabase
+
+logs: [], // carregado do Supabase
+
+feedData: [], // carregado do Supabase
+};
+
+const EMOJIS = ['🔥','😮','👏','💛','😂','🎯','✈️','🏆'];
+
+// ════════════════════════════════════════════
+// NAVEGAÇÃO
+// ════════════════════════════════════════════
+
+function goTo(screen) {
+const screens = ['feed','tarefas','ranking','analise','gestor'];
+screens.forEach(s => {
+document.getElementById('screen-' + s).classList.add('hidden');
+const nav = document.getElementById('nav-' + s);
+if (nav) nav.classList.remove('active');
+});
+document.getElementById('screen-' + screen).classList.remove('hidden');
+const nav = document.getElementById('nav-' + screen);
+if (nav) nav.classList.add('active');
+STATE.currentScreen = screen;
+
+// Lazy render
+if (screen === 'feed') renderFeed();
+if (screen === 'tarefas') renderTarefas();
+if (screen === 'ranking') renderRanking();
+if (screen === 'analise') renderAnalise();
+if (screen === 'gestor') renderGestor();
+}
+
+function loginSuccess(membro, isGestor = false) {
+STATE.currentUser = membro;
+STATE.isGestor = isGestor;
+
+// Atualiza topbar
+document.getElementById('app-topbar').classList.remove('hidden');
+document.getElementById('bottom-nav').classList.remove('hidden');
+document.getElementById('screen-login').classList.add('hidden');
+
+const nivel = getPlaneLevel(membro ? membro.xp : 0);
+document.getElementById('topbar-plane').textContent = nivel.emoji;
+document.getElementById('topbar-name').textContent = isGestor ? 'GESTOR' : membro.apelido;
+document.getElementById('topbar-level').textContent = isGestor ? 'ADMIN' : nivel.name;
+document.getElementById('topbar-ava').textContent = isGestor ? '⚙️' : membro.apelido.slice(0,2).toUpperCase();
+
+// Mostra nav gestor só se for gestor
+document.getElementById('nav-gestor').style.display = isGestor ? 'flex' : 'none';
+
+if (isGestor) {
+goTo('gestor');
+} else {
+goTo('feed');
+}
+}
+
+// ════════════════════════════════════════════
+// LOGIN
+// ════════════════════════════════════════════
+
+function initLoginSelect() {
+const sel = document.getElementById('login-select');
+const paSel = document.getElementById('pa-select');
+sel.innerHTML = '<option value="">Selecione seu apelido...</option>';
+paSel.innerHTML = '<option value="">Selecione...</option>';
+STATE.membros.forEach(m => {
+sel.innerHTML += '<option value="' + m.id + '">' + m.apelido + ' (' + m.funcao + ' · ' + (m.turno === 'manha' ? 'manhã' : 'tarde') + ')</option>';
+paSel.innerHTML += '<option value="' + m.id + '">' + m.apelido + '</option>';
+});
+}
+
+function tentarLogin() {
+const id = parseInt(document.getElementById('login-select').value);
+const senha = document.getElementById('login-senha').value;
+const errEl = document.getElementById('login-error');
+
+if (!id) { showToast('⚠️ Selecione seu apelido'); return; }
+
+const membro = STATE.membros.find(m => m.id === id);
+if (!membro.senha) {
+errEl.textContent = 'Crie sua senha primeiro (primeiro acesso).';
+errEl.style.display = 'block'; return;
+}
+if (membro.senha !== senha) {
+errEl.style.display = 'block';
+document.getElementById('login-senha').value = '';
+return;
+}
+errEl.style.display = 'none';
+addLog('login', '🔐', '<strong>' + membro.apelido + '</strong> fez login — turno ' + membro.turno);
+loginSuccess(membro);
+}
+
+function loginGestor() {
+const senha = prompt('Senha do gestor:');
+if (senha === 'avioes2025') {
+addLog('login', '⚙️', '<strong>Gestor</strong> acessou o painel');
+loginSuccess({ apelido:'Gestor', xp:9999, funcao:'gestor' }, true);
+} else if (senha !== null) {
+showToast('❌ Senha incorreta');
+}
+}
+
+function logoutGestor() {
+STATE.currentUser = null;
+STATE.isGestor = false;
+document.getElementById('app-topbar').classList.add('hidden');
+document.getElementById('bottom-nav').classList.add('hidden');
+['feed','tarefas','ranking','analise','gestor'].forEach(s =>
+document.getElementById('screen-' + s).classList.add('hidden'));
