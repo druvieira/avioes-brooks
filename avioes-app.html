@@ -1087,31 +1087,24 @@ tr:active td{background:rgba(90,171,104,0.04)}
     <div style="padding:0 16px 10px;flex-shrink:0">
       <select id="foto-sessao-sel" style="background:var(--s2);border:1px solid var(--border);border-radius:12px;padding:10px 14px;color:var(--text);font-family:'Inter',sans-serif;font-size:14px;width:100%;outline:none"></select>
     </div>
-    <!-- Área da foto -->
-    <div id="foto-preview-area" onclick="document.getElementById('foto-input-galeria').click()">
-      <div id="foto-tap-hint" style="display:flex;flex-direction:column;align-items:center;gap:14px">
-        <div style="font-size:80px;opacity:0.25">📷</div>
+    <!-- Input de arquivo ÚNICO (label wrapping — funciona em iOS e Android) -->
+    <input type="file" id="foto-input-main" accept="image/*" style="display:none;position:absolute" onchange="onFotoSelecionada(this)">
+    <!-- Área da foto — clicável via label -->
+    <label for="foto-input-main" id="foto-preview-area" style="flex:1;background:#000;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;cursor:pointer;-webkit-tap-highlight-color:transparent">
+      <div id="foto-tap-hint" style="display:flex;flex-direction:column;align-items:center;gap:14px;pointer-events:none">
+        <div style="font-size:80px;opacity:0.2">📷</div>
         <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:2px;color:rgba(255,255,255,0.2)">TOQUE PARA SELECIONAR</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.12);font-family:'Inter',sans-serif;margin-top:-8px">câmera ou galeria</div>
       </div>
-      <img id="foto-preview-img" style="display:none;width:100%;height:100%;object-fit:cover">
-    </div>
-    <!-- Botões câmera/galeria -->
-    <div style="padding:12px 16px 8px;display:flex;gap:10px;flex-shrink:0;background:var(--bg)">
-      <button onclick="document.getElementById('foto-input-camera').click()" style="flex:1;background:var(--s2);border:1px solid var(--border);border-radius:14px;padding:13px;color:var(--text);font-family:'Outfit',sans-serif;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px">
-        <span style="font-size:18px">📷</span> Câmera
-      </button>
-      <button onclick="document.getElementById('foto-input-galeria').click()" style="flex:1;background:var(--s2);border:1px solid var(--border);border-radius:14px;padding:13px;color:var(--text);font-family:'Outfit',sans-serif;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px">
-        <span style="font-size:18px">🖼️</span> Galeria
-      </button>
-    </div>
-    <div style="padding:0 16px calc(var(--safe-bot) + 14px);flex-shrink:0;background:var(--bg)">
+      <img id="foto-preview-img" style="display:none;width:100%;height:100%;object-fit:cover;position:absolute;inset:0">
+    </label>
+    <!-- Botão avaliar -->
+    <div style="padding:12px 16px calc(var(--safe-bot) + 12px);flex-shrink:0;background:var(--bg)">
       <button id="foto-btn-avaliar" onclick="iniciarAvaliacao()" disabled
-        style="width:100%;background:linear-gradient(135deg,var(--accent3),var(--accent));border:none;border-radius:14px;padding:15px;color:#fff;font-family:'Outfit',sans-serif;font-size:15px;font-weight:700;letter-spacing:1px;opacity:0.35;transition:opacity .2s">
+        style="width:100%;background:linear-gradient(135deg,var(--accent3),var(--accent));border:none;border-radius:14px;padding:16px;color:#fff;font-family:'Outfit',sans-serif;font-size:15px;font-weight:700;letter-spacing:1px;opacity:0.35;transition:opacity .25s;cursor:not-allowed">
         🚀 AVALIAR FOTO
       </button>
     </div>
-    <input type="file" id="foto-input-camera"  accept="image/*" capture="environment" style="display:none" onchange="onFotoSelecionada(this)">
-    <input type="file" id="foto-input-galeria" accept="image/*"                       style="display:none" onchange="onFotoSelecionada(this)">
   </div>
 
   <!-- STEP 2: Analisando -->
@@ -2533,9 +2526,8 @@ function resetFotoStep1() {
   document.getElementById('foto-tap-hint').style.display    = 'flex';
   const btn = document.getElementById('foto-btn-avaliar');
   btn.disabled = true; btn.style.opacity = '0.35';
-  const ca = document.getElementById('foto-input-camera');
-  const ga = document.getElementById('foto-input-galeria');
-  if (ca) ca.value = ''; if (ga) ga.value = '';
+  const inp = document.getElementById('foto-input-main');
+  if (inp) inp.value = '';
 }
 
 function onFotoSelecionada(input) {
@@ -2547,7 +2539,18 @@ function onFotoSelecionada(input) {
     img.src = b64; img.style.display = 'block';
     document.getElementById('foto-tap-hint').style.display = 'none';
     const btn = document.getElementById('foto-btn-avaliar');
-    btn.disabled = false; btn.style.opacity = '1';
+    btn.disabled = false; btn.style.opacity = '1'; btn.style.cursor = 'pointer';
+  }).catch(() => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      _fotoB64 = e.target.result;
+      const img = document.getElementById('foto-preview-img');
+      img.src = _fotoB64; img.style.display = 'block';
+      document.getElementById('foto-tap-hint').style.display = 'none';
+      const btn = document.getElementById('foto-btn-avaliar');
+      btn.disabled = false; btn.style.opacity = '1'; btn.style.cursor = 'pointer';
+    };
+    reader.readAsDataURL(file);
   });
 }
 
@@ -2608,7 +2611,7 @@ function mostrarResultado() {
   const tierEl  = document.getElementById('result-tier');
   const xpEl    = document.getElementById('result-xp');
   scoreEl.textContent = '0'; scoreEl.style.color = 'var(--text2)';
-  tierEl.className    = 'foto-step'; tierEl.textContent = '';
+  tierEl.classList.remove('show'); tierEl.textContent = '';
   xpEl.className      = ''; xpEl.style.opacity = '0'; xpEl.textContent = '';
   animarScore(_fotoScore, scoreEl, 2000);
   setTimeout(() => {
