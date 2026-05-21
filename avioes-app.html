@@ -220,17 +220,61 @@ label{
 /* ══════════════════════════════════════
    SCREEN: FEED
 ══════════════════════════════════════ */
+/* ══ RANK STORIES ══ */
 .rank-strip{
-  display:flex;gap:10px;overflow-x:auto;padding:12px 16px;
+  display:flex;gap:6px;overflow-x:auto;padding:16px 14px 10px;
   scrollbar-width:none;flex-shrink:0;
 }
 .rank-strip::-webkit-scrollbar{display:none}
-.rank-chip{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer}
-.rank-ava-wrap{position:relative;width:50px;height:50px}
-.rank-ava-ring{position:absolute;inset:-2px;border-radius:50%;background:conic-gradient(var(--accent) var(--pct,0%),rgba(90,171,104,0.1) var(--pct,0%))}
-.rank-ava{position:absolute;inset:3px;border-radius:50%;background:var(--s2);display:flex;align-items:center;justify-content:center;font-size:18px;border:2px solid var(--bg)}
-.rank-name{font-size:10px;color:var(--text2);font-weight:500;max-width:50px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.rank-xp{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--accent);font-weight:700}
+
+.rstory{
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+  cursor:pointer;flex-shrink:0;padding:0 4px;
+  -webkit-tap-highlight-color:transparent;
+  transition:transform 0.15s cubic-bezier(0.34,1.56,0.64,1);
+}
+.rstory:active{transform:scale(0.88)}
+
+.rstory-ring{
+  width:66px;height:66px;border-radius:50%;
+  padding:3px;
+  background:conic-gradient(var(--rc,rgba(90,90,130,0.2)) var(--rp,0%), rgba(255,255,255,0.05) var(--rp,0%));
+  transition:filter 0.3s;
+}
+.rstory-ring.r-bom    {--rc:var(--blue)}
+.rstory-ring.r-exc    {--rc:var(--green)}
+.rstory-ring.r-epic   {--rc:var(--accent)}
+.rstory-ring.r-legend {--rc:#fcd34d;animation:ring-glow 1.8s ease-in-out infinite}
+.rstory-ring.r-me     {filter:drop-shadow(0 0 6px var(--rc,var(--accent)))}
+@keyframes ring-glow{
+  0%,100%{filter:drop-shadow(0 0 4px #fcd34d)}
+  50%{filter:drop-shadow(0 0 14px #fcd34d) brightness(1.3)}
+}
+
+.rstory-ava{
+  width:100%;height:100%;border-radius:50%;
+  background:linear-gradient(135deg,var(--s2),var(--s3));
+  border:2.5px solid var(--bg);
+  display:flex;align-items:center;justify-content:center;
+  font-size:26px;overflow:hidden;box-sizing:border-box;
+}
+.rstory-ava img{width:100%;height:100%;object-fit:cover}
+
+.rstory-name{
+  font-size:11px;font-weight:700;color:var(--text);
+  max-width:68px;text-align:center;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  font-family:'Inter',sans-serif;letter-spacing:-0.2px;
+}
+.rstory-sub{
+  font-size:10px;font-family:'JetBrains Mono',monospace;
+  text-align:center;line-height:1;
+}
+.rstory-me-dot{
+  width:5px;height:5px;border-radius:50%;margin-top:-4px;
+  background:var(--accent);
+  box-shadow:0 0 5px var(--accent);
+}
 
 .post{background:var(--s1);border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin-bottom:2px;animation:post-in 0.4s ease both}
 @keyframes post-in{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
@@ -1675,16 +1719,51 @@ function renderFeed() {
 
 function renderRankStrip() {
   const strip = document.getElementById('rank-strip');
-  const comXP = STATE.membros.filter(m => m.xp > 0);
-  if (comXP.length === 0) { strip.innerHTML = ''; return; }
-  const maxXP = Math.max(...comXP.map(m => m.xp));
+  const me = STATE.currentUser;
+  const sorted = [...STATE.membros].sort((a,b) => b.xp - a.xp);
+
   strip.innerHTML = '';
-  [...comXP].sort((a,b) => b.xp - a.xp).forEach(m => {
-    const pct = (m.xp / maxXP * 100).toFixed(0) + '%';
-    const plane = getPlaneLevel(m.xp);
+
+  sorted.forEach(m => {
+    const plane   = getPlaneLevel(m.xp);
+    const isMe    = me && m.id === me.id;
+    const foto    = m.foto || localStorage.getItem('avioes_foto_' + m.id);
+
+    // Ring color class
+    let ringCls = '';
+    if (m.xp >= 950) ringCls = 'r-legend';
+    else if (m.xp >= 850) ringCls = 'r-epic';
+    else if (m.xp >= 700) ringCls = 'r-exc';
+    else if (m.xp >= 500) ringCls = 'r-bom';
+    if (isMe) ringCls += ' r-me';
+
+    // XP progress toward next level (ring fill %)
+    const curIdx   = PLANE_LEVELS.findIndex((p,i) => m.xp >= p.minXP && (i===PLANE_LEVELS.length-1 || m.xp < PLANE_LEVELS[i+1].minXP));
+    const cur      = PLANE_LEVELS[curIdx];
+    const next     = PLANE_LEVELS[curIdx + 1];
+    const pct      = next ? Math.round(((m.xp - cur.minXP) / (next.minXP - cur.minXP)) * 100) : 100;
+    const pctDeg   = Math.round(pct * 3.6);
+
+    // XP label
+    const xpLabel = m.xp > 0
+      ? '<span style="color:' + (m.xp>=950?'#fcd34d':m.xp>=850?'var(--accent2)':m.xp>=700?'var(--green)':m.xp>=500?'var(--blue)':'var(--text2)') + '">' + m.xp + ' xp</span>'
+      : '<span style="color:var(--text3)">novo</span>';
+
     const chip = document.createElement('div');
-    chip.className = 'rank-chip';
-    chip.innerHTML = '<div class="rank-ava-wrap"><div class="rank-ava-ring" style="--pct:' + pct + '"></div><div class="rank-ava">' + plane.emoji + '</div></div><div class="rank-name">' + m.apelido.split(' ')[0] + '</div><div class="rank-xp">' + m.xp + 'xp</div>';
+    chip.className = 'rstory';
+    chip.innerHTML =
+      '<div class="rstory-ring ' + ringCls + '" style="--rp:' + pctDeg + 'deg">' +
+        '<div class="rstory-ava">' +
+          (foto
+            ? '<img src="' + foto + '" alt="">'
+            : plane.emoji
+          ) +
+        '</div>' +
+      '</div>' +
+      '<div class="rstory-name">' + m.apelido.split(' ')[0] + '</div>' +
+      '<div class="rstory-sub">' + xpLabel + '</div>' +
+      (isMe ? '<div class="rstory-me-dot"></div>' : '');
+
     strip.appendChild(chip);
   });
 }
