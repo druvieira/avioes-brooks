@@ -23,10 +23,10 @@
   --s1:       #0d0d1f;
   --s2:       #13132a;
   --s3:       #1c1c3a;
-  --border:   rgba(124,108,252,0.12);
-  --accent:   #7c6cfc;
-  --accent2:  #a99fff;
-  --accent3:  #4a3db0;
+  --border:   rgba(30,86,49,0.20);
+  --accent:   #1e5631;
+  --accent2:  #2ea34d;
+  --accent3:  #0d3b1e;
   --text:     #ddddf5;
   --text2:    #5a5a98;
   --text3:    #28285a;
@@ -192,19 +192,19 @@ label{
 ══════════════════════════════════════ */
 #screen-login{
   justify-content:center;align-items:center;
-  background:radial-gradient(ellipse at 40% 20%,rgba(124,108,252,0.15) 0%,var(--bg) 65%);
+  background:radial-gradient(ellipse at 40% 20%,rgba(30,86,49,0.18) 0%,var(--bg) 65%);
   padding:32px 24px;gap:0;
   overflow:auto;
 }
 .login-hero{text-align:center;margin-bottom:36px}
-.login-plane{font-size:64px;animation:plane-bob 3s ease-in-out infinite;display:block;margin-bottom:12px;filter:drop-shadow(0 0 24px rgba(124,108,252,0.5))}
+.login-plane{font-size:64px;animation:plane-bob 3s ease-in-out infinite;display:block;margin-bottom:12px;filter:drop-shadow(0 0 24px rgba(30,86,49,0.6))}
 .login-title{
   font-family:'Outfit',sans-serif;font-size:40px;font-weight:800;letter-spacing:5px;
   background:linear-gradient(135deg,var(--accent),var(--accent2),var(--gold));
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;
 }
 .login-sub{font-size:12px;color:var(--text2);letter-spacing:3px;margin-top:4px;font-family:'JetBrains Mono',monospace}
-.login-card{background:rgba(13,13,31,0.85);border:1px solid rgba(124,108,252,0.2);border-radius:24px;padding:28px;width:100%;max-width:380px;backdrop-filter:blur(24px);box-shadow:0 32px 64px rgba(0,0,0,0.5),0 0 0 1px rgba(124,108,252,0.05)}
+.login-card{background:rgba(13,13,31,0.85);border:1px solid rgba(30,86,49,0.22);border-radius:24px;padding:28px;width:100%;max-width:380px;backdrop-filter:blur(24px);box-shadow:0 32px 64px rgba(0,0,0,0.5),0 0 0 1px rgba(30,86,49,0.06)}
 .login-form-group{margin-bottom:16px}
 .login-error{
   background:rgba(255,95,95,0.1);border:1px solid rgba(255,95,95,0.3);
@@ -330,7 +330,7 @@ label{
 .score-legendary{color:#ffd066}.score-epic{color:var(--accent2)}.score-great{color:var(--green)}.score-good{color:var(--blue)}.score-ok{color:var(--text2)}
 .bar-legendary{background:linear-gradient(90deg,#f59e0b,#fcd34d)}.bar-epic{background:linear-gradient(90deg,var(--accent3),var(--accent))}.bar-great{background:linear-gradient(90deg,var(--green),#6ee7b7)}.bar-good{background:linear-gradient(90deg,var(--blue),#7dd3fc)}.bar-ok{background:rgba(255,255,255,0.2)}
 .tag-legendary{background:rgba(251,191,36,0.15);color:#fcd34d;border:1px solid rgba(251,191,36,0.35)}
-.tag-epic{background:rgba(124,108,252,0.2);color:var(--accent2);border:1px solid rgba(124,108,252,0.4)}
+.tag-epic{background:rgba(30,86,49,0.22);color:var(--accent2);border:1px solid rgba(30,86,49,0.45)}
 .tag-great{background:rgba(52,211,153,0.15);color:var(--green);border:1px solid rgba(52,211,153,0.35)}
 .tag-good{background:rgba(56,189,248,0.15);color:var(--blue);border:1px solid rgba(56,189,248,0.35)}
 .tag-ok{background:rgba(90,90,140,0.15);color:var(--text2);border:1px solid rgba(90,90,140,0.3)}
@@ -537,9 +537,9 @@ tr:active td{background:rgba(90,171,104,0.04)}
 }
 .filial-chip:active{transform:scale(0.96)}
 .filial-chip.active{
-  background:rgba(124,108,252,0.15);border-color:var(--accent);
+  background:rgba(30,86,49,0.18);border-color:var(--accent);
   color:var(--accent2);font-weight:700;
-  box-shadow:0 0 12px rgba(124,108,252,0.2);
+  box-shadow:0 0 12px rgba(30,86,49,0.22);
 }
 /* ══ FOTO OVERLAY ══ */
 #overlay-foto{position:fixed;inset:0;z-index:800;background:var(--bg);display:none;flex-direction:column;animation:fadeIn .2s ease}
@@ -593,9 +593,9 @@ tr:active td{background:rgba(90,171,104,0.04)}
      SCREEN: IDENTIFICAÇÃO (primeira vez)
 ══════════════════════════════════════ -->
 <div class="screen hidden" id="screen-identificacao">
-  <div style="flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:32px 24px;background:radial-gradient(ellipse at 40% 20%,rgba(124,108,252,0.15) 0%,var(--bg) 65%);overflow-y:auto">
+  <div style="flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:32px 24px;background:radial-gradient(ellipse at 40% 20%,rgba(30,86,49,0.18) 0%,var(--bg) 65%);overflow-y:auto">
     <div style="text-align:center;margin-bottom:28px">
-      <span style="font-size:58px;animation:plane-bob 3s ease-in-out infinite;display:block;margin-bottom:10px;filter:drop-shadow(0 0 24px rgba(124,108,252,0.5))">✈️</span>
+      <span style="font-size:58px;animation:plane-bob 3s ease-in-out infinite;display:block;margin-bottom:10px;filter:drop-shadow(0 0 24px rgba(30,86,49,0.6))">✈️</span>
       <div style="font-family:'Outfit',sans-serif;font-size:36px;font-weight:800;letter-spacing:5px;background:linear-gradient(135deg,var(--accent),var(--accent2),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent">AVIÕES</div>
       <div style="font-size:10px;color:var(--text2);letter-spacing:4px;margin-top:3px;font-family:'JetBrains Mono',monospace">BROOKSFIELD · PRIMEIRO ACESSO</div>
     </div>
@@ -1201,7 +1201,7 @@ tr:active td{background:rgba(90,171,104,0.04)}
       <div id="result-score-num">0</div>
       <div style="font-size:11px;color:rgba(255,255,255,0.25);font-family:'JetBrains Mono',monospace;letter-spacing:2px;margin-bottom:16px">/1000</div>
       <div id="result-tier"></div>
-      <div id="result-xp" style="margin-top:12px;display:inline-flex;align-items:center;gap:6px;background:rgba(124,108,252,0.2);border:1px solid rgba(124,108,252,0.35);border-radius:20px;padding:7px 18px;font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;color:var(--accent2);margin-bottom:8px"></div>
+      <div id="result-xp" style="margin-top:12px;display:inline-flex;align-items:center;gap:6px;background:rgba(30,86,49,0.22);border:1px solid rgba(124,108,252,0.35);border-radius:20px;padding:7px 18px;font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;color:var(--accent2);margin-bottom:8px"></div>
       <div id="result-sessao" style="font-size:12px;color:rgba(255,255,255,0.3);font-family:'JetBrains Mono',monospace;letter-spacing:1px;margin-bottom:32px"></div>
       <div style="display:flex;flex-direction:column;gap:10px;width:100%;max-width:320px">
         <button onclick="publicarNoFeed()" style="background:linear-gradient(135deg,var(--accent3),var(--accent));border:none;border-radius:14px;padding:16px;color:#fff;font-family:'Outfit',sans-serif;font-size:15px;font-weight:700;cursor:pointer;letter-spacing:1px">✈️ POSTAR NO FEED</button>
