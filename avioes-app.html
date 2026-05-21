@@ -2217,6 +2217,7 @@ async function salvarEdicao() {
   m.turno   = document.getElementById('em-turno').value;
   if (old !== m.apelido) addLog('gestor','⚙️','<strong>Gestor</strong> editou: "' + old + '" → "' + m.apelido + '"');
   if (sb) { try { await sb.from('membros').update({ apelido: m.apelido, turno: m.turno }).eq('id', id); } catch(_) {} }
+  // (frase/cidade salvos em salvarPerfil)
   closeModal('modal-edit-membro');
   renderGestorEquipe();
 }
@@ -2260,10 +2261,13 @@ async function addMembro() {
       apelido: data.apelido,
       funcao: data.funcao,
       turno: data.turno,
-      nome:      data.nome      || nome,
-      sobrenome: data.sobrenome || sobrenome,
-      telefone:  data.telefone  || telefone || null,
-      filial:    data.filial    || filial,
+      nome:       data.nome       || nome,
+      sobrenome:  data.sobrenome  || sobrenome,
+      telefone:   data.telefone   || telefone || null,
+      filial:     data.filial     || filial,
+      frase:      data.frase      || null,
+      fraseAtiva: data.frase_ativa !== false,
+      cidade:     data.cidade     || '',
       xp: data.xp ?? 0,
       streak: data.streak ?? 0,
       senha: data.senha ?? null,
@@ -2466,7 +2470,7 @@ async function initApp() {
     // Carrega membros
     const { data: membros, error: eMembros } = await sb.from('membros').select('*').order('xp', { ascending: false });
     if (eMembros) throw eMembros;
-    if (false) STATE.membros = membros.map(m => ({
+    if (membros && membros.length > 0) STATE.membros = membros.map(m => ({
       id: m.id,
       apelido: m.apelido,
       funcao: m.funcao,
@@ -2475,10 +2479,13 @@ async function initApp() {
       streak: m.streak,
       senha: m.senha,
       semana_num: m.semana_num,
-      nome:      m.nome || '',
-      sobrenome: m.sobrenome || '',
-      telefone:  m.telefone || '',
-      filial:    m.filial || 'goiabeiras',
+      nome:       m.nome       || '',
+      sobrenome:  m.sobrenome  || '',
+      telefone:   m.telefone   || '',
+      filial:     m.filial     || 'goiabeiras',
+      frase:      m.frase      || null,
+      fraseAtiva: m.frase_ativa !== false,
+      cidade:     m.cidade     || '',
       tarefasHoje: [false, false, false, false, false],
     }));
 
@@ -2528,7 +2535,7 @@ async function initApp() {
 
     // Carrega sessões
     const { data: sessoes } = await sb.from('sessoes').select('*').order('id');
-    if (sessoes && sessoes.length > 0) STATE.sessoes = sessoes.map(s => ({ id: s.id, nome: s.nome, desc: s.descricao || '', responsavelId: s.responsavel_id || null }));
+    if (sessoes && sessoes.length > 0) STATE.sessoes = sessoes.map(s => ({ id: s.id, nome: s.nome, desc: s.descricao || '', responsavelId: s.responsavel_id || null, filial: s.filial || 'goiabeiras' }));
 
     // Carrega balcões
     const { data: balcoes } = await sb.from('balcoes').select('*').order('id');
