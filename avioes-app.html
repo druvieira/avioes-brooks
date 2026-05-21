@@ -1720,16 +1720,26 @@ function renderFeed() {
 function renderRankStrip() {
   const strip = document.getElementById('rank-strip');
   const me = STATE.currentUser;
-  const sorted = [...STATE.membros].sort((a,b) => b.xp - a.xp);
+
+  function temStory(m) {
+    return STATE.feedData.some(p => p.author === m.apelido) || (m.frase && m.fraseAtiva !== false);
+  }
+
+  const sorted = [...STATE.membros].sort((a,b) => {
+    const aA = temStory(a), bA = temStory(b);
+    if (aA !== bA) return aA ? -1 : 1;
+    return b.xp - a.xp;
+  });
 
   strip.innerHTML = '';
 
   sorted.forEach(m => {
-    const plane   = getPlaneLevel(m.xp);
-    const isMe    = me && m.id === me.id;
-    const foto    = m.foto || localStorage.getItem('avioes_foto_' + m.id);
+    const plane = getPlaneLevel(m.xp);
+    const isMe  = me && m.id === me.id;
+    const ativo = temStory(m);
+    const foto  = m.foto || localStorage.getItem('avioes_foto_' + m.id);
+    const frase = (m.frase && m.fraseAtiva !== false) ? m.frase : null;
 
-    // Ring color class
     let ringCls = '';
     if (m.xp >= 950) ringCls = 'r-legend';
     else if (m.xp >= 850) ringCls = 'r-epic';
@@ -1737,31 +1747,42 @@ function renderRankStrip() {
     else if (m.xp >= 500) ringCls = 'r-bom';
     if (isMe) ringCls += ' r-me';
 
-    // XP progress toward next level (ring fill %)
-    const curIdx   = PLANE_LEVELS.findIndex((p,i) => m.xp >= p.minXP && (i===PLANE_LEVELS.length-1 || m.xp < PLANE_LEVELS[i+1].minXP));
-    const cur      = PLANE_LEVELS[curIdx];
-    const next     = PLANE_LEVELS[curIdx + 1];
-    const pct      = next ? Math.round(((m.xp - cur.minXP) / (next.minXP - cur.minXP)) * 100) : 100;
-    const pctDeg   = Math.round(pct * 3.6);
+    let pctDeg;
+    if (ativo) {
+      pctDeg = '360deg';
+    } else {
+      const ci = PLANE_LEVELS.findIndex((p,i) => m.xp >= p.minXP && (i === PLANE_LEVELS.length-1 || m.xp < PLANE_LEVELS[i+1].minXP));
+      const nx = PLANE_LEVELS[ci+1];
+      const pct = nx ? Math.round(((m.xp - PLANE_LEVELS[ci].minXP) / (nx.minXP - PLANE_LEVELS[ci].minXP)) * 100) : 100;
+      pctDeg = Math.round(pct * 3.6) + 'deg';
+    }
 
-    // XP label
-    const xpLabel = m.xp > 0
-      ? '<span style="color:' + (m.xp>=950?'#fcd34d':m.xp>=850?'var(--accent2)':m.xp>=700?'var(--green)':m.xp>=500?'var(--blue)':'var(--text2)') + '">' + m.xp + ' xp</span>'
-      : '<span style="color:var(--text3)">novo</span>';
+    const opacity = ativo ? '1' : (m.xp > 0 ? '0.7' : '0.3');
+
+    const xpColor = m.xp>=950 ? '#fcd34d' : m.xp>=850 ? 'var(--accent2)' : m.xp>=700 ? 'var(--green)' : m.xp>=500 ? 'var(--blue)' : 'var(--text2)';
+    let subHTML;
+    if (frase) {
+      const t = frase.length > 16 ? frase.slice(0,16) + '…' : frase;
+      subHTML = '<span style="color:var(--accent2);font-size:9px;max-width:68px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;display:block;text-align:center">&ldquo;' + t + '&rdquo;</span>';
+    } else if (m.xp > 0) {
+      subHTML = '<span style="color:' + xpColor + '">' + m.xp + ' xp</span>';
+    } else {
+      subHTML = '<span style="color:var(--text3)">novo</span>';
+    }
+
+    const dotHTML = ativo
+      ? '<div style="width:11px;height:11px;border-radius:50%;background:var(--accent);border:2px solid var(--bg);margin-top:-78px;margin-left:42px;margin-bottom:0;box-shadow:0 0 7px var(--accent);position:relative;z-index:1"></div>'
+      : '';
 
     const chip = document.createElement('div');
     chip.className = 'rstory';
     chip.innerHTML =
-      '<div class="rstory-ring ' + ringCls + '" style="--rp:' + pctDeg + 'deg">' +
-        '<div class="rstory-ava">' +
-          (foto
-            ? '<img src="' + foto + '" alt="">'
-            : plane.emoji
-          ) +
-        '</div>' +
+      '<div class="rstory-ring ' + ringCls + '" style="--rp:' + pctDeg + ';opacity:' + opacity + '">' +
+        '<div class="rstory-ava">' + (foto ? '<img src="' + foto + '" alt="">' : plane.emoji) + '</div>' +
       '</div>' +
+      dotHTML +
       '<div class="rstory-name">' + m.apelido.split(' ')[0] + '</div>' +
-      '<div class="rstory-sub">' + xpLabel + '</div>' +
+      '<div class="rstory-sub">' + subHTML + '</div>' +
       (isMe ? '<div class="rstory-me-dot"></div>' : '');
 
     strip.appendChild(chip);
