@@ -1,7 +1,7 @@
 {
-  "name": "Aviões · Brooksfield",
+  "name": "Aviões",
   "short_name": "Aviões",
-  "description": "Gamificação da equipe Brooksfield",
+  "description": "Sistema de gamificação de equipe de vendas",
   "start_url": "./avioes-app.html",
   "scope": "./",
   "display": "standalone",

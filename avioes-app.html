@@ -10,7 +10,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon.svg">
-<title>Aviões · Brooksfield</title>
+<title>Aviões</title>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -19,7 +19,7 @@
    RESET & VARIABLES
 ══════════════════════════════════════ */
 :root {
-  /* ─── Brooksfield Light Mode ─── */
+  /* ─── Light Mode ─── */
   --bg:       #fafafa;
   --s1:       #ffffff;
   --s2:       #f0f0f0;
@@ -603,7 +603,7 @@ tr:active td{background:rgba(90,171,104,0.04)}
     <div style="text-align:center;margin-bottom:28px">
       <span style="font-size:58px;animation:plane-bob 3s ease-in-out infinite;display:block;margin-bottom:10px;filter:drop-shadow(0 0 24px rgba(30,86,49,0.6))">✈️</span>
       <div style="font-family:'Outfit',sans-serif;font-size:36px;font-weight:800;letter-spacing:5px;background:linear-gradient(135deg,var(--accent),var(--accent2),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent">AVIÕES</div>
-      <div style="font-size:10px;color:var(--text2);letter-spacing:4px;margin-top:3px;font-family:'JetBrains Mono',monospace">BROOKSFIELD · PRIMEIRO ACESSO</div>
+      <div style="font-size:10px;color:var(--text2);letter-spacing:4px;margin-top:3px;font-family:'JetBrains Mono',monospace">PRIMEIRO ACESSO</div>
     </div>
     <div class="login-card" style="width:100%;max-width:380px">
       <div style="font-family:'Outfit',sans-serif;font-weight:700;font-size:17px;margin-bottom:4px">Bem-vindo(a)! 👋</div>
@@ -641,35 +641,24 @@ tr:active td{background:rgba(90,171,104,0.04)}
   <div class="login-hero">
     <span class="login-plane" id="login-plane-icon">✈️</span>
     <div class="login-title">AVIÕES</div>
-    <div class="login-sub">Brooksfield · Brookfield</div>
+    <div class="login-sub" id="login-sub">Acesse sua conta</div>
   </div>
   <div class="login-card">
-    <div style="margin-bottom:18px">
-      <label style="display:block;margin-bottom:8px">Sua filial</label>
-      <div class="filial-grid">
-        <div class="filial-chip active" onclick="selecionarFilial('goiabeiras',this)">🏬 Goiabeiras</div>
-        <div class="filial-chip" onclick="selecionarFilial('estacao',this)">🚉 Estação</div>
-        <div class="filial-chip" onclick="selecionarFilial('3americas',this)">🌎 3 Américas</div>
-        <div class="filial-chip" onclick="selecionarFilial('pantanal',this)">🌿 Pantanal</div>
-      </div>
-    </div>
     <div class="login-form-group">
-      <label>Quem é você?</label>
-      <select id="login-select">
-        <option value="">Selecione seu apelido...</option>
-      </select>
+      <label>Apelido</label>
+      <input type="text" id="login-apelido" placeholder="Seu apelido..." autocorrect="off" autocapitalize="none" autocomplete="username" onkeydown="if(event.key==='Enter')document.getElementById('login-senha').focus()">
     </div>
     <div class="login-form-group">
       <label>Senha</label>
-      <input type="password" id="login-senha" placeholder="••••••••" autocomplete="current-password">
+      <input type="password" id="login-senha" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')tentarLogin()">
     </div>
-    <div class="login-error" id="login-error">Senha incorreta. Tente novamente.</div>
+    <div class="login-error" id="login-error">Usuário ou senha incorretos.</div>
     <button class="btn btn-primary" onclick="tentarLogin()">✈️ DECOLAR</button>
     <div style="text-align:center;margin-top:14px">
-      <span style="font-size:12px;color:var(--text2);cursor:pointer" onclick="openModal('modal-primeiro-acesso')">Primeiro acesso? Crie sua senha</span>
+      <span style="font-size:12px;color:var(--text2);cursor:pointer" onclick="irParaIdentificacao()">Primeiro acesso? Ative sua conta</span>
     </div>
     <div style="text-align:center;margin-top:8px">
-      <span style="font-size:11px;color:var(--text3);cursor:pointer;font-family:'JetBrains Mono',monospace;letter-spacing:1px" onclick="loginGestor()">ACESSO GESTOR</span>
+      <span style="font-size:11px;color:var(--text3);cursor:pointer;font-family:'JetBrains Mono',monospace;letter-spacing:1px" onclick="loginGestor()">ACESSO ADM</span>
     </div>
   </div>
 </div>
@@ -680,11 +669,11 @@ tr:active td{background:rgba(90,171,104,0.04)}
 
 <!-- TOPBAR -->
 <div class="topbar hidden" id="app-topbar">
-  <div class="topbar-brand">
+  <div class="topbar-brand" onclick="goTo('feed')" style="cursor:pointer">
     <span class="plane-anim" id="topbar-plane">✈️</span>
     <div>
       <div class="topbar-title">AVIÕES</div>
-      <div class="topbar-sub">Brooksfield</div>
+      <div class="topbar-sub" id="topbar-brand-sub"></div>
     </div>
   </div>
   <div class="user-pill" onclick="abrirPerfil()">
@@ -999,7 +988,7 @@ tr:active td{background:rgba(90,171,104,0.04)}
 <!-- BOTTOM NAV -->
 <nav class="bottom-nav hidden" id="bottom-nav">
   <div class="nav-item active" id="nav-feed"    onclick="goTo('feed')">
-    <span class="nav-icon">📸</span><span class="nav-label">Feed</span>
+    <span class="nav-icon">🏠</span><span class="nav-label">Início</span>
     <span class="nav-badge" id="feed-badge"></span>
   </div>
   <div class="nav-item" id="nav-tarefas" onclick="goTo('tarefas')">
@@ -1021,19 +1010,17 @@ tr:active td{background:rgba(90,171,104,0.04)}
 ══════════════════════════════════════ -->
 <div class="modal-overlay" id="modal-primeiro-acesso">
   <div class="modal">
-    <div class="modal-title">🔑 Criar senha</div>
-    <div class="modal-form-group">
-      <label>Sua filial</label>
-      <div class="filial-grid">
-        <div class="filial-chip active" onclick="selecionarFilialPA('goiabeiras',this)">🏬 Goiabeiras</div>
-        <div class="filial-chip" onclick="selecionarFilialPA('estacao',this)">🚉 Estação</div>
-        <div class="filial-chip" onclick="selecionarFilialPA('3americas',this)">🌎 3 Américas</div>
-        <div class="filial-chip" onclick="selecionarFilialPA('pantanal',this)">🌿 Pantanal</div>
-      </div>
+    <div class="modal-title">🔑 Criar / Alterar senha</div>
+    <div style="font-size:13px;color:var(--text2);margin-bottom:16px;line-height:1.5">
+      Para criar ou alterar sua senha, informe seu apelido e o telefone cadastrado pelo gestor.
     </div>
     <div class="modal-form-group">
-      <label>Quem é você?</label>
-      <select id="pa-select"><option value="">Selecione...</option></select>
+      <label>Apelido</label>
+      <input type="text" id="pa-apelido" placeholder="Seu apelido" autocorrect="off" autocapitalize="none">
+    </div>
+    <div class="modal-form-group">
+      <label>Telefone cadastrado</label>
+      <input type="tel" id="pa-telefone" placeholder="(27) 99999-9999" oninput="mascaraTel(this)">
     </div>
     <div class="modal-form-group">
       <label>Nova senha</label>
@@ -1043,6 +1030,7 @@ tr:active td{background:rgba(90,171,104,0.04)}
       <label>Confirmar senha</label>
       <input type="password" id="pa-confirm" placeholder="Repita a senha">
     </div>
+    <div class="login-error modal-error" id="pa-error" style="display:none">Dados inválidos. Verifique e tente novamente.</div>
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeModal('modal-primeiro-acesso')">Cancelar</button>
       <button class="btn btn-primary" onclick="criarSenha()">✔ Confirmar</button>
@@ -1208,7 +1196,8 @@ tr:active td{background:rgba(90,171,104,0.04)}
       <div style="font-size:11px;color:rgba(255,255,255,0.25);font-family:'JetBrains Mono',monospace;letter-spacing:2px;margin-bottom:16px">/1000</div>
       <div id="result-tier"></div>
       <div id="result-xp" style="margin-top:12px;display:inline-flex;align-items:center;gap:6px;background:rgba(30,86,49,0.22);border:1px solid rgba(124,108,252,0.35);border-radius:20px;padding:7px 18px;font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;color:var(--accent2);margin-bottom:8px"></div>
-      <div id="result-sessao" style="font-size:12px;color:rgba(255,255,255,0.3);font-family:'JetBrains Mono',monospace;letter-spacing:1px;margin-bottom:32px"></div>
+      <div id="result-sessao" style="font-size:12px;color:rgba(255,255,255,0.3);font-family:'JetBrains Mono',monospace;letter-spacing:1px;margin-bottom:10px"></div>
+      <div id="result-resumo" style="display:none;font-size:13px;color:rgba(255,255,255,0.6);font-style:italic;text-align:center;max-width:280px;margin-bottom:22px;line-height:1.4"></div>
       <div style="display:flex;flex-direction:column;gap:10px;width:100%;max-width:320px">
         <button onclick="publicarNoFeed()" style="background:linear-gradient(135deg,var(--accent3),var(--accent));border:none;border-radius:14px;padding:16px;color:#fff;font-family:'Outfit',sans-serif;font-size:15px;font-weight:700;cursor:pointer;letter-spacing:1px">✈️ POSTAR NO FEED</button>
         <button onclick="tirarDeNovo()" style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:14px;padding:13px;color:rgba(255,255,255,0.6);font-family:'Outfit',sans-serif;font-size:14px;font-weight:600;cursor:pointer">📷 Tirar de novo</button>
@@ -1578,6 +1567,8 @@ function loginSuccess(membro, isGestor = false) {
   document.getElementById('topbar-level').textContent = isGestor ? 'ADMIN' : nivel.name;
   const filialEl = document.getElementById('topbar-filial');
   if (filialEl) filialEl.textContent = isGestor ? '' : (FILIAL_NOMES[membro?.filial] || '');
+  const brandSub = document.getElementById('topbar-brand-sub');
+  if (brandSub) brandSub.textContent = isGestor ? 'ADM GERAL' : (FILIAL_NOMES[membro?.filial] || '');
   const avaEl = document.getElementById('topbar-ava');
   if (avaEl) {
     if (!isGestor && membro?.foto) {
@@ -1615,46 +1606,19 @@ const FILIAL_NOMES = {
 let selectedFilial = 'goiabeiras';
 let selectedFilialPA = 'goiabeiras';
 
-function selecionarFilial(filial, el) {
-  selectedFilial = filial;
-  document.querySelectorAll('#screen-login .filial-chip').forEach(c => c.classList.remove('active'));
-  el.classList.add('active');
-  initLoginSelect();
-}
-
-function selecionarFilialPA(filial, el) {
-  selectedFilialPA = filial;
-  document.querySelectorAll('#modal-primeiro-acesso .filial-chip').forEach(c => c.classList.remove('active'));
-  el.classList.add('active');
-}
-
-function initLoginSelect() {
-  const filtrados = STATE.membros.filter(m => !selectedFilial || m.filial === selectedFilial || !m.filial);
-  const sel   = document.getElementById('login-select');
-  const paSel = document.getElementById('pa-select');
-  if (sel) {
-    sel.innerHTML = '<option value="">Selecione seu apelido...</option>';
-    filtrados.forEach(m => {
-      sel.innerHTML += '<option value="' + m.id + '">' + m.apelido +
-        ' (' + (m.funcao==='vendedor'?'Vendedor':'Caixa') + ' · ' + (m.turno==='manha'?'Manhã':'Tarde') + ')</option>';
-    });
-  }
-  if (paSel) {
-    paSel.innerHTML = '<option value="">Selecione...</option>';
-    STATE.membros.forEach(m => {
-      paSel.innerHTML += '<option value="' + m.id + '">' + m.apelido + '</option>';
-    });
-  }
-}
-
 function tentarLogin() {
-  const id    = parseInt(document.getElementById('login-select').value);
-  const senha = document.getElementById('login-senha').value;
-  const errEl = document.getElementById('login-error');
-  if (!id) { showToast('⚠️ Selecione seu apelido'); return; }
-  const membro = STATE.membros.find(m => m.id === id);
+  const apelido = document.getElementById('login-apelido').value.trim();
+  const senha   = document.getElementById('login-senha').value;
+  const errEl   = document.getElementById('login-error');
+  if (!apelido) { showToast('⚠️ Digite seu apelido'); return; }
+  if (!senha)   { showToast('⚠️ Digite sua senha'); return; }
+  const membro = STATE.membros.find(m => m.apelido.toLowerCase() === apelido.toLowerCase());
+  if (!membro) {
+    errEl.textContent = 'Usuário não encontrado.';
+    errEl.style.display = 'block';
+    return;
+  }
   if (!membro.senha) {
-    // Senha nula = ainda não ativou o acesso
     localStorage.removeItem('avioes_onboarded');
     document.getElementById('screen-login').classList.add('hidden');
     document.getElementById('screen-identificacao').classList.remove('hidden');
@@ -1671,6 +1635,58 @@ function tentarLogin() {
   addLog('login','🔐','<strong>' + membro.apelido + '</strong> entrou · ' + (FILIAL_NOMES[membro.filial]||membro.filial));
   localStorage.setItem('avioes_session', JSON.stringify({ memberId: membro.id, isGestor: false }));
   loginSuccess(membro);
+}
+
+function checkFirstRun() {
+  // Sem sessão salva — garante que a tela de login está visível
+  document.getElementById('screen-login').classList.remove('hidden');
+  document.getElementById('screen-identificacao').classList.add('hidden');
+}
+
+function verificarPrimeiroLogin(membro) {
+  // Hook de pós-login — reservado para onboarding futuro
+}
+
+function irParaIdentificacao() {
+  document.getElementById('screen-login').classList.add('hidden');
+  document.getElementById('screen-identificacao').classList.remove('hidden');
+  document.getElementById('id-nome').value = '';
+  document.getElementById('id-telefone').value = '';
+  document.getElementById('id-error').style.display = 'none';
+}
+
+function irParaLogin() {
+  document.getElementById('screen-identificacao').classList.add('hidden');
+  document.getElementById('screen-login').classList.remove('hidden');
+}
+
+function selecionarFilialID(filial, el) {
+  document.querySelectorAll('#id-filial-grid .filial-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+}
+
+async function identificarFuncionario() {
+  const nome  = document.getElementById('id-nome').value.trim();
+  const tel   = document.getElementById('id-telefone').value.replace(/\D/g,'');
+  const errEl = document.getElementById('id-error');
+  if (!nome || !tel) { showToast('⚠️ Preencha todos os campos'); return; }
+  const m = STATE.membros.find(x =>
+    x.apelido.toLowerCase() === nome.toLowerCase() &&
+    (x.telefone || '').replace(/\D/g,'').endsWith(tel.slice(-8))
+  );
+  if (!m) { errEl.style.display = 'block'; return; }
+  errEl.style.display = 'none';
+  const senhaInicial = tel.slice(-8);
+  m.senha = senhaInicial;
+  try { await salvarSenhaBanco(m.id, senhaInicial); } catch(_) {}
+  addLog('login','✅','<strong>' + m.apelido + '</strong> ativou o acesso');
+  showToast('✅ Acesso ativado! Sua senha são os últimos 8 dígitos do telefone.');
+  setTimeout(() => {
+    document.getElementById('screen-identificacao').classList.add('hidden');
+    document.getElementById('screen-login').classList.remove('hidden');
+    document.getElementById('login-apelido').value = m.apelido;
+    document.getElementById('login-senha').focus();
+  }, 2000);
 }
 
 function loginGestor() {
@@ -1741,7 +1757,7 @@ function fazerLogout() {
     document.getElementById('screen-' + s).classList.add('hidden'));
   document.getElementById('screen-login').classList.remove('hidden');
   document.getElementById('login-senha').value = '';
-  document.getElementById('login-select').value = '';
+  document.getElementById('login-apelido').value = '';
 }
 
 function logoutGestor() {
@@ -1756,22 +1772,37 @@ function logoutGestor() {
     document.getElementById('screen-' + s).classList.add('hidden'));
   document.getElementById('screen-login').classList.remove('hidden');
   document.getElementById('login-senha').value = '';
-  document.getElementById('login-select').value = '';
+  document.getElementById('login-apelido').value = '';
   // Reset all gestor subs
   document.querySelectorAll('.gestor-sub').forEach(s => s.classList.remove('active'));
   document.getElementById('gestor-main').classList.add('active');
 }
 
 function criarSenha() {
-  const id      = parseInt(document.getElementById('pa-select').value);
-  const senha   = document.getElementById('pa-senha').value;
-  const confirm = document.getElementById('pa-confirm').value;
-  if (!id) { showToast('⚠️ Selecione o apelido'); return; }
+  const apelido  = document.getElementById('pa-apelido').value.trim();
+  const telefone = document.getElementById('pa-telefone').value.replace(/\D/g,'');
+  const senha    = document.getElementById('pa-senha').value;
+  const confirm  = document.getElementById('pa-confirm').value;
+  const errEl    = document.getElementById('pa-error');
+  if (!apelido)       { showToast('⚠️ Digite seu apelido'); return; }
+  if (!telefone)      { showToast('⚠️ Digite seu telefone'); return; }
   if (senha.length < 4) { showToast('⚠️ Mínimo 4 caracteres'); return; }
   if (senha !== confirm) { showToast('⚠️ Senhas diferentes'); return; }
-  const m = STATE.membros.find(x => x.id === id);
+  const m = STATE.membros.find(x => x.apelido.toLowerCase() === apelido.toLowerCase());
+  if (!m) {
+    errEl.textContent = 'Apelido não encontrado. Fale com seu gestor.';
+    errEl.style.display = 'block';
+    return;
+  }
+  const telDB = (m.telefone || '').replace(/\D/g,'');
+  if (!telDB || !telDB.endsWith(telefone.slice(-8))) {
+    errEl.textContent = 'Telefone não confere. Verifique e tente novamente.';
+    errEl.style.display = 'block';
+    return;
+  }
+  errEl.style.display = 'none';
   m.senha = senha;
-  addLog('gestor','🔑','<strong>' + m.apelido + '</strong> criou nova senha');
+  addLog('login','🔑','<strong>' + m.apelido + '</strong> criou nova senha');
   closeModal('modal-primeiro-acesso');
   showToast('✅ Senha criada! Faça login.');
   salvarSenhaBanco(m.id, senha);
@@ -2374,7 +2405,6 @@ async function addMembro() {
     document.getElementById('nm-telefone').value = '';
     closeModal('modal-add-membro');
     renderGestorEquipe();
-    initLoginSelect();
     showToast('✅ ' + apelido + ' adicionado!');
   } catch(err) {
     console.error('Erro ao salvar membro:', err);
@@ -2653,7 +2683,6 @@ async function initApp() {
     _lastFeedId = Math.max(...STATE.feedData.map(p => typeof p.id === 'number' ? p.id : 0));
   }
   hideLoadingScreen();
-  initLoginSelect();
 
   // Auto-login: restaura sessao salva
   const _sess = localStorage.getItem('avioes_session');
@@ -2733,9 +2762,13 @@ function hideLoadingScreen() {
 // FOTO — sistema completo v2
 // ════════════════════════════════════════════
 
-let _fotoB64  = null;   // base64 da foto atual
+let _fotoB64   = null;   // base64 da foto atual
+let _fotoUrl   = null;   // URL pública após upload (evita duplo upload)
 let _fotoScore = 0;
 let _fotoXP    = 0;
+let _fotoResumo = '';    // resumo da IA
+
+const EDGE_AVALIAR = SUPABASE_URL + '/functions/v1/avaliar-foto';
 
 function mostrarStep(n) {
   [1,2,3].forEach(i => {
@@ -2832,17 +2865,54 @@ function comprimirImagem(file, maxPx = 900) {
 async function iniciarAvaliacao() {
   if (!_fotoB64) return;
   mostrarStep(2);
-  const msgs = ['Detectando estrutura...','Analisando organização...','Verificando degradê...','Calculando proporções...','Gerando pontuação...'];
-  const bar = document.getElementById('analyzing-bar');
+  const msgs = ['Enviando foto...','Detectando estrutura...','Analisando organização...','Verificando degradê...','Gerando pontuação...'];
+  const bar   = document.getElementById('analyzing-bar');
   const msgEl = document.getElementById('analyzing-msg');
   bar.style.width = '0%';
-  for (let i = 0; i < msgs.length; i++) {
-    msgEl.textContent = msgs[i];
-    bar.style.width = ((i + 1) / msgs.length * 100) + '%';
-    await new Promise(r => setTimeout(r, 420));
-  }
-  await new Promise(r => setTimeout(r, 250));
-  _fotoScore = gerarScore();
+  _fotoUrl   = null;
+  _fotoResumo = '';
+
+  // Animação de progresso (não bloqueia o upload)
+  const animPromise = (async () => {
+    for (let i = 0; i < msgs.length; i++) {
+      msgEl.textContent = msgs[i];
+      bar.style.width = ((i + 1) / msgs.length * 100) + '%';
+      await new Promise(r => setTimeout(r, 500));
+    }
+  })();
+
+  // Upload + chamada à IA em paralelo com a animação
+  const sessaoNome = document.getElementById('foto-sessao-sel').value;
+  const sessaoObj  = STATE.sessoes.find(s => s.nome === sessaoNome) || STATE.balcoes.find(b => b.nome === sessaoNome);
+  const tipoSessao = sessaoObj?.tipo || 'paredao';
+
+  let iaScore = null;
+  try {
+    if (sb && _fotoB64) {
+      const me = STATE.currentUser;
+      _fotoUrl = await uploadFotoStorage(_fotoB64, me.id);
+    }
+    if (_fotoUrl) {
+      const resp = await fetch(EDGE_AVALIAR, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
+        body: JSON.stringify({ foto_url: _fotoUrl, tipo_sessao: tipoSessao }),
+        signal: AbortSignal.timeout(35_000),
+      });
+      if (resp.ok) {
+        const data = await resp.json();
+        if (typeof data.score === 'number') {
+          iaScore = Math.max(0, Math.min(1000, Math.round(data.score)));
+          _fotoResumo = data.resumo || '';
+        }
+      }
+    }
+  } catch (_) {}
+
+  await animPromise; // garante que a animação terminou
+  await new Promise(r => setTimeout(r, 200));
+
+  _fotoScore = iaScore !== null ? iaScore : gerarScore();
   _fotoXP    = _fotoScore >= 950 ? 30 : _fotoScore >= 850 ? 25 : _fotoScore >= 700 ? 20 : _fotoScore >= 500 ? 15 : 10;
   mostrarResultado();
 }
@@ -2858,7 +2928,10 @@ function gerarScore() {
 
 function mostrarResultado() {
   mostrarStep(3);
-  document.getElementById('result-bg').style.backgroundImage = 'url(' + _fotoB64 + ')';
+  document.getElementById('result-bg').style.backgroundImage = 'url(' + (_fotoUrl || _fotoB64) + ')';
+  // Resumo da IA (se disponível)
+  const resumoEl = document.getElementById('result-resumo');
+  if (resumoEl) { resumoEl.textContent = _fotoResumo || ''; resumoEl.style.display = _fotoResumo ? 'block' : 'none'; }
   document.getElementById('result-sessao').textContent = '\u{1F4CD} ' + (document.getElementById('foto-sessao-sel').value || '—');
   const scoreEl = document.getElementById('result-score-num');
   const tierEl  = document.getElementById('result-tier');
@@ -2908,9 +2981,9 @@ async function publicarNoFeed() {
   if (!me || !_fotoB64) return;
   const sessao = document.getElementById('foto-sessao-sel').value || '—';
 
-  // Upload da foto para o servidor (Supabase Storage)
-  let fotoUrl = null;
-  if (_fotoB64 && sb) {
+  // Reusa URL do upload feito em iniciarAvaliacao (evita duplo upload)
+  let fotoUrl = _fotoUrl;
+  if (!fotoUrl && _fotoB64 && sb) {
     fotoUrl = await uploadFotoStorage(_fotoB64, me.id);
   }
 

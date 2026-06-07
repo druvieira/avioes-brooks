@@ -1,5 +1,5 @@
 -- ═══════════════════════════════════════════════════════
--- AVIÕES · BROOKSFIELD — Schema Supabase
+-- AVIÕES — Schema Supabase
 -- Cole isso inteiro no SQL Editor do Supabase e execute
 -- ═══════════════════════════════════════════════════════
 
