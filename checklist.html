@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#15171c">
+<title>Auditoria de VM — Brooksfield</title>
+<style>
+  :root{
+    --bg:#15171c; --panel:#1d2026; --panel-2:#23272f; --line:#2e333d;
+    --ink:#e9ecf1; --ink-dim:#9aa3b2; --ink-faint:#646c7a;
+    --amber:#f2a93b; --amber-deep:#c87f1c; --green:#46c08d; --red:#e2614f; --blue:#5b8def;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--bg); color:var(--ink);
+    font-family:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    font-size:16px; line-height:1.45; padding-bottom:96px; -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:760px;margin:0 auto;padding:0 16px}
+
+  header{position:sticky;top:0;z-index:30;background:var(--bg);border-bottom:1px solid var(--line)}
+  .head-row{display:flex;align-items:center;gap:12px;padding:14px 16px 12px;max-width:760px;margin:0 auto}
+  .badge{width:42px;height:42px;border-radius:11px;flex:0 0 auto;background:radial-gradient(circle at 30% 25%, #2a2f38, #14161b);border:1px solid #353b46;display:grid;place-items:center;position:relative;box-shadow:inset 0 0 0 3px rgba(242,169,59,.08)}
+  .badge::before{content:"";width:18px;height:18px;border-radius:50%;border:2px solid var(--amber);border-top-color:transparent;border-right-color:transparent;transform:rotate(45deg)}
+  .badge .dot{position:absolute;width:5px;height:5px;border-radius:50%;background:var(--amber);box-shadow:0 0 8px var(--amber);top:7px;right:8px}
+  .title-h{display:flex;flex-direction:column;line-height:1.15;min-width:0}
+  .title-h b{font-size:16px;font-weight:700;letter-spacing:.2px}
+  .title-h span{font-size:11px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:2px}
+
+  .gauge-bar{padding:0 16px 12px;max-width:760px;margin:0 auto}
+  .gauge-track{height:10px;border-radius:6px;background:#101216;overflow:hidden;border:1px solid var(--line)}
+  .gauge-fill{height:100%;width:0;border-radius:6px;background:linear-gradient(90deg,var(--amber-deep),var(--amber));transition:width .4s cubic-bezier(.2,.8,.2,1);box-shadow:0 0 12px rgba(242,169,59,.4)}
+  .gauge-meta{display:flex;justify-content:space-between;align-items:baseline;margin-top:7px;font-size:12px;color:var(--ink-dim)}
+  .gauge-meta b{color:var(--ink);font-variant-numeric:tabular-nums;font-size:13px}
+
+  /* cabeçalho de auditoria */
+  .cabecalho{margin:14px 0;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+  .cabecalho h3{margin:0 0 12px;font-size:13px;text-transform:uppercase;letter-spacing:1.5px;color:var(--amber)}
+  .field{margin-bottom:10px}
+  .field:last-child{margin-bottom:0}
+  .field label{display:block;font-size:12px;color:var(--ink-dim);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px}
+  .field input{width:100%;background:var(--panel-2);border:1px solid var(--line);border-radius:9px;color:var(--ink);font-size:15px;padding:10px 12px;font-family:inherit}
+  .field input:focus{outline:none;border-color:var(--amber-deep)}
+
+  section.card{margin:14px 0;background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  .sec-head{display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer;user-select:none}
+  .sec-head:active{background:var(--panel-2)}
+  .sec-ico{width:34px;height:34px;border-radius:9px;flex:0 0 auto;display:grid;place-items:center;font-size:16px;background:var(--panel-2);border:1px solid var(--line);font-weight:700;color:var(--amber)}
+  .sec-titles{flex:1;min-width:0}
+  .sec-titles b{display:block;font-size:15px;font-weight:700}
+  .sec-count{font-size:12px;color:var(--ink-dim);font-variant-numeric:tabular-nums;background:var(--panel-2);border:1px solid var(--line);padding:3px 9px;border-radius:20px;flex:0 0 auto}
+  .sec-count.full{color:var(--green);border-color:rgba(70,192,141,.4)}
+  .chev{flex:0 0 auto;color:var(--ink-faint);transition:transform .25s;font-size:13px}
+  .card.open .chev{transform:rotate(90deg)}
+  .sec-prog{height:3px;background:#101216}
+  .sec-prog i{display:block;height:100%;width:0;background:var(--amber);transition:width .35s}
+
+  .sec-body{display:none;padding:4px 0 10px}
+  .card.open .sec-body{display:block}
+  .grp{padding:4px 16px 2px}
+  .grp-label{font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:var(--amber);font-weight:700;margin:12px 0 4px;display:flex;align-items:center;gap:8px}
+  .grp-label::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--line),transparent)}
+
+  .item{display:flex;gap:12px;align-items:flex-start;padding:11px 4px;border-bottom:1px solid rgba(46,51,61,.5);cursor:pointer}
+  .item:last-child{border-bottom:none}
+  .check{width:23px;height:23px;border-radius:7px;border:2px solid var(--ink-faint);flex:0 0 auto;margin-top:1px;display:grid;place-items:center;transition:.15s}
+  .item.done .check{background:var(--green);border-color:var(--green)}
+  .check svg{width:13px;height:13px;stroke:#0f1115;stroke-width:3.5;fill:none;opacity:0;transition:opacity .15s}
+  .item.done .check svg{opacity:1}
+  .item-txt{flex:1;min-width:0}
+  .item-txt p{margin:0;font-size:14.5px}
+  .item.done .item-txt p{color:var(--ink-faint)}
+
+  /* campos de texto dentro de seção */
+  .txt-field{padding:6px 16px 2px}
+  .txt-field label{display:block;font-size:12px;color:var(--ink-dim);margin:8px 0 4px;text-transform:uppercase;letter-spacing:.5px}
+  .txt-field textarea,.txt-field input[type=text]{width:100%;background:var(--panel-2);border:1px solid var(--line);border-radius:9px;color:var(--ink);font-size:14.5px;padding:10px 12px;font-family:inherit;resize:vertical}
+  .txt-field textarea:focus,.txt-field input:focus{outline:none;border-color:var(--amber-deep)}
+
+  /* sim/não fotos */
+  .yesno{display:flex;gap:8px;padding:6px 16px}
+  .yesno button{flex:1;background:var(--panel-2);border:1px solid var(--line);color:var(--ink-dim);padding:10px;border-radius:9px;font-size:14px;font-weight:600;cursor:pointer}
+  .yesno button.on{background:var(--amber);color:#1a1206;border-color:var(--amber)}
+
+  .footbar{position:fixed;left:0;right:0;bottom:0;z-index:40;background:var(--bg);border-top:1px solid var(--line);padding:12px 16px calc(12px + env(safe-area-inset-bottom))}
+  .footbar .inner{max-width:760px;margin:0 auto;display:flex;gap:10px;align-items:center}
+  .foot-stat{flex:1;min-width:0}
+  .foot-stat b{font-size:13px;display:block;font-variant-numeric:tabular-nums}
+  .foot-stat span{font-size:11px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:1px}
+  .btn{border:1px solid var(--line);background:var(--panel-2);color:var(--ink-dim);font-size:12px;font-weight:600;padding:11px 14px;border-radius:9px;cursor:pointer;text-transform:uppercase;letter-spacing:.5px;flex:0 0 auto}
+  .btn.amber{background:var(--amber);color:#1a1206;border-color:var(--amber)}
+  .btn:active{transform:scale(.97)}
+
+  .topctl{display:flex;gap:8px;padding:6px 16px 0;max-width:760px;margin:0 auto}
+  .topctl button{flex:1;background:transparent;border:1px solid var(--line);color:var(--ink-dim);font-size:11.5px;padding:8px;border-radius:8px;cursor:pointer;text-transform:uppercase;letter-spacing:.5px}
+
+  .toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%) translateY(20px);background:var(--panel-2);border:1px solid var(--amber-deep);color:var(--ink);padding:10px 18px;border-radius:10px;font-size:13px;opacity:0;pointer-events:none;transition:.3s;z-index:60}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .scope-note{font-size:11px;color:var(--ink-faint);text-align:center;padding:18px 16px 4px;letter-spacing:.3px}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="head-row">
+    <div class="badge"><span class="dot"></span></div>
+    <div class="title-h">
+      <b>Auditoria de VM</b>
+      <span>Brooksfield · Visual Merchandising</span>
+    </div>
+  </div>
+  <div class="gauge-bar">
+    <div class="gauge-track"><div class="gauge-fill" id="masterFill"></div></div>
+    <div class="gauge-meta">
+      <span><b id="masterPct">0%</b> conferido</span>
+      <span><b id="masterCount">0/0</b> itens</span>
+    </div>
+  </div>
+  <div class="topctl">
+    <button id="expandAll">Abrir tudo</button>
+    <button id="collapseAll">Fechar tudo</button>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="cabecalho">
+    <h3>Identificação da avaliação</h3>
+    <div class="field"><label>Data</label><input type="date" id="cab_data"></div>
+    <div class="field"><label>Loja</label><input type="text" id="cab_loja" placeholder="Ex: Brooksfield Natal Shopping"></div>
+    <div class="field"><label>Responsável pela avaliação</label><input type="text" id="cab_resp" placeholder="Seu nome"></div>
+    <div class="field"><label>Horário</label><input type="time" id="cab_hora"></div>
+  </div>
+
+  <div id="board"></div>
+</main>
+
+<div class="scope-note" id="resetNote"></div>
+
+<div class="footbar">
+  <div class="inner">
+    <div class="foot-stat">
+      <b id="footTxt">Bora começar a auditoria</b>
+      <span id="footSub">toca num item pra marcar</span>
+    </div>
+    <button class="btn amber" id="exportBtn">Gerar relatório</button>
+    <button class="btn" id="resetDay">Zerar</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const STORE_KEY = "auditoria_vm_v1";
+
+const DATA = [
+  { id:"vitrine", n:"1", name:"Vitrine", items:[
+    "A vitrine está limpa e sem marcas?",
+    "Os manequins estão corretamente alinhados?",
+    "Não houve necessidade de entrar na vitrine durante a avaliação?",
+    "Nenhuma roupa foi retirada dos manequins?",
+    "Os manequins estão organizados e sem desalinhamentos?",
+    "Nenhum item da composição da vitrine foi movimentado indevidamente?"
+  ]},
+  { id:"entrada", n:"2", name:"Entrada / Mesa principal", items:[
+    "A mesa está nivelada e organizada?",
+    "As pilhas de camisetas possuem entre 14 e 16 peças?",
+    "As camisetas estão alinhadas corretamente?",
+    "As cores estão organizadas do tom mais claro para o mais escuro?",
+    "Bermudas e calças estão dobradas e alinhadas corretamente?"
+  ]},
+  { id:"paredoes", n:"3", name:"Paredões e paredes", items:[
+    "Os produtos estão organizados por coluna de cor?",
+    "Os colarinhos estão posicionados para fora e alinhados?",
+    "A exposição está uniforme e bem apresentada?"
+  ]},
+  { id:"balcoes", n:"4", name:"Balcões", items:[
+    "As calças estão devidamente alinhadas e organizadas?",
+    "A apresentação geral está padronizada?"
+  ]},
+  { id:"acessorios", n:"5", name:"Acessórios", items:[
+    "Há reposição completa dos acessórios?",
+    "Há cintos suficientes?",
+    "Há nécessaires disponíveis?",
+    "Há bolsas disponíveis?",
+    "Existe algum espaço vazio que precise de reposição?"
+  ]},
+  { id:"alfaiataria", n:"6", name:"Alfaiataria", groups:[
+    { label:"Ternos na horizontal", items:[
+      "Todos estão alinhados?",
+      "Nenhum apresenta aspecto amassado?",
+      "As mangas estão corretamente posicionadas para fora (\u201cmangueadas\u201d)?"
+    ]},
+    { label:"Ternos frontais", items:[
+      "Os três primeiros ternos estão bem passados?",
+      "A apresentação está impecável?"
+    ]}
+  ]},
+  { id:"limpeza", n:"7", name:"Limpeza e manutenção", items:[
+    "O piso está limpo?",
+    "A loja apresenta boa organização geral?",
+    "A iluminação está funcionando corretamente?",
+    "Não há lâmpadas queimadas ou falhas de iluminação?"
+  ]},
+  { id:"apoio", n:"8", name:"Apoio da equipe", items:[
+    "Algum vendedor ofereceu ajuda durante a montagem ou organização?",
+    "Recebi suporte quando necessário?"
+  ], texts:[
+    {id:"apoio_quem", label:"Quem ajudou?"},
+    {id:"apoio_como", label:"Como foi o suporte prestado?"}
+  ]},
+];
+
+let state = loadState();
+
+function todayStamp(){const d=new Date();return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate();}
+function loadState(){
+  try{const raw=localStorage.getItem(STORE_KEY);if(raw){const s=JSON.parse(raw);return s;}}catch(e){}
+  return {checked:{}, texts:{}, fotos:null};
+}
+function saveState(){try{localStorage.setItem(STORE_KEY,JSON.stringify(state));}catch(e){}}
+
+const board = document.getElementById("board");
+
+function allItems(sec){
+  if(sec.groups){let o=[];sec.groups.forEach((g,gi)=>g.items.forEach((it,ii)=>o.push(sec.id+"|"+gi+"|"+ii)));return o;}
+  return sec.items.map((it,ii)=>sec.id+"|0|"+ii);
+}
+
+function render(){
+  board.innerHTML="";
+  DATA.forEach(sec=>{
+    const ids=allItems(sec);
+    const done=ids.filter(id=>state.checked[id]).length;
+    const total=ids.length;
+    const pct=total?Math.round(done/total*100):0;
+    const isOpen=state.open&&state.open[sec.id];
+
+    const card=document.createElement("section");
+    card.className="card"+(isOpen?" open":"");
+    card.dataset.sec=sec.id;
+
+    const head=document.createElement("div");
+    head.className="sec-head";
+    head.innerHTML=`<div class="sec-ico">${sec.n}</div>
+      <div class="sec-titles"><b>${sec.name}</b></div>
+      <div class="sec-count js-count ${done===total?'full':''}">${done}/${total}</div>
+      <div class="chev">▶</div>`;
+    head.onclick=()=>{state.open=state.open||{};state.open[sec.id]=!isOpen;saveState();render();};
+    card.appendChild(head);
+
+    const prog=document.createElement("div");prog.className="sec-prog";
+    prog.innerHTML=`<i class="js-bar" style="width:${pct}%"></i>`;
+    card.appendChild(prog);
+
+    const body=document.createElement("div");body.className="sec-body";
+    const renderItems=(items,gi)=>{
+      const grp=document.createElement("div");grp.className="grp";
+      items.forEach((txt,ii)=>{
+        const id=sec.id+"|"+gi+"|"+ii;
+        const isDone=!!state.checked[id];
+        const row=document.createElement("div");
+        row.className="item"+(isDone?" done":"");
+        row.innerHTML=`<div class="check"><svg viewBox="0 0 24 24"><polyline points="4,12 10,18 20,6"/></svg></div>
+          <div class="item-txt"><p>${txt}</p></div>`;
+        row.onclick=()=>{
+          if(state.checked[id]){delete state.checked[id];row.classList.remove("done");}
+          else{state.checked[id]=true;row.classList.add("done");}
+          saveState();refreshCounters(sec.id);
+        };
+        grp.appendChild(row);
+      });
+      return grp;
+    };
+
+    if(sec.groups){
+      sec.groups.forEach((g,gi)=>{
+        const gl=document.createElement("div");gl.className="grp";
+        gl.innerHTML=`<div class="grp-label">${g.label}</div>`;
+        body.appendChild(gl);
+        body.appendChild(renderItems(g.items,gi));
+      });
+    } else {
+      body.appendChild(renderItems(sec.items,0));
+    }
+
+    if(sec.texts){
+      sec.texts.forEach(tf=>{
+        const wrap=document.createElement("div");wrap.className="txt-field";
+        wrap.innerHTML=`<label>${tf.label}</label><textarea rows="2" data-tid="${tf.id}">${state.texts[tf.id]||""}</textarea>`;
+        const ta=wrap.querySelector("textarea");
+        ta.oninput=()=>{state.texts[tf.id]=ta.value;saveState();};
+        body.appendChild(wrap);
+      });
+    }
+
+    card.appendChild(body);
+    board.appendChild(card);
+  });
+
+  // seção 9 — registro final (fixa, fora do loop)
+  const reg=document.createElement("section");
+  reg.className="card open";
+  reg.innerHTML=`<div class="sec-head"><div class="sec-ico">9</div><div class="sec-titles"><b>Registro final</b></div></div>
+    <div class="sec-body">
+      <div class="txt-field"><label>Pendências encontradas</label><textarea rows="3" data-tid="reg_pend">${state.texts.reg_pend||""}</textarea></div>
+      <div class="txt-field"><label>Observações gerais</label><textarea rows="3" data-tid="reg_obs">${state.texts.reg_obs||""}</textarea></div>
+      <div class="txt-field"><label>Fotos anexadas?</label></div>
+      <div class="yesno">
+        <button data-foto="sim" class="${state.fotos==='sim'?'on':''}">Sim</button>
+        <button data-foto="nao" class="${state.fotos==='nao'?'on':''}">Não</button>
+      </div>
+      <div class="txt-field"><label>O que as fotos registram?</label><textarea rows="2" data-tid="reg_fotos_desc">${state.texts.reg_fotos_desc||""}</textarea></div>
+    </div>`;
+  board.appendChild(reg);
+  reg.querySelectorAll("textarea").forEach(ta=>{
+    ta.oninput=()=>{state.texts[ta.dataset.tid]=ta.value;saveState();};
+  });
+  reg.querySelectorAll("[data-foto]").forEach(b=>{
+    b.onclick=()=>{state.fotos=b.dataset.foto;saveState();render();};
+  });
+
+  updateMaster();
+}
+
+function refreshCounters(secId){
+  const sec=DATA.find(s=>s.id===secId);
+  const card=board.querySelector(`section[data-sec="${secId}"]`);
+  if(sec&&card){
+    const ids=allItems(sec);
+    const done=ids.filter(id=>state.checked[id]).length;
+    const total=ids.length;
+    const pct=total?Math.round(done/total*100):0;
+    const cnt=card.querySelector(".js-count"),bar=card.querySelector(".js-bar");
+    if(cnt){cnt.textContent=done+"/"+total;cnt.classList.toggle("full",done===total);}
+    if(bar)bar.style.width=pct+"%";
+  }
+  updateMaster();
+}
+
+function updateMaster(){
+  let done=0,total=0;
+  DATA.forEach(sec=>{const ids=allItems(sec);total+=ids.length;done+=ids.filter(id=>state.checked[id]).length;});
+  const pct=total?Math.round(done/total*100):0;
+  document.getElementById("masterFill").style.width=pct+"%";
+  document.getElementById("masterPct").textContent=pct+"%";
+  document.getElementById("masterCount").textContent=done+"/"+total;
+  const ft=document.getElementById("footTxt"),fs=document.getElementById("footSub");
+  if(done===0){ft.textContent="Bora começar a auditoria";fs.textContent="toca num item pra marcar";}
+  else if(done===total){ft.textContent="Auditoria completa ✓";fs.textContent="pronto pra gerar o relatório";}
+  else{ft.textContent=`Faltam ${total-done} itens`;fs.textContent=`${pct}% conferido`;}
+}
+
+document.getElementById("expandAll").onclick=()=>{state.open={};DATA.forEach(s=>state.open[s.id]=true);saveState();render();};
+document.getElementById("collapseAll").onclick=()=>{state.open={};saveState();render();};
+
+document.getElementById("resetDay").onclick=()=>{
+  if(confirm("Zerar toda a auditoria? Isso apaga marcações e textos.")){
+    state={checked:{},texts:{},fotos:null,open:{}};saveState();render();toast("Auditoria zerada");
+  }
+};
+
+/* ---------- exportar relatório ---------- */
+document.getElementById("exportBtn").onclick=()=>{
+  const L=[];
+  L.push("CHECKLIST DE VM — BROOKSFIELD");
+  L.push("");
+  const data=document.getElementById("cab_data").value;
+  const loja=document.getElementById("cab_loja").value;
+  const resp=document.getElementById("cab_resp").value;
+  const hora=document.getElementById("cab_hora").value;
+  L.push("Data: "+(data||"___"));
+  L.push("Loja: "+(loja||"___"));
+  L.push("Responsável: "+(resp||"___"));
+  L.push("Horário: "+(hora||"___"));
+  L.push("");
+
+  DATA.forEach(sec=>{
+    L.push("— "+sec.n+". "+sec.name.toUpperCase()+" —");
+    const push=(items,gi,glabel)=>{
+      if(glabel)L.push("  "+glabel+":");
+      items.forEach((txt,ii)=>{
+        const id=sec.id+"|"+gi+"|"+ii;
+        L.push("  ["+(state.checked[id]?"X":" ")+"] "+txt);
+      });
+    };
+    if(sec.groups)sec.groups.forEach((g,gi)=>push(g.items,gi,g.label));
+    else push(sec.items,0,null);
+    if(sec.texts)sec.texts.forEach(tf=>{if(state.texts[tf.id])L.push("  "+tf.label+" "+state.texts[tf.id]);});
+    L.push("");
+  });
+
+  L.push("— 9. REGISTRO FINAL —");
+  L.push("  Pendências: "+(state.texts.reg_pend||"—"));
+  L.push("  Observações gerais: "+(state.texts.reg_obs||"—"));
+  L.push("  Fotos anexadas: "+(state.fotos==='sim'?"Sim":state.fotos==='nao'?"Não":"—"));
+  if(state.texts.reg_fotos_desc)L.push("  Descrição das fotos: "+state.texts.reg_fotos_desc);
+
+  let done=0,total=0;
+  DATA.forEach(sec=>{const ids=allItems(sec);total+=ids.length;done+=ids.filter(id=>state.checked[id]).length;});
+  L.push("");
+  L.push("Conferido: "+done+"/"+total+" itens ("+Math.round(done/total*100)+"%)");
+
+  const txt=L.join("\n");
+  if(navigator.share){
+    navigator.share({text:txt}).catch(()=>copyFallback(txt));
+  } else copyFallback(txt);
+};
+
+function copyFallback(txt){
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(txt).then(()=>toast("Relatório copiado!")).catch(()=>showText(txt));
+  } else showText(txt);
+}
+function showText(txt){
+  const w=window.open("","_blank");
+  if(w){w.document.write("<pre style='font:14px monospace;white-space:pre-wrap;padding:16px'>"+txt.replace(/</g,"&lt;")+"</pre>");}
+  else{prompt("Copie o relatório:",txt);}
+}
+
+function toast(msg){const t=document.getElementById("toast");t.textContent=msg;t.classList.add("show");clearTimeout(t._tm);t._tm=setTimeout(()=>t.classList.remove("show"),1900);}
+
+// data automática no cabeçalho
+(function(){const d=new Date();const iso=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");document.getElementById("cab_data").value=iso;})();
+
+document.getElementById("resetNote").textContent="Preenchimento salvo só neste aparelho. Use \u201cGerar relatório\u201d pra enviar ao supervisor.";
+
+state.open=state.open||{vitrine:true};
+render();
+</script>
+</body>
+</html>
