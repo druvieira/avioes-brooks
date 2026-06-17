@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Auditoria VM — Brooksfield</title>
+<style>
+  :root{
+    --bg:#0a0c0f; --panel:#12161c; --panel2:#171c24;
+    --line:#232a34; --amber:#f5a623; --amber-dim:#7a5a1f;
+    --txt:#e8eaed; --mut:#7d8794; --ok:#3fb950; --field:#0d1116;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{margin:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    font-size:15px;line-height:1.45;padding-bottom:90px}
+  .wrap{max-width:620px;margin:0 auto;padding:0 14px}
+
+  header{position:sticky;top:0;z-index:50;background:rgba(10,12,15,.92);
+    backdrop-filter:blur(10px);border-bottom:1px solid var(--line);padding:14px 0 12px}
+  .htop{display:flex;align-items:center;gap:10px}
+  .badge{font-size:10px;letter-spacing:2px;color:var(--amber);
+    border:1px solid var(--amber-dim);border-radius:4px;padding:3px 7px;font-weight:700}
+  h1{font-size:17px;margin:0;font-weight:800;letter-spacing:.5px}
+  .sub{color:var(--mut);font-size:12px;margin-top:2px}
+  .prog{margin-top:10px;height:6px;background:var(--field);border-radius:99px;overflow:hidden}
+  .prog>i{display:block;height:100%;width:0;background:var(--amber);transition:width .3s}
+  .progtxt{font-size:11px;color:var(--mut);margin-top:5px;display:flex;justify-content:space-between}
+
+  .topfields{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:14px 0}
+  .topfields .full{grid-column:1/-1}
+  label.fld{display:block}
+  label.fld span{font-size:10px;letter-spacing:1px;color:var(--mut);text-transform:uppercase;display:block;margin-bottom:4px}
+  input,textarea{width:100%;background:var(--field);border:1px solid var(--line);
+    border-radius:8px;color:var(--txt);padding:10px;font-size:14px;font-family:inherit}
+  input:focus,textarea:focus{outline:none;border-color:var(--amber)}
+  textarea{resize:vertical;min-height:60px}
+
+  .sec{background:var(--panel);border:1px solid var(--line);border-radius:12px;
+    margin:12px 0;overflow:hidden}
+  .sechead{display:flex;align-items:center;gap:10px;padding:13px 14px;cursor:pointer;
+    user-select:none}
+  .secnum{font-size:11px;font-weight:800;color:var(--amber);
+    background:var(--field);border:1px solid var(--amber-dim);border-radius:6px;
+    min-width:26px;height:26px;display:flex;align-items:center;justify-content:center}
+  .sectitle{flex:1;font-weight:700;font-size:14px}
+  .seccount{font-size:11px;color:var(--mut)}
+  .chev{color:var(--mut);transition:transform .2s}
+  .sec.open .chev{transform:rotate(90deg)}
+  .secbody{display:none;padding:0 14px 14px}
+  .sec.open .secbody{display:block}
+  .subgrp{font-size:11px;letter-spacing:1px;color:var(--amber);text-transform:uppercase;
+    margin:12px 0 6px;font-weight:700}
+
+  .item{display:flex;gap:11px;align-items:flex-start;padding:9px 0;
+    border-top:1px solid var(--line)}
+  .item:first-of-type{border-top:none}
+  .box{flex-shrink:0;width:24px;height:24px;border:2px solid var(--line);border-radius:6px;
+    background:var(--field);position:relative;transition:.15s;margin-top:1px}
+  .item.on .box{background:var(--amber);border-color:var(--amber)}
+  .item.on .box::after{content:"";position:absolute;left:7px;top:3px;width:6px;height:11px;
+    border:solid #0a0c0f;border-width:0 2.5px 2.5px 0;transform:rotate(45deg)}
+  .item .lbl{flex:1;font-size:14px;padding-top:2px}
+  .item.on .lbl{color:var(--mut)}
+  .obs{margin-top:10px}
+
+  footer{position:fixed;bottom:0;left:0;right:0;background:rgba(10,12,15,.95);
+    backdrop-filter:blur(10px);border-top:1px solid var(--line);padding:12px 14px;z-index:60}
+  .footwrap{max-width:620px;margin:0 auto;display:flex;gap:10px}
+  button{flex:1;border:none;border-radius:10px;padding:14px;font-size:15px;font-weight:700;
+    font-family:inherit;cursor:pointer}
+  .btn-send{background:var(--amber);color:#0a0c0f}
+  .btn-send:active{opacity:.85}
+  .btn-send:disabled{opacity:.4}
+  .toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);
+    background:var(--panel2);border:1px solid var(--line);color:var(--txt);
+    padding:12px 18px;border-radius:10px;font-size:13px;z-index:100;opacity:0;
+    transition:.25s;pointer-events:none;max-width:90%;text-align:center}
+  .toast.show{opacity:1;bottom:104px}
+  .toast.err{border-color:#f85149;color:#ff9b94}
+  .toast.ok{border-color:var(--ok);color:#7ee787}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="htop">
+      <span class="badge">VM</span>
+      <div>
+        <h1>AUDITORIA DE VITRINE</h1>
+        <div class="sub">Brooksfield · padrão único</div>
+      </div>
+    </div>
+    <div class="prog"><i id="bar"></i></div>
+    <div class="progtxt"><span id="pcount">0 de 35</span><span id="ppct">0%</span></div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="topfields">
+    <label class="fld"><span>Loja</span><input id="f_loja" placeholder="Ex: Cuiabá Shopping"></label>
+    <label class="fld"><span>Responsável</span><input id="f_resp" placeholder="Seu nome"></label>
+    <label class="fld full"><span>Horário</span><input id="f_hora" placeholder="Ex: 09:30"></label>
+  </div>
+
+  <div id="secs"></div>
+
+  <!-- Registro final -->
+  <div class="sec" data-final>
+    <div class="sechead" onclick="tog(this)">
+      <span class="secnum">9</span>
+      <span class="sectitle">Registro final</span>
+      <span class="chev">›</span>
+    </div>
+    <div class="secbody">
+      <label class="fld obs"><span>Pendências encontradas</span><textarea id="r_pend"></textarea></label>
+      <label class="fld obs"><span>Observações gerais</span><textarea id="r_obs"></textarea></label>
+      <div class="item obs" id="fotoToggle" onclick="togFoto()">
+        <div class="box"></div><div class="lbl">Fotos anexadas?</div>
+      </div>
+      <label class="fld obs"><span>O que as fotos registram</span><textarea id="r_fotos"></textarea></label>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="footwrap">
+    <button class="btn-send" id="btnSend" onclick="enviar()">Enviar e gerar relatório</button>
+  </div>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SB_URL="https://xhfzcfefqinoyajwedgc.supabase.co";
+const SB_KEY="sb_publishable_awF5rTXO_7ulgLAbNy9Eiw_jctYNNxv";
+const sb=supabase.createClient(SB_URL,SB_KEY);
+
+// ---- estrutura do checklist ----
+const DATA=[
+ {n:1,t:"Vitrine",items:[
+  "A vitrine está limpa e sem marcas?",
+  "Os manequins estão corretamente alinhados?",
+  "Não houve necessidade de entrar na vitrine durante a avaliação?",
+  "Nenhuma roupa foi retirada dos manequins?",
+  "Os manequins estão organizados e sem desalinhamentos?",
+  "Nenhum item da composição da vitrine foi movimentado indevidamente?"]},
+ {n:2,t:"Entrada / Mesa principal",items:[
+  "A mesa está nivelada e organizada?",
+  "As pilhas de camisetas possuem entre 14 e 16 peças?",
+  "As camisetas estão alinhadas corretamente?",
+  "As cores estão organizadas do tom mais claro para o mais escuro?",
+  "Bermudas e calças estão dobradas e alinhadas corretamente?"]},
+ {n:3,t:"Paredões e paredes",items:[
+  "Os produtos estão organizados por coluna de cor?",
+  "Os colarinhos estão posicionados para fora e alinhados?",
+  "A exposição está uniforme e bem apresentada?"]},
+ {n:4,t:"Balcões",items:[
+  "As calças estão devidamente alinhadas e organizadas?",
+  "A apresentação geral está padronizada?"]},
+ {n:5,t:"Acessórios",items:[
+  "Há reposição completa dos acessórios?",
+  "Há cintos suficientes?",
+  "Há nécessaires disponíveis?",
+  "Há bolsas disponíveis?",
+  "Existe algum espaço vazio que precise de reposição?"]},
+ {n:6,t:"Alfaiataria",groups:[
+  {g:"Ternos na horizontal",items:[
+   "Todos estão alinhados?",
+   "Nenhum apresenta aspecto amassado?",
+   "As mangas estão posicionadas para fora (mangueadas)?"]},
+  {g:"Ternos frontais",items:[
+   "Os três primeiros ternos estão bem passados?",
+   "A apresentação está impecável?"]}]},
+ {n:7,t:"Limpeza e manutenção",items:[
+  "O piso está limpo?",
+  "A loja apresenta boa organização geral?",
+  "A iluminação está funcionando corretamente?",
+  "Não há lâmpadas queimadas ou falhas de iluminação?"]},
+ {n:8,t:"Apoio da equipe",items:[
+  "Algum vendedor ofereceu ajuda durante a montagem/organização?",
+  "Recebi suporte quando necessário?"],
+  fields:[{id:"a_quem",lbl:"Quem ajudou?"},{id:"a_como",lbl:"Como foi o suporte prestado?"}]}
+];
+
+let TOTAL=0;
+const st={};        // estado dos itens "secN_i"
+let temFoto=false;
+
+// ---- render ----
+const secsEl=document.getElementById('secs');
+DATA.forEach(s=>{
+  const sec=document.createElement('div');sec.className='sec';
+  let body='';
+  const render=(arr,off)=>arr.map((txt,i)=>{
+    const id=`s${s.n}_${off+i}`;TOTAL++;
+    return `<div class="item" data-id="${id}" onclick="hit('${id}')"><div class="box"></div><div class="lbl">${txt}</div></div>`;
+  }).join('');
+  let off=0;
+  if(s.groups){
+    s.groups.forEach(g=>{
+      body+=`<div class="subgrp">${g.g}</div>`+render(g.items,off);off+=g.items.length;
+    });
+  }else{
+    body+=render(s.items,0);off=s.items.length;
+  }
+  if(s.fields){
+    s.fields.forEach(f=>body+=`<label class="fld obs"><span>${f.lbl}</span><textarea id="${f.id}"></textarea></label>`);
+  }
+  body+=`<label class="fld obs"><span>Observações</span><textarea id="obs_${s.n}"></textarea></label>`;
+  sec.innerHTML=`<div class="sechead" onclick="tog(this)">
+    <span class="secnum">${s.n}</span><span class="sectitle">${s.t}</span>
+    <span class="seccount" id="cnt${s.n}"></span><span class="chev">›</span></div>
+    <div class="secbody">${body}</div>`;
+  secsEl.appendChild(sec);
+});
+
+document.getElementById('pcount').textContent=`0 de ${TOTAL}`;
+
+function tog(h){h.parentElement.classList.toggle('open')}
+function hit(id){
+  st[id]=!st[id];
+  document.querySelector(`[data-id="${id}"]`).classList.toggle('on',st[id]);
+  upd();
+}
+function togFoto(){
+  temFoto=!temFoto;
+  document.getElementById('fotoToggle').classList.toggle('on',temFoto);
+}
+function upd(){
+  const done=Object.values(st).filter(Boolean).length;
+  const pct=Math.round(done/TOTAL*100);
+  document.getElementById('bar').style.width=pct+'%';
+  document.getElementById('pcount').textContent=`${done} de ${TOTAL}`;
+  document.getElementById('ppct').textContent=pct+'%';
+  DATA.forEach(s=>{
+    const c=document.querySelectorAll(`.sec [data-id^="s${s.n}_"]`);
+    let on=0;c.forEach(e=>{if(st[e.dataset.id])on++});
+    document.getElementById('cnt'+s.n).textContent=`${on}/${c.length}`;
+  });
+}
+
+function val(id){const e=document.getElementById(id);return e?e.value.trim():''}
+function toast(msg,type){
+  const t=document.getElementById('toast');t.textContent=msg;
+  t.className='toast show '+(type||'');
+  setTimeout(()=>t.className='toast',3200);
+}
+
+function montarRelatorio(){
+  const data=new Date().toLocaleDateString('pt-BR');
+  let r=`*AUDITORIA DE VM — BROOKSFIELD*\n`;
+  r+=`Loja: ${val('f_loja')||'-'}\n`;
+  r+=`Responsável: ${val('f_resp')||'-'}\n`;
+  r+=`Data: ${data}  Horário: ${val('f_hora')||'-'}\n`;
+  const done=Object.values(st).filter(Boolean).length;
+  r+=`Conformidade: ${Math.round(done/TOTAL*100)}% (${done}/${TOTAL})\n`;
+  DATA.forEach(s=>{
+    const itens=[];
+    const collect=(arr,off)=>arr.forEach((txt,i)=>{
+      const id=`s${s.n}_${off+i}`;itens.push(`${st[id]?'✅':'⬜'} ${txt}`);
+    });
+    let off=0;
+    if(s.groups)s.groups.forEach(g=>{collect(g.items,off);off+=g.items.length});
+    else collect(s.items,0);
+    r+=`\n*${s.n}. ${s.t}*\n`+itens.join('\n')+'\n';
+    if(s.n===8){
+      if(val('a_quem'))r+=`Quem ajudou: ${val('a_quem')}\n`;
+      if(val('a_como'))r+=`Suporte: ${val('a_como')}\n`;
+    }
+    const o=val('obs_'+s.n);if(o)r+=`Obs: ${o}\n`;
+  });
+  r+=`\n*9. Registro final*\n`;
+  if(val('r_pend'))r+=`Pendências: ${val('r_pend')}\n`;
+  if(val('r_obs'))r+=`Observações: ${val('r_obs')}\n`;
+  r+=`Fotos anexadas: ${temFoto?'Sim':'Não'}\n`;
+  if(temFoto&&val('r_fotos'))r+=`Fotos: ${val('r_fotos')}\n`;
+  return r;
+}
+
+async function enviar(){
+  if(!val('f_loja')||!val('f_resp')){toast('Preencha Loja e Responsável','err');return}
+  const btn=document.getElementById('btnSend');btn.disabled=true;btn.textContent='Enviando...';
+  const done=Object.values(st).filter(Boolean).length;
+  const obs={};DATA.forEach(s=>{const o=val('obs_'+s.n);if(o)obs[s.n]=o});
+  const payload={
+    loja:val('f_loja'),responsavel:val('f_resp'),horario:val('f_hora'),
+    itens:st,observacoes:obs,
+    quem_ajudou:val('a_quem'),como_foi_suporte:val('a_como'),
+    pendencias:val('r_pend'),observacoes_gerais:val('r_obs'),
+    tem_fotos:temFoto,descricao_fotos:val('r_fotos'),
+    pontuacao:Math.round(done/TOTAL*100)
+  };
+  try{
+    const {error}=await sb.from('auditorias_vm').insert(payload);
+    if(error)throw error;
+    toast('Salvo! Abrindo WhatsApp...','ok');
+    setTimeout(()=>{
+      window.open('https://wa.me/?text='+encodeURIComponent(montarRelatorio()),'_blank');
+    },600);
+  }catch(e){
+    toast('Erro ao salvar: '+(e.message||e),'err');
+    // mesmo com erro, deixa mandar o relatório
+    setTimeout(()=>window.open('https://wa.me/?text='+encodeURIComponent(montarRelatorio()),'_blank'),800);
+  }finally{
+    btn.disabled=false;btn.textContent='Enviar e gerar relatório';
+  }
+}
+</script>
+</body>
+</html>
