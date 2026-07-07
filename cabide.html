@@ -1,0 +1,1243 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#0a0c0f">
+<title>CABIDE · Campanha de ternos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --la: #0a0c0f;          /* lã fria de terno — fundo, quase preto */
+    --forro: #12151a;       /* forro — cards */
+    --forro-2: #181c23;     /* camada acima */
+    --giz: #e8e4da;         /* giz de alfaiate — texto */
+    --giz-fraco: #8f8b81;   /* giz esmaecido — texto secundário */
+    --linha: #c9a15a;       /* linha de costura dourada — acento */
+    --linha-clara: #e3c186;
+    --ok: #5fb97a;
+    --nao: #d16b5e;
+    --tracado: 1px dashed rgba(201,161,90,.45);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html { -webkit-text-size-adjust: 100%; background: #0a0c0f !important; color-scheme: dark; }
+  body {
+    background: #0a0c0f !important;
+    color: var(--giz);
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 15px;
+    line-height: 1.45;
+    min-height: 100vh;
+    padding-bottom: 90px;
+  }
+  .wrap { max-width: 560px; margin: 0 auto; padding: 0 16px; }
+  .aviso {
+    background: rgba(201,161,90,.1);
+    border: 1px dashed rgba(201,161,90,.5);
+    color: var(--linha-clara);
+    font-size: 12.5px;
+    border-radius: 10px;
+    padding: 10px 14px;
+    margin: 4px 0 14px;
+    text-align: center;
+  }
+
+  /* ---------- campanha Dia dos Pais ---------- */
+  .campanha {
+    background: linear-gradient(135deg, rgba(201,161,90,.16), rgba(201,161,90,.05));
+    border: 1px solid rgba(201,161,90,.5);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin: 4px 0 14px;
+    text-align: center;
+  }
+  .campanha .camp-titulo {
+    font-family: 'Marcellus', serif;
+    font-size: 15px;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--linha-clara);
+  }
+  .campanha .camp-conta {
+    font-family: 'Marcellus', serif;
+    font-size: 30px;
+    color: var(--giz);
+    font-variant-numeric: tabular-nums;
+    margin: 2px 0;
+  }
+  .campanha .camp-conta small {
+    font-family: 'Inter';
+    font-size: 11px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--giz-fraco);
+  }
+  .campanha .camp-regra {
+    font-size: 11.5px;
+    color: var(--giz-fraco);
+    line-height: 1.5;
+  }
+  .campanha .camp-regra b { color: var(--linha-clara); font-weight: 600; }
+  .campanha.dobro {
+    border-color: var(--linha);
+    box-shadow: 0 0 18px rgba(201,161,90,.18);
+  }
+  .campanha.dobro .camp-titulo::after { content: ' · pontos em dobro'; }
+
+  /* ---------- header ---------- */
+  header { padding: 26px 0 18px; text-align: center; position: relative; }
+  .marca {
+    font-family: 'Marcellus', serif;
+    font-size: 34px;
+    letter-spacing: .34em;
+    text-indent: .34em;
+    color: var(--giz);
+  }
+  .marca .svg-cabide { display: inline-block; vertical-align: -4px; margin-right: 10px; }
+  .sub {
+    margin-top: 4px;
+    font-size: 11px;
+    letter-spacing: .22em;
+    text-transform: uppercase;
+    color: var(--linha);
+  }
+  .costura {
+    margin: 16px auto 0;
+    width: 72%;
+    border-bottom: var(--tracado);
+    position: relative;
+  }
+  .costura::after {
+    content: '';
+    position: absolute; right: -6px; top: -3px;
+    width: 5px; height: 5px; border-radius: 50%;
+    background: var(--linha);
+  }
+  .epigrafe {
+    text-align: center;
+    font-style: italic;
+    color: var(--giz-fraco);
+    font-size: 13px;
+    line-height: 1.55;
+    max-width: 42ch;
+    margin: 14px auto 0;
+  }
+  .epigrafe b { color: var(--linha-clara); font-weight: 600; font-style: normal; }
+
+  /* ---------- abas ---------- */
+  .abas {
+    display: flex;
+    margin: 4px 0 6px;
+    border-bottom: var(--tracado);
+  }
+  .abas button {
+    flex: 1;
+    background: none; border: none;
+    color: var(--giz-fraco);
+    font-family: 'Marcellus', serif;
+    font-size: 14px;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    padding: 13px 0;
+    cursor: pointer;
+    position: relative;
+  }
+  .abas button.ativa { color: var(--linha-clara); }
+  .abas button.ativa::after {
+    content: '';
+    position: absolute; left: 22%; right: 22%; bottom: -1px;
+    border-bottom: 2px solid var(--linha);
+  }
+  .abas .pill {
+    display: inline-block;
+    min-width: 18px;
+    background: var(--linha);
+    color: #16130c;
+    font-family: 'Inter';
+    font-size: 11px;
+    font-weight: 700;
+    border-radius: 99px;
+    padding: 1px 5px;
+    margin-left: 4px;
+    vertical-align: 2px;
+  }
+
+  /* ---------- painel resumo ---------- */
+  .resumo {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+    margin: 18px 0;
+  }
+  .resumo .box {
+    background: var(--forro);
+    border: 1px solid rgba(232,228,218,.06);
+    border-radius: 10px;
+    padding: 12px 8px;
+    text-align: center;
+  }
+  .resumo .num {
+    font-family: 'Marcellus', serif;
+    font-size: 24px;
+    color: var(--linha-clara);
+    font-variant-numeric: tabular-nums;
+  }
+  .resumo .rot {
+    font-size: 10px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--giz-fraco);
+    margin-top: 2px;
+  }
+
+  /* ---------- seções ---------- */
+  h2 {
+    font-family: 'Marcellus', serif;
+    font-weight: 400;
+    font-size: 17px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--giz);
+    margin: 26px 0 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  h2::after { content: ''; flex: 1; border-bottom: var(--tracado); }
+
+  /* ---------- form ---------- */
+  .card {
+    background: var(--forro);
+    border: 1px solid rgba(232,228,218,.06);
+    border-radius: 12px;
+    padding: 16px;
+  }
+  label {
+    display: block;
+    font-size: 11px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--giz-fraco);
+    margin: 14px 0 6px;
+  }
+  label:first-child { margin-top: 0; }
+  select, input[type="text"], input[type="password"], input[type="date"], input[type="tel"] {
+    width: 100%;
+    background: var(--forro-2);
+    border: 1px solid rgba(232,228,218,.1);
+    border-radius: 8px;
+    color: var(--giz);
+    font-family: inherit;
+    font-size: 16px;
+    padding: 12px 14px;
+    outline: none;
+    appearance: none;
+    min-height: 48px;
+  }
+  input[type="date"] { color-scheme: dark; }
+  select:focus-visible, input:focus-visible, button:focus-visible {
+    border-color: var(--linha);
+    box-shadow: 0 0 0 2px rgba(201,161,90,.25);
+  }
+  .selwrap { position: relative; }
+  .selwrap::after {
+    content: '▾'; position: absolute; right: 14px; top: 50%;
+    transform: translateY(-50%); color: var(--linha); pointer-events: none;
+  }
+  .stepper {
+    display: flex; align-items: center; gap: 0;
+    background: var(--forro-2);
+    border: 1px solid rgba(232,228,218,.1);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .stepper button {
+    width: 56px; height: 50px;
+    background: transparent; border: none;
+    color: var(--linha); font-size: 24px; cursor: pointer;
+  }
+  .stepper .qtd {
+    flex: 1; text-align: center;
+    font-family: 'Marcellus', serif;
+    font-size: 24px;
+    font-variant-numeric: tabular-nums;
+  }
+  .simnao { display: flex; gap: 8px; }
+  .simnao button {
+    flex: 1;
+    background: var(--forro-2);
+    border: 1px solid rgba(232,228,218,.1);
+    border-radius: 8px;
+    color: var(--giz-fraco);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    padding: 13px;
+    cursor: pointer;
+  }
+  .simnao button.on {
+    border-color: var(--linha);
+    color: var(--linha-clara);
+    background: rgba(201,161,90,.09);
+  }
+  .btn {
+    width: 100%;
+    margin-top: 18px;
+    background: var(--linha);
+    color: #16130c;
+    border: none;
+    border-radius: 8px;
+    padding: 14px;
+    font-family: inherit;
+    font-weight: 700;
+    font-size: 15px;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: transform .08s ease, opacity .15s ease;
+  }
+  .btn:active { transform: scale(.98); }
+  .btn:disabled { opacity: .45; cursor: default; }
+  .btn.fantasma {
+    background: transparent;
+    color: var(--linha);
+    border: 1px solid rgba(201,161,90,.5);
+  }
+
+  /* ---------- ranking: fita métrica ---------- */
+  .fita-item { margin-bottom: 18px; }
+  .fita-topo {
+    display: flex; justify-content: space-between; align-items: baseline;
+    margin-bottom: 6px;
+  }
+  .fita-nome { font-weight: 600; font-size: 14px; }
+  .fita-nome .lider { color: var(--linha-clara); margin-right: 4px; }
+  .fita-nome .mult {
+    font-size: 10px; font-weight: 700;
+    letter-spacing: .08em;
+    color: var(--ok);
+    border: 1px solid rgba(95,185,122,.5);
+    border-radius: 99px;
+    padding: 1px 7px;
+    margin-left: 6px;
+    vertical-align: 1px;
+  }
+  .fita-placar {
+    font-family: 'Marcellus', serif;
+    font-size: 15px;
+    color: var(--linha-clara);
+    font-variant-numeric: tabular-nums;
+  }
+  .fita-placar small { color: var(--giz-fraco); font-family: 'Inter'; font-size: 11px; }
+  .fita {
+    position: relative;
+    height: 26px;
+    background: var(--forro-2);
+    border-radius: 5px;
+    border: 1px solid rgba(232,228,218,.08);
+  }
+  .fita .fita-inner {
+    position: absolute; inset: 0;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .fita .ticks {
+    position: absolute; inset: 0;
+    background-image: repeating-linear-gradient(
+      to right,
+      transparent 0,
+      transparent calc(var(--tick) - 1px),
+      rgba(232,228,218,.14) calc(var(--tick) - 1px),
+      rgba(232,228,218,.14) var(--tick)
+    );
+  }
+  .fita .fill {
+    position: absolute; left: 0; top: 0; bottom: 0;
+    background: linear-gradient(90deg, #a8823f, var(--linha) 60%, var(--linha-clara));
+    border-radius: 4px 0 0 4px;
+    transition: width .6s cubic-bezier(.2,.8,.2,1);
+  }
+  .fita .meta-agulha {
+    position: absolute; top: -2px; bottom: -2px;
+    border-left: 2px dashed rgba(232,228,218,.75);
+  }
+  .fita .meta-rot {
+    position: absolute; top: 100%; margin-top: 3px;
+    transform: translateX(-50%);
+    font-size: 9px; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--giz-fraco);
+  }
+  .fita-item.bateu .fita { border-color: rgba(95,185,122,.6); }
+  .fita-item.bateu .fita-placar { color: var(--ok); }
+
+  /* ---------- feed ---------- */
+  .venda {
+    display: flex; align-items: center; gap: 12px;
+    background: var(--forro);
+    border: 1px solid rgba(232,228,218,.06);
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+  }
+  .venda .info { flex: 1; min-width: 0; }
+  .venda .quem { font-weight: 600; font-size: 14px; }
+  .venda .det { font-size: 12px; color: var(--giz-fraco); margin-top: 1px; }
+  .venda .det b { color: var(--linha-clara); font-weight: 600; }
+  .badge {
+    font-size: 10px; font-weight: 700;
+    letter-spacing: .1em; text-transform: uppercase;
+    padding: 4px 9px; border-radius: 99px;
+    white-space: nowrap;
+  }
+  .badge.pendente { background: rgba(201,161,90,.15); color: var(--linha-clara); border: 1px solid rgba(201,161,90,.4); }
+  .badge.aprovada { background: rgba(95,185,122,.14); color: var(--ok); border: 1px solid rgba(95,185,122,.4); }
+  .badge.rejeitada { background: rgba(209,107,94,.12); color: var(--nao); border: 1px solid rgba(209,107,94,.4); }
+  .badge.atrasado { background: rgba(209,107,94,.16); color: var(--nao); border: 1px solid rgba(209,107,94,.55); }
+  .badge.hoje { background: rgba(201,161,90,.2); color: var(--linha-clara); border: 1px solid var(--linha); }
+  .badge.agendado { background: rgba(232,228,218,.06); color: var(--giz-fraco); border: 1px solid rgba(232,228,218,.18); }
+  .badge.entregue { background: rgba(95,185,122,.14); color: var(--ok); border: 1px solid rgba(95,185,122,.4); }
+  .badge.aberto { background: rgba(232,228,218,.06); color: var(--giz-fraco); border: 1px solid rgba(232,228,218,.18); }
+  .badge.comprou { background: rgba(95,185,122,.14); color: var(--ok); border: 1px solid rgba(95,185,122,.4); }
+  .badge.dobro { background: rgba(201,161,90,.2); color: var(--linha-clara); border: 1px solid var(--linha); }
+
+  .vazio {
+    text-align: center;
+    color: var(--giz-fraco);
+    font-size: 13px;
+    padding: 22px 10px;
+    border: var(--tracado);
+    border-radius: 10px;
+  }
+
+  /* ---------- gerência ---------- */
+  .rodape-fixo {
+    position: fixed; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(to top, var(--la) 65%, transparent);
+    padding: 18px 16px 22px;
+    display: flex; justify-content: center;
+  }
+  .rodape-fixo button {
+    background: var(--forro);
+    border: 1px solid rgba(201,161,90,.4);
+    color: var(--linha);
+    font-family: inherit;
+    font-size: 12px;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    padding: 10px 26px;
+    border-radius: 99px;
+    cursor: pointer;
+  }
+  .modal-bg {
+    position: fixed; inset: 0;
+    background: rgba(10,12,15,.82);
+    display: none;
+    align-items: flex-end;
+    justify-content: center;
+    z-index: 50;
+  }
+  .modal-bg.aberto { display: flex; }
+  .modal {
+    background: var(--forro);
+    border: 1px solid rgba(232,228,218,.1);
+    border-radius: 16px 16px 0 0;
+    width: 100%; max-width: 560px;
+    max-height: 86vh;
+    overflow-y: auto;
+    padding: 20px 16px 30px;
+  }
+  .modal h3 {
+    font-family: 'Marcellus', serif;
+    font-weight: 400;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    font-size: 16px;
+    margin-bottom: 14px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .modal h3 .fechar { font-size: 22px; cursor: pointer; color: var(--giz-fraco); background: none; border: none; }
+  .acoes { display: flex; gap: 8px; }
+  .acoes button {
+    border: none; border-radius: 7px;
+    font-family: inherit; font-weight: 700; font-size: 12px;
+    letter-spacing: .06em; text-transform: uppercase;
+    padding: 9px 14px; cursor: pointer;
+  }
+  .acoes .sim { background: rgba(95,185,122,.16); color: var(--ok); border: 1px solid rgba(95,185,122,.5); }
+  .acoes .nao { background: rgba(209,107,94,.12); color: var(--nao); border: 1px solid rgba(209,107,94,.5); }
+  .acoes .desfazer { background: transparent; color: var(--giz-fraco); border: 1px solid rgba(232,228,218,.2); }
+
+  /* ---------- toast ---------- */
+  #toast {
+    position: fixed; left: 50%; bottom: 90px;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--forro-2);
+    border: 1px solid var(--linha);
+    color: var(--giz);
+    font-size: 13px; font-weight: 500;
+    padding: 11px 20px;
+    border-radius: 99px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .25s, transform .25s;
+    z-index: 99;
+    white-space: nowrap;
+  }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; }
+  }
+</style>
+</head>
+<body>
+<div style="position:fixed;inset:0;background:#0a0c0f;z-index:-1"></div>
+
+<div class="wrap">
+  <header>
+    <div class="marca">
+      <span class="svg-cabide">
+        <svg width="30" height="26" viewBox="0 0 30 26" fill="none">
+          <path d="M15 2c-2 0-3.4 1.4-3.4 3.2 0 1.2.7 2.1 1.7 2.7.8.5 1.1 1 1.1 1.9L2.2 18.6c-1.3.8-.8 3 .8 3h24c1.6 0 2.1-2.2.8-3L15.6 9.8c0-1.6-.6-2.5-1.8-3.2-.6-.4-.9-.8-.9-1.4 0-.7.5-1.2 1.3-1.2s1.3.5 1.3 1.2" stroke="#c9a15a" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </span>CABIDE</div>
+    <div class="sub">Campanha de ternos</div>
+    <div class="costura"></div>
+    <p class="epigrafe">Parabéns pela venda. Mas lembre-se — <b>a venda apenas começou.</b><br>Ela só termina quando o cliente sai vestindo perfeito.</p>
+  </header>
+
+  <div class="campanha" id="banner" hidden>
+    <div class="camp-titulo" id="bannerTitulo">Dia dos Pais</div>
+    <div class="camp-conta"><span id="bannerDias">–</span> <small id="bannerRot">dias</small></div>
+    <div class="camp-regra" id="bannerRegra"></div>
+  </div>
+
+  <div class="aviso" id="aviso" hidden></div>
+
+  <div class="abas">
+    <button id="tabCampanha" class="ativa">Campanha</button>
+    <button id="tabBoot">Boot <span class="pill" id="pillBoot" hidden>0</span></button>
+    <button id="tabLeads">Leads <span class="pill" id="pillLeads" hidden>0</span></button>
+  </div>
+
+  <section id="abaCampanha">
+
+  <div class="resumo">
+    <div class="box"><div class="num" id="rTotal">–</div><div class="rot">Cabides no mês</div></div>
+    <div class="box"><div class="num" id="rLider">–</div><div class="rot">Líder</div></div>
+    <div class="box"><div class="num" id="rDias">–</div><div class="rot">Dias até o dia 24</div></div>
+  </div>
+
+  <h2>Registrar venda</h2>
+  <div class="card">
+    <label for="selVend">Vendedor</label>
+    <div class="selwrap">
+      <select id="selVend"><option value="">Quem vendeu?</option></select>
+    </div>
+
+    <label for="inValor">Valor da venda</label>
+    <input type="text" id="inValor" inputmode="numeric" placeholder="R$ 0,00" autocomplete="off">
+
+    <label>Cabides nesta venda</label>
+    <div class="stepper">
+      <button type="button" id="btnMenos" aria-label="Menos um cabide">−</button>
+      <div class="qtd" id="qtdCabides">1</div>
+      <button type="button" id="btnMais" aria-label="Mais um cabide">+</button>
+    </div>
+
+    <label>Essa venda tem boot?</label>
+    <div class="simnao">
+      <button type="button" id="btnBootNao" class="on">Não</button>
+      <button type="button" id="btnBootSim">Sim</button>
+    </div>
+
+    <div id="camposBoot" hidden>
+      <label for="inCliente">Cliente</label>
+      <input type="text" id="inCliente" placeholder="Nome do cliente" autocomplete="off">
+
+      <label for="inRetirada">Retirada do boot</label>
+      <input type="date" id="inRetirada">
+    </div>
+
+    <button class="btn" id="btnRegistrar">Registrar venda</button>
+  </div>
+
+  <h2>Ranking do mês</h2>
+  <div id="ranking"></div>
+
+  <h2>Últimas vendas</h2>
+  <div id="feed"></div>
+  </section>
+
+  <section id="abaBoot" hidden>
+    <h2>Retiradas pendentes</h2>
+    <div id="bootPend"></div>
+
+    <h2>Boots entregues</h2>
+    <div id="bootOk"></div>
+  </section>
+
+  <section id="abaLeads" hidden>
+    <h2>Cadastrar lead</h2>
+    <div class="card">
+      <label for="selVendLead">Vendedor</label>
+      <div class="selwrap">
+        <select id="selVendLead"><option value="">Quem atendeu?</option></select>
+      </div>
+
+      <label for="inLeadNome">Cliente</label>
+      <input type="text" id="inLeadNome" placeholder="Nome do cliente" autocomplete="off">
+
+      <label for="inLeadZap">WhatsApp</label>
+      <input type="tel" id="inLeadZap" inputmode="numeric" placeholder="(84) 9 9999-9999" autocomplete="off">
+
+      <label for="selRelacao">Quem tá comprando o presente?</label>
+      <div class="selwrap">
+        <select id="selRelacao">
+          <option value="">Escolha</option>
+          <option>Esposa</option>
+          <option>Filho(a)</option>
+          <option>O próprio pai</option>
+          <option>Outro</option>
+        </select>
+      </div>
+
+      <label for="inLeadObs">Observação <span style="text-transform:none;letter-spacing:0">(tamanho, ocasião, o que faltou pra fechar)</span></label>
+      <input type="text" id="inLeadObs" placeholder="Ex.: pai 1,80m, terno pro culto, achou caro" autocomplete="off">
+
+      <button class="btn" id="btnLead">Cadastrar lead</button>
+    </div>
+
+    <h2>Leads em aberto</h2>
+    <div id="leadsAbertos"></div>
+
+    <h2>Leads que compraram</h2>
+    <div id="leadsFechados"></div>
+  </section>
+</div>
+
+<div class="rodape-fixo">
+  <button id="btnGerencia">✂ &nbsp;Gerência</button>
+</div>
+
+<!-- modal PIN -->
+<div class="modal-bg" id="modalPin">
+  <div class="modal">
+    <h3>Acesso da gerência <button class="fechar" data-fecha="modalPin" aria-label="Fechar">×</button></h3>
+    <label for="inPin">PIN</label>
+    <input type="password" id="inPin" inputmode="numeric" maxlength="6" placeholder="••••" autocomplete="off">
+    <button class="btn" id="btnPinOk">Entrar</button>
+  </div>
+</div>
+
+<!-- modal gerência -->
+<div class="modal-bg" id="modalGer">
+  <div class="modal">
+    <h3>Mesa da gerência <button class="fechar" data-fecha="modalGer" aria-label="Fechar">×</button></h3>
+    <div id="gerPendentes"></div>
+    <h3 style="margin-top:22px">Revisadas no mês</h3>
+    <div id="gerHistorico"></div>
+    <button class="btn fantasma" id="btnCopiarLink" style="margin-top:20px">Copiar link pro grupo</button>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+/* Loader do supabase-js com fallback de CDN.
+   Se todas falharem (ex: preview do app Claude bloqueia CDN externa),
+   o app entra em modo visualização em vez de quebrar. */
+(function () {
+  const cdns = [
+    'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js',
+    'https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.min.js'
+  ];
+  let i = 0;
+  function tenta() {
+    if (i >= cdns.length) {
+      window.__sbFalhou = true;
+      if (window.iniciarApp) window.iniciarApp();
+      return;
+    }
+    const s = document.createElement('script');
+    s.src = cdns[i++];
+    s.onload = () => { window.__sbCarregado = true; if (window.iniciarApp) window.iniciarApp(); };
+    s.onerror = tenta;
+    document.head.appendChild(s);
+  }
+  tenta();
+})();
+</script>
+<script>
+/* ================= CONFIG — mexa só aqui ================= */
+const CONFIG = {
+  SUPABASE_URL: 'https://xhfzcfefqinoyajwedgc.supabase.co',
+  SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhoZnpjZmVmcWlub3lhandlZGdjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkxMzYzOTMsImV4cCI6MjA5NDcxMjM5M30.tVIqLyu5sUsag0qic5NudXTMUVQ0BaXLUXCbH9xneKQ',
+  VENDEDORES: ['Witória', 'Leela', 'Brenno', 'Arthur'],
+  META_CABIDES: 10,          // meta individual do mês
+  PIN_GERENCIA: '2024',      // troque antes de mandar no grupo
+
+  /* --- Campanha Dia dos Pais --- */
+  CAMPANHA: {
+    ini: '2026-07-25',       // abre com o mês comercial de agosto
+    fim: '2026-08-09',       // Dia dos Pais
+    dobroIni: '2026-08-06',  // reta final: cabide vale 2 pontos
+    mult: 1.5,               // multiplicador pós-meta (quem bate 10 cabides)
+    ptLead: 1                // ponto por lead que virou compra
+  }
+};
+/* ========================================================== */
+
+let sb = null; // criado em conectar(), depois do script carregar
+
+/* Mês comercial: fecha dia 24.
+   Do dia 25 em diante, a venda já conta pro mês seguinte. */
+function calcMesRef() {
+  const d = new Date();
+  let ano = d.getFullYear(), mes = d.getMonth(); // 0-11
+  if (d.getDate() >= 25) { mes += 1; if (mes > 11) { mes = 0; ano += 1; } }
+  return ano + '-' + String(mes + 1).padStart(2, '0');
+}
+const mesRef = calcMesRef();
+const fmtBRL = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
+let vendas = [];
+let boots = [];
+let leads = [];
+let qtd = 1;
+let gerLiberada = false;
+
+const $ = id => document.getElementById(id);
+
+/* ---------- helpers ---------- */
+function toast(msg) {
+  const t = $('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._h);
+  t._h = setTimeout(() => t.classList.remove('show'), 2600);
+}
+function horaBR(iso) {
+  const d = new Date(iso);
+  return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }) +
+    ' ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+}
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, c =>
+    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+function hojeISO() {
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+function dataBR(iso) {
+  const p = String(iso).split('-');
+  return p[2] + '/' + p[1];
+}
+
+/* ---------- campanha: janelas e pontos ---------- */
+const C = CONFIG.CAMPANHA;
+function noDobro(dataISO) { return dataISO >= C.dobroIni && dataISO <= C.fim; }
+function naCampanha(dataISO) { return dataISO >= C.ini && dataISO <= C.fim; }
+
+/* Pontos de uma venda aprovada:
+   base = qtd de cabides
+   × 2 se caiu na reta final (06 a 09/08)
+   × 1.5 se o vendedor já tinha batido a meta de 10 antes dessa venda */
+function calcularPontos(aprovadas, leadsFechados) {
+  const porVend = {};
+  CONFIG.VENDEDORES.forEach(v => porVend[v] = { cabides: 0, pontos: 0, valor: 0, ultima: null, multAtivo: false });
+
+  const cronologica = [...aprovadas].sort((a, b) =>
+    (a.created_at || '').localeCompare(b.created_at || ''));
+
+  cronologica.forEach(v => {
+    if (!porVend[v.vendedor]) porVend[v.vendedor] = { cabides: 0, pontos: 0, valor: 0, ultima: null, multAtivo: false };
+    const p = porVend[v.vendedor];
+    const dia = (v.created_at || '').slice(0, 10);
+    let pts = v.qtd_cabides;
+    if (noDobro(dia)) pts *= 2;
+    if (p.cabides >= CONFIG.META_CABIDES) { pts *= C.mult; p.multAtivo = true; }
+    p.pontos += pts;
+    p.cabides += v.qtd_cabides;
+    if (p.cabides >= CONFIG.META_CABIDES) p.multAtivo = true;
+    p.valor += Number(v.valor_venda);
+    const t = v.reviewed_at || v.created_at;
+    if (!p.ultima || t > p.ultima) p.ultima = t;
+  });
+
+  // lead que virou compra dentro da campanha = ponto bônus
+  leadsFechados.forEach(l => {
+    const dia = (l.created_at || '').slice(0, 10);
+    if (!naCampanha(dia)) return;
+    if (porVend[l.vendedor]) porVend[l.vendedor].pontos += C.ptLead;
+  });
+
+  return porVend;
+}
+
+/* ---------- banner regressivo ---------- */
+function renderBanner() {
+  const hoje = hojeISO();
+  if (hoje > C.fim) { $('banner').hidden = true; return; }
+
+  const dHoje = new Date(hoje + 'T00:00:00');
+  const dFim = new Date(C.fim + 'T00:00:00');
+  const dias = Math.round((dFim - dHoje) / 86400000);
+
+  $('banner').hidden = false;
+  $('bannerDias').textContent = dias === 0 ? 'É HOJE' : dias;
+  $('bannerRot').textContent = dias === 0 ? '' : (dias === 1 ? 'dia pro Dia dos Pais' : 'dias pro Dia dos Pais');
+
+  if (hoje < C.ini) {
+    $('bannerRegra').innerHTML = 'Campanha abre em <b>25/07</b> junto com o mês comercial · reta final de <b>6 a 9/08</b> com cabide valendo <b>dobro</b>';
+  } else if (noDobro(hoje)) {
+    $('banner').classList.add('dobro');
+    $('bannerRegra').innerHTML = '<b>RETA FINAL</b> — cada cabide vale <b>2 pontos</b> até o dia 9. Quem tá atrás ainda vira.';
+  } else {
+    $('bannerRegra').innerHTML = 'Cabide valendo ponto · bateu <b>10</b>, destrava <b>×1,5</b> no resto · de <b>6 a 9/08</b> tudo vale <b>dobro</b> · lead que compra = <b>+1 ponto</b>';
+  }
+}
+
+/* ---------- abas ---------- */
+function mostrarAba(qual) {
+  $('abaCampanha').hidden = qual !== 'campanha';
+  $('abaBoot').hidden = qual !== 'boot';
+  $('abaLeads').hidden = qual !== 'leads';
+  $('tabCampanha').classList.toggle('ativa', qual === 'campanha');
+  $('tabBoot').classList.toggle('ativa', qual === 'boot');
+  $('tabLeads').classList.toggle('ativa', qual === 'leads');
+}
+$('tabCampanha').onclick = () => mostrarAba('campanha');
+$('tabBoot').onclick = () => mostrarAba('boot');
+$('tabLeads').onclick = () => mostrarAba('leads');
+
+/* ---------- form ---------- */
+CONFIG.VENDEDORES.forEach(v => {
+  const o = document.createElement('option');
+  o.value = v; o.textContent = v;
+  $('selVend').appendChild(o);
+  const o2 = o.cloneNode(true);
+  $('selVendLead').appendChild(o2);
+});
+
+// máscara de moeda estilo caixa: digita números, formata sozinho
+$('inValor').addEventListener('input', e => {
+  const dig = e.target.value.replace(/\D/g, '').slice(0, 9);
+  e.target.value = dig ? fmtBRL.format(parseInt(dig, 10) / 100) : '';
+});
+function valorNum() {
+  const dig = $('inValor').value.replace(/\D/g, '');
+  return dig ? parseInt(dig, 10) / 100 : 0;
+}
+
+// máscara simples de telefone
+$('inLeadZap').addEventListener('input', e => {
+  const d = e.target.value.replace(/\D/g, '').slice(0, 11);
+  let out = d;
+  if (d.length > 2) out = '(' + d.slice(0, 2) + ') ' + d.slice(2);
+  if (d.length > 7) out = '(' + d.slice(0, 2) + ') ' + d.slice(2, 7) + '-' + d.slice(7);
+  e.target.value = out;
+});
+
+$('btnMenos').onclick = () => { qtd = Math.max(1, qtd - 1); $('qtdCabides').textContent = qtd; };
+$('btnMais').onclick = () => { qtd = Math.min(20, qtd + 1); $('qtdCabides').textContent = qtd; };
+
+let temBoot = false;
+function setBoot(v) {
+  temBoot = v;
+  $('btnBootSim').classList.toggle('on', v);
+  $('btnBootNao').classList.toggle('on', !v);
+  $('camposBoot').hidden = !v;
+}
+$('btnBootSim').onclick = () => setBoot(true);
+$('btnBootNao').onclick = () => setBoot(false);
+
+$('btnRegistrar').onclick = async () => {
+  if (!sb) return toast('Sem conexão — abre pelo link oficial no grupo');
+  const vendedor = $('selVend').value;
+  const valor = valorNum();
+  const cliente = temBoot ? $('inCliente').value.trim() : '';
+  const retirada = temBoot ? $('inRetirada').value : '';
+  if (!vendedor) return toast('Escolha o vendedor');
+  if (valor <= 0) return toast('Informe o valor da venda');
+  if (temBoot && !cliente) return toast('Informe o nome do cliente do boot');
+  if (temBoot && !retirada) return toast('Informe a data de retirada do boot');
+
+  const btn = $('btnRegistrar');
+  btn.disabled = true;
+  const { error } = await sb.from('cabide_vendas').insert({
+    vendedor, valor_venda: valor, qtd_cabides: qtd, mes_ref: mesRef,
+    cliente: cliente || null, data_retirada: retirada || null
+  });
+  btn.disabled = false;
+
+  if (error) return toast('Erro ao registrar — tenta de novo');
+  toast(retirada
+    ? `Venda registrada — boot de ${cliente.split(' ')[0]} pra ${dataBR(retirada)}`
+    : `${qtd} cabide${qtd > 1 ? 's' : ''} registrado${qtd > 1 ? 's' : ''} — aguardando gerência`);
+  $('inValor').value = '';
+  $('inCliente').value = '';
+  $('inRetirada').value = '';
+  setBoot(false);
+  qtd = 1; $('qtdCabides').textContent = 1;
+  carregar();
+};
+
+/* ---------- leads ---------- */
+$('btnLead').onclick = async () => {
+  if (!sb) return toast('Sem conexão com o banco');
+  const vendedor = $('selVendLead').value;
+  const nome = $('inLeadNome').value.trim();
+  const zap = $('inLeadZap').value.replace(/\D/g, '');
+  const relacao = $('selRelacao').value;
+  const obs = $('inLeadObs').value.trim();
+  if (!vendedor) return toast('Escolha o vendedor');
+  if (!nome) return toast('Informe o nome do cliente');
+  if (zap.length < 10) return toast('WhatsApp incompleto');
+
+  const btn = $('btnLead');
+  btn.disabled = true;
+  const { error } = await sb.from('dp_leads').insert({
+    vendedor, cliente_nome: nome, whatsapp: zap,
+    relacao: relacao || null, observacao: obs || null
+  });
+  btn.disabled = false;
+
+  if (error) return toast('Erro ao cadastrar — tenta de novo');
+  toast('Lead na agulha — se comprar, vale ponto');
+  $('inLeadNome').value = '';
+  $('inLeadZap').value = '';
+  $('selRelacao').value = '';
+  $('inLeadObs').value = '';
+  carregar();
+};
+
+function zapLink(num, nome) {
+  const msg = encodeURIComponent(`Oi ${nome.split(' ')[0]}! Ainda dá tempo de garantir o presente do Dia dos Pais — o ajuste expresso sai a tempo. Te esperamos na loja!`);
+  return `https://wa.me/55${num}?text=${msg}`;
+}
+
+function renderLeads() {
+  const abertos = leads.filter(l => !l.comprou);
+  const fechados = leads.filter(l => l.comprou);
+
+  const pill = $('pillLeads');
+  pill.hidden = abertos.length === 0;
+  pill.textContent = abertos.length;
+
+  $('leadsAbertos').innerHTML = abertos.length === 0
+    ? `<div class="vazio">Nenhum lead em aberto. Todo cliente que não fechou merece um cadastro aqui.</div>`
+    : abertos.map(l => `
+      <div class="venda">
+        <div class="info">
+          <div class="quem">${esc(l.cliente_nome)}</div>
+          <div class="det">${l.relacao ? esc(l.relacao) + ' · ' : ''}lead de <b>${esc(l.vendedor)}</b>${l.observacao ? ' · ' + esc(l.observacao) : ''}</div>
+        </div>
+        <div class="acoes">
+          <button class="desfazer" onclick="window.open('${zapLink(l.whatsapp, l.cliente_nome)}','_blank')">Zap</button>
+          <button class="sim" onclick="marcarLead('${l.id}', true)">Comprou</button>
+        </div>
+      </div>`).join('');
+
+  $('leadsFechados').innerHTML = fechados.length === 0
+    ? `<div class="vazio">Nenhum lead convertido ainda.</div>`
+    : fechados.map(l => `
+      <div class="venda">
+        <div class="info">
+          <div class="quem">${esc(l.cliente_nome)}</div>
+          <div class="det">lead de <b>${esc(l.vendedor)}</b> · +${C.ptLead} ponto</div>
+        </div>
+        <span class="badge comprou">Comprou</span>
+        <div class="acoes">
+          <button class="desfazer" onclick="marcarLead('${l.id}', false)">Desfazer</button>
+        </div>
+      </div>`).join('');
+}
+
+async function marcarLead(id, comprou) {
+  if (!sb) return toast('Sem conexão com o banco');
+  const { error } = await sb.from('dp_leads').update({ comprou }).eq('id', id);
+  if (error) return toast('Erro ao atualizar');
+  toast(comprou ? 'Lead convertido — ponto na fita' : 'Voltou pra lista de leads');
+  carregar();
+}
+
+/* ---------- dados ---------- */
+async function carregar() {
+  if (!sb) return;
+  const { data, error } = await sb.from('cabide_vendas')
+    .select('*')
+    .eq('mes_ref', mesRef)
+    .order('created_at', { ascending: false });
+  if (error) return;
+  vendas = data || [];
+
+  // boots: independente do mês — venda do dia 30 pode ter retirada dia 5 do mês seguinte
+  const { data: b } = await sb.from('cabide_vendas')
+    .select('*')
+    .not('data_retirada', 'is', null)
+    .neq('status', 'rejeitada')
+    .order('data_retirada', { ascending: true })
+    .limit(100);
+  boots = b || [];
+
+  const { data: l } = await sb.from('dp_leads')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(200);
+  leads = l || [];
+
+  render();
+}
+
+/* ---------- render ---------- */
+function render() {
+  renderBanner();
+
+  const aprov = vendas.filter(v => v.status === 'aprovada');
+  const pend = vendas.filter(v => v.status === 'pendente');
+
+  // placar por vendedor (pontos da campanha + cabides)
+  const placar = calcularPontos(aprov, leads.filter(l => l.comprou));
+
+  // desempate: pontos > cabides > quem chegou primeiro
+  const rank = Object.entries(placar)
+    .map(([nome, p]) => ({ nome, ...p }))
+    .sort((a, b) => b.pontos - a.pontos || b.cabides - a.cabides || (a.ultima || 'z').localeCompare(b.ultima || 'z'));
+
+  // resumo
+  const total = aprov.reduce((s, v) => s + v.qtd_cabides, 0);
+  $('rTotal').textContent = total;
+  $('rLider').textContent = rank[0] && rank[0].pontos > 0 ? rank[0].nome.split(' ')[0] : '–';
+  const hoje = new Date();
+  const d0 = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate());
+  const fecha = hoje.getDate() >= 25
+    ? new Date(hoje.getFullYear(), hoje.getMonth() + 1, 24)
+    : new Date(hoje.getFullYear(), hoje.getMonth(), 24);
+  $('rDias').textContent = Math.round((fecha - d0) / 86400000);
+
+  // ranking — fitas métricas (barra continua sendo cabides rumo à meta de 10)
+  const maxEscala = Math.max(CONFIG.META_CABIDES, ...rank.map(r => r.cabides)) * 1.08;
+  const tick = (100 / maxEscala).toFixed(3) + '%';
+  const metaPos = (CONFIG.META_CABIDES / maxEscala * 100).toFixed(2) + '%';
+
+  $('ranking').innerHTML = total === 0 && pend.length === 0 && rank.every(r => r.pontos === 0)
+    ? `<div class="vazio">Nenhum cabide na fita ainda. A primeira venda abre o mês.</div>`
+    : rank.map((r, i) => {
+      const pct = Math.min(100, r.cabides / maxEscala * 100).toFixed(2);
+      const bateu = r.cabides >= CONFIG.META_CABIDES;
+      const ptsFmt = Number.isInteger(r.pontos) ? r.pontos : r.pontos.toFixed(1).replace('.', ',');
+      return `
+      <div class="fita-item ${bateu ? 'bateu' : ''}">
+        <div class="fita-topo">
+          <span class="fita-nome">${i === 0 && r.pontos > 0 ? '<span class="lider">✂</span>' : ''}${esc(r.nome)}${r.multAtivo ? '<span class="mult">×1,5</span>' : ''}</span>
+          <span class="fita-placar">${ptsFmt} pts<small> · ${r.cabides}/${CONFIG.META_CABIDES} cabides · ${fmtBRL.format(r.valor)}</small></span>
+        </div>
+        <div class="fita" style="margin-bottom:14px">
+          <div class="fita-inner">
+            <div class="ticks" style="--tick:${tick}"></div>
+            <div class="fill" style="width:${pct}%"></div>
+          </div>
+          <div class="meta-agulha" style="left:${metaPos}"></div>
+          <div class="meta-rot" style="left:${metaPos}">meta</div>
+        </div>
+      </div>`;
+    }).join('');
+
+  // feed — pendentes primeiro
+  const feed = [...pend, ...vendas.filter(v => v.status !== 'pendente')].slice(0, 12);
+  $('feed').innerHTML = feed.length === 0
+    ? `<div class="vazio">Sem vendas registradas este mês.</div>`
+    : feed.map(v => {
+      const dia = (v.created_at || '').slice(0, 10);
+      const tagDobro = noDobro(dia) ? ' <span class="badge dobro" style="padding:2px 7px">2×</span>' : '';
+      return `
+      <div class="venda">
+        <div class="info">
+          <div class="quem">${esc(v.vendedor)}</div>
+          <div class="det"><b>${v.qtd_cabides} cabide${v.qtd_cabides > 1 ? 's' : ''}</b>${tagDobro} · ${fmtBRL.format(v.valor_venda)} · ${horaBR(v.created_at)}</div>
+        </div>
+        <span class="badge ${v.status}">${v.status}</span>
+      </div>`;
+    }).join('');
+
+  renderBoots();
+  renderLeads();
+  if (gerLiberada) renderGerencia();
+}
+
+/* ---------- boot (alfaiataria) ---------- */
+function renderBoots() {
+  const hoje = hojeISO();
+  const pend = boots.filter(b => !b.boot_entregue);
+  const ok = boots.filter(b => b.boot_entregue).slice(-5).reverse();
+
+  const pill = $('pillBoot');
+  pill.hidden = pend.length === 0;
+  pill.textContent = pend.length;
+
+  $('bootPend').innerHTML = pend.length === 0
+    ? `<div class="vazio">Nenhum boot na agulha. Tudo entregue.</div>`
+    : pend.map(b => {
+      const tag = b.data_retirada < hoje ? ['atrasado', 'Atrasado']
+        : b.data_retirada === hoje ? ['hoje', 'Hoje']
+        : ['agendado', dataBR(b.data_retirada)];
+      return `
+      <div class="venda">
+        <div class="info">
+          <div class="quem">${esc(b.cliente || 'Cliente')}</div>
+          <div class="det">venda de <b>${esc(b.vendedor)}</b> · ${fmtBRL.format(b.valor_venda)} · retira ${dataBR(b.data_retirada)}</div>
+        </div>
+        <span class="badge ${tag[0]}">${tag[1]}</span>
+        <div class="acoes">
+          <button class="sim" onclick="marcarBoot('${b.id}', true)">Entregue</button>
+        </div>
+      </div>`;
+    }).join('');
+
+  $('bootOk').innerHTML = ok.length === 0
+    ? `<div class="vazio">Nenhum boot entregue ainda.</div>`
+    : ok.map(b => `
+      <div class="venda">
+        <div class="info">
+          <div class="quem">${esc(b.cliente || 'Cliente')}</div>
+          <div class="det">venda de <b>${esc(b.vendedor)}</b> · retirada ${dataBR(b.data_retirada)}</div>
+        </div>
+        <span class="badge entregue">Entregue</span>
+        <div class="acoes">
+          <button class="desfazer" onclick="marcarBoot('${b.id}', false)">Desfazer</button>
+        </div>
+      </div>`).join('');
+}
+
+async function marcarBoot(id, entregue) {
+  if (!sb) return toast('Sem conexão com o banco');
+  const { error } = await sb.from('cabide_vendas')
+    .update({ boot_entregue: entregue })
+    .eq('id', id);
+  if (error) return toast('Erro ao atualizar');
+  toast(entregue ? 'Boot entregue — cliente vestido' : 'Voltou pra fila de retirada');
+  carregar();
+}
+
+/* ---------- gerência ---------- */
+function abrir(id) { $(id).classList.add('aberto'); }
+function fechar(id) { $(id).classList.remove('aberto'); }
+document.querySelectorAll('[data-fecha]').forEach(b => b.onclick = () => fechar(b.dataset.fecha));
+document.querySelectorAll('.modal-bg').forEach(m => m.onclick = e => { if (e.target === m) m.classList.remove('aberto'); });
+
+$('btnGerencia').onclick = () => {
+  if (gerLiberada) { renderGerencia(); abrir('modalGer'); }
+  else { $('inPin').value = ''; abrir('modalPin'); setTimeout(() => $('inPin').focus(), 100); }
+};
+$('btnPinOk').onclick = () => {
+  if ($('inPin').value === CONFIG.PIN_GERENCIA) {
+    gerLiberada = true;
+    fechar('modalPin');
+    renderGerencia();
+    abrir('modalGer');
+  } else toast('PIN incorreto');
+};
+$('inPin').addEventListener('keydown', e => { if (e.key === 'Enter') $('btnPinOk').click(); });
+
+function renderGerencia() {
+  const pend = vendas.filter(v => v.status === 'pendente');
+  const hist = vendas.filter(v => v.status !== 'pendente').slice(0, 10);
+
+  $('gerPendentes').innerHTML = pend.length === 0
+    ? `<div class="vazio">Nada pendente. Fila limpa.</div>`
+    : pend.map(v => `
+      <div class="venda">
+        <div class="info">
+          <div class="quem">${esc(v.vendedor)}</div>
+          <div class="det"><b>${v.qtd_cabides} cabide${v.qtd_cabides > 1 ? 's' : ''}</b> · ${fmtBRL.format(v.valor_venda)} · ${horaBR(v.created_at)}</div>
+        </div>
+        <div class="acoes">
+          <button class="sim" onclick="revisar('${v.id}','aprovada')">Aprovar</button>
+          <button class="nao" onclick="revisar('${v.id}','rejeitada')">Rejeitar</button>
+        </div>
+      </div>`).join('');
+
+  $('gerHistorico').innerHTML = hist.length === 0
+    ? `<div class="vazio">Nenhuma venda revisada ainda.</div>`
+    : hist.map(v => `
+      <div class="venda">
+        <div class="info">
+          <div class="quem">${esc(v.vendedor)}</div>
+          <div class="det"><b>${v.qtd_cabides} cabide${v.qtd_cabides > 1 ? 's' : ''}</b> · ${fmtBRL.format(v.valor_venda)} · <span class="badge ${v.status}" style="padding:2px 7px">${v.status}</span></div>
+        </div>
+        <div class="acoes">
+          <button class="desfazer" onclick="revisar('${v.id}','pendente')">Desfazer</button>
+        </div>
+      </div>`).join('');
+}
+
+async function revisar(id, status) {
+  if (!sb) return toast('Sem conexão com o banco');
+  const { error } = await sb.from('cabide_vendas')
+    .update({ status, reviewed_at: status === 'pendente' ? null : new Date().toISOString() })
+    .eq('id', id);
+  if (error) return toast('Erro ao atualizar');
+  toast(status === 'aprovada' ? 'Venda aprovada — ponto na fita' :
+        status === 'rejeitada' ? 'Venda rejeitada' : 'Voltou pra fila');
+  carregar();
+}
+
+$('btnCopiarLink').onclick = async () => {
+  try {
+    await navigator.clipboard.writeText(location.href);
+    toast('Link copiado — cola no grupo');
+  } catch { toast(location.href); }
+};
+
+/* ---------- boot ---------- */
+function aviso(msg) {
+  const a = $('aviso');
+  a.textContent = msg;
+  a.hidden = false;
+}
+
+let iniciado = false;
+function conectar() {
+  if (iniciado) return;
+  iniciado = true;
+
+  if (typeof supabase === 'undefined') {
+    aviso('Modo visualização — sem conexão com o banco aqui. Pelo link do GitHub Pages funciona normal.');
+    render();
+    return;
+  }
+  if (!CONFIG.SUPABASE_ANON_KEY || CONFIG.SUPABASE_ANON_KEY.startsWith('COLE')) {
+    aviso('Falta configurar: cola a anon key do Supabase no bloco CONFIG do código.');
+    render();
+    return;
+  }
+  try {
+    sb = supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
+  } catch (e) {
+    aviso('Erro ao conectar no Supabase — confere URL e anon key no CONFIG.');
+    render();
+    return;
+  }
+
+  sb.channel('cabide-rt')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'cabide_vendas' }, carregar)
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'dp_leads' }, carregar)
+    .subscribe();
+  setInterval(carregar, 45000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) carregar(); });
+  carregar();
+}
+
+window.iniciarApp = conectar;
+if (window.__sbCarregado || window.__sbFalhou) conectar();
+render(); // desenha a estrutura de cara, mesmo antes dos dados chegarem
+</script>
+</body>
+</html>
