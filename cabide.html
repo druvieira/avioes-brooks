@@ -406,6 +406,119 @@
   .badge.comprou { background: rgba(95,185,122,.14); color: var(--ok); border: 1px solid rgba(95,185,122,.4); }
   .badge.dobro { background: rgba(201,161,90,.2); color: var(--linha-clara); border: 1px solid var(--linha); }
 
+  .venda .parabens {
+    font-size: 12px;
+    font-style: italic;
+    color: var(--linha-clara);
+    margin-top: 4px;
+  }
+  .venda .coment {
+    font-size: 12px;
+    color: var(--giz);
+    margin-top: 4px;
+    padding: 6px 10px;
+    background: rgba(201,161,90,.08);
+    border-left: 2px solid var(--linha);
+    border-radius: 0 6px 6px 0;
+  }
+  .venda .coment b { color: var(--linha-clara); }
+
+  /* ---------- comentários estilo rede social ---------- */
+  .cm-item { display: flex; gap: 10px; margin-bottom: 16px; }
+  .cm-item.resposta { margin-left: 42px; }
+  .cm-avatar {
+    width: 34px; height: 34px; border-radius: 50%;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Marcellus', serif;
+    font-size: 15px;
+    color: #16130c;
+    border: 1px solid rgba(232,228,218,.2);
+  }
+  .cm-corpo { flex: 1; min-width: 0; }
+  .cm-cab { font-size: 13px; }
+  .cm-cab b { font-weight: 600; color: var(--giz); }
+  .cm-cab .cm-tempo { color: var(--giz-fraco); font-size: 12px; margin-left: 6px; }
+  .cm-texto { font-size: 14px; margin-top: 1px; word-break: break-word; }
+  .cm-acoes {
+    display: flex; gap: 16px;
+    font-size: 12px;
+    color: var(--giz-fraco);
+    margin-top: 4px;
+  }
+  .cm-acoes button {
+    background: none; border: none;
+    color: var(--giz-fraco);
+    font-family: inherit; font-size: 12px; font-weight: 600;
+    padding: 0; cursor: pointer;
+  }
+  .cm-like {
+    display: flex; flex-direction: column; align-items: center;
+    gap: 2px; flex-shrink: 0;
+    padding-top: 4px;
+  }
+  .cm-like button {
+    background: none; border: none;
+    font-size: 17px; line-height: 1;
+    cursor: pointer;
+    color: var(--giz-fraco);
+    filter: grayscale(1) opacity(.6);
+  }
+  .cm-like button.curtiu { filter: none; }
+  .cm-like .cm-n { font-size: 11px; color: var(--giz-fraco); }
+  .respondendo {
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 12px;
+    color: var(--giz-fraco);
+    background: var(--forro);
+    border: 1px solid rgba(232,228,218,.08);
+    border-radius: 8px 8px 0 0;
+    padding: 7px 12px;
+    margin-bottom: -6px;
+  }
+  .respondendo button { background: none; border: none; color: var(--nao); font-size: 15px; cursor: pointer; }
+  .emoji-bar {
+    display: flex; justify-content: space-between;
+    padding: 4px 2px 10px;
+  }
+  .emoji-bar button {
+    background: none; border: none;
+    font-size: 24px; line-height: 1;
+    cursor: pointer;
+    padding: 4px;
+  }
+  .cm-form { display: flex; gap: 8px; align-items: center; margin-bottom: 18px; }
+  .cm-form .selwrap { width: 92px; flex-shrink: 0; }
+  .cm-form select { min-height: 46px; padding: 8px 6px; font-size: 13px; border-radius: 99px; text-align: center; }
+  .cm-form input {
+    flex: 1; min-height: 46px;
+    font-size: 15px;
+    border-radius: 99px;
+    padding: 10px 18px;
+  }
+  .cm-form button.enviar {
+    background: var(--linha);
+    color: #16130c;
+    border: none;
+    border-radius: 50%;
+    width: 46px; height: 46px;
+    font-size: 17px;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .ger-coment {
+    width: 100%;
+    background: var(--forro-2);
+    border: 1px solid rgba(232,228,218,.1);
+    border-radius: 7px;
+    color: var(--giz);
+    font-family: inherit;
+    font-size: 13px;
+    padding: 8px 10px;
+    margin-top: 8px;
+    outline: none;
+  }
+
   .vazio {
     text-align: center;
     color: var(--giz-fraco);
@@ -620,6 +733,23 @@
     <h2>Leads que compraram</h2>
     <div id="leadsFechados"></div>
   </section>
+
+  <h2 style="margin-top:34px">Comentários</h2>
+  <div id="muralLista"></div>
+  <div id="respondendoBox" hidden class="respondendo">
+    <span id="respondendoTxt"></span>
+    <button id="btnCancelaResp" aria-label="Cancelar resposta">×</button>
+  </div>
+  <div class="emoji-bar" id="emojiBar">
+    <button>❤️</button><button>🙌</button><button>🔥</button><button>👏</button><button>😢</button><button>😍</button><button>😮</button><button>😂</button>
+  </div>
+  <div class="cm-form">
+    <div class="selwrap">
+      <select id="muralAutor"><option value="">Quem?</option></select>
+    </div>
+    <input type="text" id="muralTexto" placeholder="O que você acha disso?" maxlength="200" autocomplete="off">
+    <button class="enviar" id="btnMural" aria-label="Enviar">➤</button>
+  </div>
 </div>
 
 <div class="rodape-fixo">
@@ -709,6 +839,7 @@ const fmtBRL = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BR
 let vendas = [];
 let boots = [];
 let leads = [];
+let mural = [];
 let qtd = 1;
 let gerLiberada = false;
 
@@ -738,6 +869,25 @@ function hojeISO() {
 function dataBR(iso) {
   const p = String(iso).split('-');
   return p[2] + '/' + p[1];
+}
+
+/* ---------- parabéns automático no feed ---------- */
+const PARABENS = [
+  'Ponto na fita — venda costurada com classe.',
+  'Mais um cliente saindo vestindo perfeito. É disso que a casa gosta.',
+  'Terno no cabide, nome no placar. Segue o baile.',
+  'Venda fechada na agulha. O ranking sentiu.',
+  'Cliente bem vestido é propaganda ambulante. Boa!',
+  'Costura fina — mais um pro placar.',
+  'A fita métrica esticou. Parabéns pela venda!',
+  'Elegância vendida, meta mais perto.'
+];
+function frasePara(v) {
+  // determinística pelo id: cada venda tem sempre a mesma frase
+  let h = 0;
+  const s = String(v.id);
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
+  return PARABENS[h % PARABENS.length];
 }
 
 /* ---------- campanha: janelas e pontos ---------- */
@@ -824,7 +974,14 @@ CONFIG.VENDEDORES.forEach(v => {
   $('selVend').appendChild(o);
   const o2 = o.cloneNode(true);
   $('selVendLead').appendChild(o2);
+  const o3 = o.cloneNode(true);
+  $('muralAutor').appendChild(o3);
 });
+{
+  const og = document.createElement('option');
+  og.value = 'Gerência'; og.textContent = 'Gerência';
+  $('muralAutor').appendChild(og);
+}
 
 // máscara de moeda estilo caixa: digita números, formata sozinho
 $('inValor').addEventListener('input', e => {
@@ -993,6 +1150,12 @@ async function carregar() {
     .limit(200);
   leads = l || [];
 
+  const { data: c } = await sb.from('cabide_mural')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(60);
+  mural = c || [];
+
   render();
 }
 
@@ -1057,11 +1220,16 @@ function render() {
     : feed.map(v => {
       const dia = (v.created_at || '').slice(0, 10);
       const tagDobro = noDobro(dia) ? ' <span class="badge dobro" style="padding:2px 7px">2×</span>' : '';
+      const extra = v.status === 'aprovada'
+        ? `<div class="parabens">${esc(frasePara(v))}</div>` +
+          (v.comentario_gerencia ? `<div class="coment"><b>✂ Gerência:</b> ${esc(v.comentario_gerencia)}</div>` : '')
+        : '';
       return `
       <div class="venda">
         <div class="info">
           <div class="quem">${esc(v.vendedor)}</div>
           <div class="det"><b>${v.qtd_cabides} cabide${v.qtd_cabides > 1 ? 's' : ''}</b>${tagDobro} · ${fmtBRL.format(v.valor_venda)} · ${horaBR(v.created_at)}</div>
+          ${extra}
         </div>
         <span class="badge ${v.status}">${v.status}</span>
       </div>`;
@@ -1069,6 +1237,7 @@ function render() {
 
   renderBoots();
   renderLeads();
+  renderMural();
   if (gerLiberada) renderGerencia();
 }
 
@@ -1126,6 +1295,112 @@ async function marcarBoot(id, entregue) {
   carregar();
 }
 
+/* ---------- comentários estilo rede social ---------- */
+const CORES_AVATAR = ['#c9a15a', '#8fb98f', '#9a8fc9', '#c98f8f', '#8fb9c9', '#c9b98f'];
+function corAvatar(nome) {
+  let h = 0;
+  for (let i = 0; i < nome.length; i++) h = (h * 31 + nome.charCodeAt(i)) >>> 0;
+  return CORES_AVATAR[h % CORES_AVATAR.length];
+}
+function tempoRel(iso) {
+  const s = Math.max(0, (Date.now() - new Date(iso)) / 1000);
+  if (s < 60) return 'agora';
+  if (s < 3600) return Math.floor(s / 60) + ' min';
+  if (s < 86400) return Math.floor(s / 3600) + ' h';
+  if (s < 604800) return Math.floor(s / 86400) + ' d';
+  return Math.floor(s / 604800) + ' sem';
+}
+let respondendoA = null; // post sendo respondido
+
+// curtidas deste aparelho (pra pintar o coração e permitir descurtir)
+function likesLocais() {
+  try { return JSON.parse(localStorage.getItem('cabide_likes') || '[]'); } catch { return []; }
+}
+function salvarLikesLocais(arr) {
+  try { localStorage.setItem('cabide_likes', JSON.stringify(arr)); } catch {}
+}
+
+function cmHTML(m, resposta) {
+  const curtiu = likesLocais().includes(m.id);
+  return `
+  <div class="cm-item ${resposta ? 'resposta' : ''}">
+    <div class="cm-avatar" style="background:${corAvatar(m.autor)}">${esc(m.autor[0].toUpperCase())}</div>
+    <div class="cm-corpo">
+      <div class="cm-cab"><b>${esc(m.autor)}</b><span class="cm-tempo">${tempoRel(m.created_at)}</span></div>
+      <div class="cm-texto">${esc(m.texto)}</div>
+      <div class="cm-acoes">
+        ${resposta ? '' : `<button onclick="responder('${m.id}', '${esc(m.autor)}')">Responder</button>`}
+      </div>
+    </div>
+    <div class="cm-like">
+      <button class="${curtiu ? 'curtiu' : ''}" onclick="curtir('${m.id}', ${m.curtidas})" aria-label="Curtir">${curtiu ? '❤️' : '🤍'}</button>
+      ${m.curtidas > 0 ? `<span class="cm-n">${m.curtidas}</span>` : ''}
+    </div>
+  </div>`;
+}
+
+function renderMural() {
+  const raiz = mural.filter(m => !m.parent_id);
+  $('muralLista').innerHTML = raiz.length === 0
+    ? `<div class="vazio" style="margin-bottom:16px">Nenhum comentário ainda. Começa a resenha.</div>`
+    : raiz.map(m => {
+      const resps = mural.filter(r => r.parent_id === m.id)
+        .sort((a, b) => a.created_at.localeCompare(b.created_at));
+      return cmHTML(m, false) + resps.map(r => cmHTML(r, true)).join('');
+    }).join('');
+}
+
+async function curtir(id, atual) {
+  if (!sb) return toast('Sem conexão com o banco');
+  const locais = likesLocais();
+  const ja = locais.includes(id);
+  const novo = Math.max(0, atual + (ja ? -1 : 1));
+  const { error } = await sb.from('cabide_mural').update({ curtidas: novo }).eq('id', id);
+  if (error) return toast('Erro ao curtir');
+  salvarLikesLocais(ja ? locais.filter(x => x !== id) : [...locais, id]);
+  carregar();
+}
+
+function responder(id, autor) {
+  respondendoA = id;
+  $('respondendoBox').hidden = false;
+  $('respondendoTxt').textContent = 'Respondendo a ' + autor;
+  $('muralTexto').focus();
+}
+$('btnCancelaResp').onclick = () => {
+  respondendoA = null;
+  $('respondendoBox').hidden = true;
+};
+
+document.querySelectorAll('#emojiBar button').forEach(b => {
+  b.onclick = () => {
+    $('muralTexto').value += b.textContent;
+    $('muralTexto').focus();
+  };
+});
+
+$('btnMural').onclick = async () => {
+  if (!sb) return toast('Sem conexão com o banco');
+  const autor = $('muralAutor').value;
+  const texto = $('muralTexto').value.trim();
+  if (!autor) return toast('Escolhe quem tá comentando');
+  if (!texto) return toast('Escreve alguma coisa primeiro');
+
+  const btn = $('btnMural');
+  btn.disabled = true;
+  const { error } = await sb.from('cabide_mural').insert({
+    autor, texto, parent_id: respondendoA
+  });
+  btn.disabled = false;
+
+  if (error) return toast('Erro ao comentar — tenta de novo');
+  $('muralTexto').value = '';
+  respondendoA = null;
+  $('respondendoBox').hidden = true;
+  carregar();
+};
+$('muralTexto').addEventListener('keydown', e => { if (e.key === 'Enter') $('btnMural').click(); });
+
 /* ---------- gerência ---------- */
 function abrir(id) { $(id).classList.add('aberto'); }
 function fechar(id) { $(id).classList.remove('aberto'); }
@@ -1153,12 +1428,13 @@ function renderGerencia() {
   $('gerPendentes').innerHTML = pend.length === 0
     ? `<div class="vazio">Nada pendente. Fila limpa.</div>`
     : pend.map(v => `
-      <div class="venda">
+      <div class="venda" style="flex-direction:column;align-items:stretch">
         <div class="info">
           <div class="quem">${esc(v.vendedor)}</div>
           <div class="det"><b>${v.qtd_cabides} cabide${v.qtd_cabides > 1 ? 's' : ''}</b> · ${fmtBRL.format(v.valor_venda)} · ${horaBR(v.created_at)}</div>
         </div>
-        <div class="acoes">
+        <input type="text" class="ger-coment" id="coment-${v.id}" placeholder="Comentário pro vendedor (opcional)" maxlength="140">
+        <div class="acoes" style="margin-top:8px">
           <button class="sim" onclick="revisar('${v.id}','aprovada')">Aprovar</button>
           <button class="nao" onclick="revisar('${v.id}','rejeitada')">Rejeitar</button>
         </div>
@@ -1180,8 +1456,12 @@ function renderGerencia() {
 
 async function revisar(id, status) {
   if (!sb) return toast('Sem conexão com o banco');
+  const campo = $('coment-' + id);
+  const upd = { status, reviewed_at: status === 'pendente' ? null : new Date().toISOString() };
+  if (status === 'aprovada' && campo && campo.value.trim()) upd.comentario_gerencia = campo.value.trim();
+  if (status === 'pendente') upd.comentario_gerencia = null;
   const { error } = await sb.from('cabide_vendas')
-    .update({ status, reviewed_at: status === 'pendente' ? null : new Date().toISOString() })
+    .update(upd)
     .eq('id', id);
   if (error) return toast('Erro ao atualizar');
   toast(status === 'aprovada' ? 'Venda aprovada — ponto na fita' :
@@ -1229,6 +1509,7 @@ function conectar() {
   sb.channel('cabide-rt')
     .on('postgres_changes', { event: '*', schema: 'public', table: 'cabide_vendas' }, carregar)
     .on('postgres_changes', { event: '*', schema: 'public', table: 'dp_leads' }, carregar)
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'cabide_mural' }, carregar)
     .subscribe();
   setInterval(carregar, 45000);
   document.addEventListener('visibilitychange', () => { if (!document.hidden) carregar(); });
